@@ -1,0 +1,518 @@
+{
+  "status": "PASS",
+  "scene": {
+    "layout": {
+      "table_center_xy": [
+        0.125,
+        0.0
+      ],
+      "table_size_xyz": [
+        1.95,
+        0.8,
+        0.08
+      ],
+      "table_top_z": 0.7,
+      "human_root_xy": [
+        1.05,
+        0.0
+      ],
+      "ur3_nominal_base_position": [
+        0.1,
+        0.7,
+        0.5
+      ],
+      "ur3_nominal_base_yaw_deg": 180.0,
+      "tool_electrode_radius_m": 0.01,
+      "tool_electrode_offset_m": 0.088,
+      "video_resolution": [
+        960,
+        540
+      ],
+      "provenance": "engineering: table height/size, pedestal and camera placement; patient body dimensions come from the asset bounding box"
+    },
+    "supine": {
+      "human_root_path": "/World/Human",
+      "root_translate": [
+        1.05,
+        0.0,
+        0.8491305232048034
+      ],
+      "rotation_matrix": [
+        [
+          6.123233995736766e-17,
+          -6.123233995736766e-17,
+          -1.0
+        ],
+        [
+          1.0,
+          3.749399456654644e-33,
+          6.123233995736766e-17
+        ],
+        [
+          0.0,
+          -1.0,
+          6.123233995736766e-17
+        ]
+      ],
+      "rotation": "Rz(yaw) @ Rz(90) @ Rx(-90): supine, head toward -X, chest toward +Z, patient left toward +Y (rig faces -Y when standing)",
+      "bbox_min_world": [
+        -0.7696510076522829,
+        -0.9244881272315979,
+        0.7
+      ],
+      "bbox_max_world": [
+        1.0504741688899233,
+        0.924486637115479,
+        1.048362624645233
+      ],
+      "table_top_z": 0.7,
+      "provenance": "engineering: supine root rotation + table height; body dimensions come from the M_Medical_01 asset bounding box"
+    },
+    "human_bbox_min": [
+      -0.7696510076522829,
+      -0.9244881272315979,
+      0.7
+    ],
+    "human_bbox_max": [
+      1.0504741688899233,
+      0.924486637115479,
+      1.048362624645233
+    ],
+    "table_bounds": {
+      "x": [
+        -0.85,
+        1.1
+      ],
+      "y": [
+        -0.4,
+        0.4
+      ],
+      "top_z": 0.7
+    },
+    "cameras": {
+      "ThirdView": {
+        "position": [
+          -1.45,
+          -1.35,
+          2.0
+        ],
+        "look_at": [
+          -0.1,
+          0.25,
+          0.8
+        ]
+      },
+      "ChestCloseup": {
+        "position": [
+          -0.1,
+          -0.95,
+          1.3
+        ],
+        "look_at": [
+          0.0,
+          0.0,
+          0.92
+        ]
+      },
+      "PerceptionRGBD": {
+        "position": [
+          -0.35,
+          0.0,
+          2.1
+        ],
+        "look_at": [
+          -0.35,
+          0.05,
+          1.0
+        ]
+      }
+    }
+  },
+  "prior": {
+    "degree": 4,
+    "coefficients": [
+      0.04640271468897092,
+      -0.686389465936059,
+      4.7555083078019414e-05,
+      -3.430586486929294,
+      0.0034873360979452233,
+      0.5256190026386633,
+      -3.349815683318698,
+      0.01831930737715011,
+      13.157265820142623,
+      -0.0017559066162983487,
+      3.9123556205821632,
+      0.04173098109043184,
+      8.976896699966526,
+      -0.07400379211275082,
+      -22.728511603924037
+    ],
+    "u_range_m": [
+      -0.35,
+      0.05
+    ],
+    "v_limit_m": 0.25,
+    "fit_rms_m": 0.005305874213258688,
+    "samples": 119,
+    "provenance": {
+      "source": "asset_measurement: polynomial fit to the anterior chest mesh",
+      "model": "bivariate polynomial of degree 4 in (u, v)"
+    }
+  },
+  "settings": {
+    "provenance": "engineering",
+    "depth_median_window": 3,
+    "normal_window": 12,
+    "normal_radius_m": 0.03,
+    "max_depth_m": 2.0,
+    "max_skin_offset_m": 0.05,
+    "normal_max_angle_deg": 25.0,
+    "max_incidence_deg": 65.0,
+    "note": "25\u00b0 \u9608\u503c\u6cbf\u7528\u7532\u72b6\u817a\u590d\u73b0\u7684\u7ecf\u9a8c\u503c\uff0c\u4f46\u6bd4\u8f83\u5bf9\u8c61\u5df2\u4ece\"\u5168\u5c40\u524d\u5411\"\u6539\u4e3a \"\u6309 (u,v) \u7684\u66f2\u9762\u5148\u9a8c\"\uff08M0 \u5b9e\u6d4b\u80f8\u5ed3\u6cd5\u5411\u76f8\u5bf9\u5168\u5c40\u524d\u5411\u6700\u5927\u504f 62\u00b0\uff09\u3002"
+  },
+  "targets": {
+    "V1": {
+      "nominal_position_world": [
+        -0.22962236295630048,
+        -0.02057027973991567,
+        0.9645065699416021
+      ],
+      "fused_position_world": [
+        -0.22961877279000908,
+        -0.02057089323197902,
+        0.9644727047625148
+      ],
+      "fused_normal_world": [
+        0.13056249861433766,
+        -0.04083853254683411,
+        0.9905986312402225
+      ],
+      "source": "depth",
+      "info": {
+        "pixel": [
+          707.9746752360654,
+          400.7191263362397
+        ],
+        "depth_m": 1.1334218978881836,
+        "skin_point_distance_m": 3.406047593807337e-05,
+        "normal_angle_vs_prior_deg": 5.005006242318401,
+        "normal_inliers": 664,
+        "skin_point_rejected": false,
+        "normal_rejected": false,
+        "normal_accepted": true,
+        "measured_normal_world": [
+          0.13056249861433766,
+          -0.04083853254683411,
+          0.9905986312402225
+        ],
+        "incidence_deg": 13.702355167500544,
+        "prior_normal_world": [
+          0.048076065839188636,
+          -0.0688995678819531,
+          0.9964645209123777
+        ],
+        "prior_point_world": [
+          -0.2298840042353658,
+          -0.020640919409765434,
+          0.9707252193615474
+        ]
+      }
+    },
+    "V2": {
+      "nominal_position_world": [
+        -0.22962233723611614,
+        0.020572314046876216,
+        0.9645064903588529
+      ],
+      "fused_position_world": [
+        -0.22961375379289323,
+        0.02057378094102855,
+        0.9644255248055589
+      ],
+      "fused_normal_world": [
+        0.12832120174174608,
+        0.0378319903245743,
+        0.9910108020055258
+      ],
+      "source": "depth",
+      "info": {
+        "pixel": [
+          707.8628227863228,
+          377.48193277771
+        ],
+        "depth_m": 1.1353373527526855,
+        "skin_point_distance_m": 8.14324756852525e-05,
+        "normal_angle_vs_prior_deg": 4.9491996593291105,
+        "normal_inliers": 666,
+        "skin_point_rejected": false,
+        "normal_rejected": false,
+        "normal_accepted": true,
+        "measured_normal_world": [
+          0.12832120174174608,
+          0.0378319903245743,
+          0.9910108020055258
+        ],
+        "incidence_deg": 13.702626766781718,
+        "prior_normal_world": [
+          0.04811686901987801,
+          0.06937142504774062,
+          0.9964298130328086
+        ],
+        "prior_point_world": [
+          -0.22988291010253215,
+          0.02064307164533576,
+          0.970714902053007
+        ]
+      }
+    },
+    "V4": {
+      "nominal_position_world": [
+        -0.1340286023573485,
+        0.10902720114299042,
+        0.9236961115667646
+      ],
+      "fused_position_world": [
+        -0.1337633625581674,
+        0.10916110013726511,
+        0.9222514637543711
+      ],
+      "fused_normal_world": [
+        0.02902668573723533,
+        0.6863715123296205,
+        0.7266715892185832
+      ],
+      "source": "depth",
+      "info": {
+        "pixel": [
+          757.132929311211,
+          329.89915102774467
+        ],
+        "depth_m": 1.1814905405044556,
+        "skin_point_distance_m": 0.0014748858917186633,
+        "normal_angle_vs_prior_deg": 10.733162565858095,
+        "normal_inliers": 484,
+        "skin_point_rejected": false,
+        "normal_rejected": false,
+        "normal_accepted": true,
+        "measured_normal_world": [
+          0.02902668573723533,
+          0.6863715123296205,
+          0.7266715892185832
+        ],
+        "incidence_deg": 47.96051799211461,
+        "prior_normal_world": [
+          0.06949310267416073,
+          0.5414778591018937,
+          0.8378379537723847
+        ],
+        "prior_point_world": [
+          -0.13532912326975008,
+          0.10867195699900994,
+          0.9350124053137282
+        ]
+      }
+    },
+    "V5": {
+      "nominal_position_world": [
+        -0.12166270710373121,
+        0.13916618044822499,
+        0.8062203689167624
+      ],
+      "fused_position_world": [
+        -0.12166270710373121,
+        0.13916618044822499,
+        0.8062203689167624
+      ],
+      "fused_normal_world": [
+        0.25503416333268125,
+        0.8835510365605435,
+        -0.3928042022763868
+      ],
+      "source": "mesh_fallback",
+      "info": {
+        "pixel": [
+          752.5191475159254,
+          320.44296480039003
+        ],
+        "depth_m": null,
+        "skin_point_distance_m": null,
+        "normal_angle_vs_prior_deg": null,
+        "normal_inliers": 0,
+        "skin_point_rejected": false,
+        "normal_rejected": false,
+        "normal_accepted": false,
+        "measured_normal_world": null,
+        "incidence_deg": 121.45476560107437,
+        "reason": "grazing_incidence"
+      }
+    },
+    "V6": {
+      "nominal_position_world": [
+        -0.12457692016823597,
+        0.14849287003527997,
+        0.8314016148970266
+      ],
+      "fused_position_world": [
+        -0.12457692016823597,
+        0.14849287003527997,
+        0.8314016148970266
+      ],
+      "fused_normal_world": [
+        0.23552802494622344,
+        0.9495013553562858,
+        -0.20730105074868133
+      ],
+      "source": "mesh_fallback",
+      "info": {
+        "pixel": [
+          753.2394587847184,
+          314.420321212037
+        ],
+        "depth_m": null,
+        "skin_point_distance_m": null,
+        "normal_angle_vs_prior_deg": null,
+        "normal_inliers": 0,
+        "skin_point_rejected": false,
+        "normal_rejected": false,
+        "normal_accepted": false,
+        "measured_normal_world": null,
+        "incidence_deg": 110.63450164374535,
+        "reason": "grazing_incidence"
+      }
+    },
+    "V3": {
+      "nominal_position_world": [
+        -0.18197862411108678,
+        0.06554076819182943,
+        0.951865609191223
+      ],
+      "fused_position_world": [
+        -0.18205007624488628,
+        0.06551289657303455,
+        0.9523538604728108
+      ],
+      "fused_normal_world": [
+        0.07258887637266258,
+        0.2963319527593737,
+        0.9523225445198548
+      ],
+      "source": "depth",
+      "info": {
+        "pixel": [
+          733.513549259035,
+          352.57666737141733
+        ],
+        "depth_m": 1.1494371891021729,
+        "skin_point_distance_m": 0.0004942383519425432,
+        "normal_angle_vs_prior_deg": 1.4878602371547975,
+        "normal_inliers": 650,
+        "skin_point_rejected": false,
+        "normal_rejected": false,
+        "normal_accepted": true,
+        "measured_normal_world": [
+          0.07258887637266258,
+          0.2963319527593737,
+          0.9523225445198548
+        ],
+        "incidence_deg": 24.53447447858981,
+        "prior_normal_world": [
+          0.0912108934019644,
+          0.27862430962717655,
+          0.9560591336354213
+        ],
+        "prior_point_world": [
+          -0.18332394592772738,
+          0.06465760635174318,
+          0.9596334895103459
+        ]
+      }
+    }
+  },
+  "evaluation": {
+    "per_target": [
+      {
+        "name": "V1",
+        "source": "depth",
+        "position_error_m": 3.406047593807337e-05,
+        "fused_normal_angle_vs_mesh_deg": 0.29862416892823257,
+        "measured_normal_angle_vs_mesh_deg": 0.29862416892823257,
+        "normal_angle_vs_prior_deg": 5.005006242318401,
+        "normal_accepted": true,
+        "depth_hit": true
+      },
+      {
+        "name": "V2",
+        "source": "depth",
+        "position_error_m": 8.14324756852525e-05,
+        "fused_normal_angle_vs_mesh_deg": 0.1006299631671267,
+        "measured_normal_angle_vs_mesh_deg": 0.1006299631671267,
+        "normal_angle_vs_prior_deg": 4.9491996593291105,
+        "normal_accepted": true,
+        "depth_hit": true
+      },
+      {
+        "name": "V4",
+        "source": "depth",
+        "position_error_m": 0.0014748858917186633,
+        "fused_normal_angle_vs_mesh_deg": 1.9790745876136016,
+        "measured_normal_angle_vs_mesh_deg": 1.9790745876136016,
+        "normal_angle_vs_prior_deg": 10.733162565858095,
+        "normal_accepted": true,
+        "depth_hit": true
+      },
+      {
+        "name": "V5",
+        "source": "mesh_fallback",
+        "position_error_m": 0.0,
+        "fused_normal_angle_vs_mesh_deg": 8.102307404646514e-05,
+        "measured_normal_angle_vs_mesh_deg": null,
+        "normal_angle_vs_prior_deg": null,
+        "normal_accepted": false,
+        "depth_hit": false
+      },
+      {
+        "name": "V6",
+        "source": "mesh_fallback",
+        "position_error_m": 0.0,
+        "fused_normal_angle_vs_mesh_deg": 8.102757220463912e-05,
+        "measured_normal_angle_vs_mesh_deg": null,
+        "normal_angle_vs_prior_deg": null,
+        "normal_accepted": false,
+        "depth_hit": false
+      },
+      {
+        "name": "V3",
+        "source": "depth",
+        "position_error_m": 0.0004942383519425432,
+        "fused_normal_angle_vs_mesh_deg": 0.7691633397950045,
+        "measured_normal_angle_vs_mesh_deg": 0.7691633397950045,
+        "normal_angle_vs_prior_deg": 1.4878602371547975,
+        "normal_accepted": true,
+        "depth_hit": true
+      }
+    ],
+    "position_error_m": {
+      "mean": 0.00034743619921408876,
+      "max": 0.0014748858917186633
+    },
+    "fused_normal_angle_vs_mesh_deg": {
+      "mean": 0.5246090183583694,
+      "max": 1.9790745876136016
+    },
+    "measured_normal_angle_vs_mesh_deg": {
+      "mean": 0.7868730148759913,
+      "max": 1.9790745876136016
+    },
+    "normal_acceptance_rate": 0.6666666666666666,
+    "depth_hit_rate": 0.6666666666666666,
+    "valid_rate": 1.0,
+    "fallback_targets": [
+      "V5",
+      "V6"
+    ]
+  },
+  "screenshots": {
+    "closeup": "/home/jxy/EmbodiedAI/RoboECG/runs/m2/fusion_closeup.png",
+    "depth": "/home/jxy/EmbodiedAI/RoboECG/runs/m2/depth.png"
+  }
+}

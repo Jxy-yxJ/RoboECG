@@ -1,0 +1,139 @@
+{
+  "status": "PASS",
+  "note_clearance": "The patient collision capsules use fixed engineering radii (not scaled with body size), so small bodies report smaller clearance; clearance_ok flags configurations below the 2 cm margin.",
+  "body_scales": [
+    0.9,
+    0.95,
+    1.0,
+    1.05,
+    1.1
+  ],
+  "note": "Uniform scale sweep of the M_Medical_01 asset. Body dimensions are asset measurements; no clinical statistics are implied.",
+  "results": [
+    {
+      "body_scale": 0.9,
+      "body_height_m": 1.6381126588879857,
+      "shoulder_width_m": 0.354060276964996,
+      "clavicle_separation_m": 0.03715559232734954,
+      "chest_origin_world": [
+        -0.26704496897545915,
+        -3.3552344791409894e-09,
+        0.8538384928468876
+      ],
+      "surface_cells_ok": 16,
+      "surface_cells_total": 16,
+      "reachability_status": "PASS",
+      "candidates_passed": 51,
+      "candidates_total": 135,
+      "best_position": [
+        -0.11704496897545916,
+        0.44999999664476553,
+        1.0038384928468875
+      ],
+      "best_yaw_deg": 225.0,
+      "best_clearance_m": 0.022970006688945506,
+      "clearance_ok": true,
+      "clearance_margin_m": 0.02
+    },
+    {
+      "body_scale": 0.95,
+      "body_height_m": 1.7291189177150958,
+      "shoulder_width_m": 0.3737302923519402,
+      "clavicle_separation_m": 0.03921979190109118,
+      "chest_origin_world": [
+        -0.34021413391854016,
+        -3.541636393877834e-09,
+        0.862385075782826
+      ],
+      "surface_cells_ok": 16,
+      "surface_cells_total": 16,
+      "reachability_status": "PASS",
+      "candidates_passed": 42,
+      "candidates_total": 135,
+      "best_position": [
+        -0.040214133918540174,
+        0.2999999964583636,
+        1.0123850757828259
+      ],
+      "best_yaw_deg": 135.0,
+      "best_clearance_m": 0.020959296793624634,
+      "clearance_ok": true,
+      "clearance_margin_m": 0.02
+    },
+    {
+      "body_scale": 1.0,
+      "body_height_m": 1.8201251765422062,
+      "shoulder_width_m": 0.39340030773888446,
+      "clavicle_separation_m": 0.041283991474832825,
+      "chest_origin_world": [
+        -0.4133832988616213,
+        -3.728038306879955e-09,
+        0.8709316587187641
+      ],
+      "surface_cells_ok": 16,
+      "surface_cells_total": 16,
+      "reachability_status": "PASS",
+      "candidates_passed": 39,
+      "candidates_total": 135,
+      "best_position": [
+        -0.1133832988616213,
+        0.29999999627196167,
+        1.020931658718764
+      ],
+      "best_yaw_deg": 225.0,
+      "best_clearance_m": 0.021051267612173803,
+      "clearance_ok": true,
+      "clearance_margin_m": 0.02
+    },
+    {
+      "body_scale": 1.05,
+      "body_height_m": 1.9111314353693165,
+      "shoulder_width_m": 0.4130703231258287,
+      "clavicle_separation_m": 0.043348191048574465,
+      "chest_origin_world": [
+        -0.4865524638047024,
+        -3.914440223351523e-09,
+        0.8794782416547022
+      ],
+      "surface_cells_ok": 16,
+      "surface_cells_total": 16,
+      "reachability_status": "PASS",
+      "candidates_passed": 39,
+      "candidates_total": 135,
+      "best_position": [
+        -0.4865524638047024,
+        0.2999999960855598,
+        1.0294782416547021
+      ],
+      "best_yaw_deg": 225.0,
+      "best_clearance_m": 0.02119295523588014,
+      "clearance_ok": true,
+      "clearance_margin_m": 0.02
+    },
+    {
+      "body_scale": 1.1,
+      "body_height_m": 2.0021376941964273,
+      "shoulder_width_m": 0.432740338512773,
+      "clavicle_separation_m": 0.045412390622316105,
+      "chest_origin_world": [
+        -0.5597216287477835,
+        -4.100842139823091e-09,
+        0.8880248245906406
+      ],
+      "surface_cells_ok": 16,
+      "surface_cells_total": 16,
+      "reachability_status": "PASS",
+      "candidates_passed": 39,
+      "candidates_total": 135,
+      "best_position": [
+        -0.4097216287477835,
+        0.2999999958991578,
+        1.0380248245906405
+      ],
+      "best_yaw_deg": 225.0,
+      "best_clearance_m": 0.021383186568326586,
+      "clearance_ok": true,
+      "clearance_margin_m": 0.02
+    }
+  ]
+}

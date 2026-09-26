@@ -1,0 +1,1524 @@
+{
+  "status": "PASS",
+  "acceptance": {
+    "min_clearance_m": 0.03879851981188768,
+    "margin_m": 0.02,
+    "reach_error_rule": "reach_error <= planned backoff + 5 mm"
+  },
+  "scene": {
+    "layout": {
+      "table_center_xy": [
+        0.125,
+        0.0
+      ],
+      "table_size_xyz": [
+        1.95,
+        0.8,
+        0.08
+      ],
+      "table_top_z": 0.7,
+      "human_root_xy": [
+        1.05,
+        0.0
+      ],
+      "ur3_nominal_base_position": [
+        0.1,
+        0.7,
+        0.5
+      ],
+      "ur3_nominal_base_yaw_deg": 180.0,
+      "tool_electrode_radius_m": 0.01,
+      "tool_electrode_offset_m": 0.088,
+      "video_resolution": [
+        960,
+        540
+      ],
+      "provenance": "engineering: table height/size, pedestal and camera placement; patient body dimensions come from the asset bounding box"
+    },
+    "supine": {
+      "human_root_path": "/World/Human",
+      "root_translate": [
+        1.05,
+        0.0,
+        0.8491305232048034
+      ],
+      "rotation_matrix": [
+        [
+          6.123233995736766e-17,
+          -6.123233995736766e-17,
+          -1.0
+        ],
+        [
+          1.0,
+          3.749399456654644e-33,
+          6.123233995736766e-17
+        ],
+        [
+          0.0,
+          -1.0,
+          6.123233995736766e-17
+        ]
+      ],
+      "rotation": "Rz(yaw) @ Rz(90) @ Rx(-90): supine, head toward -X, chest toward +Z, patient left toward +Y (rig faces -Y when standing)",
+      "bbox_min_world": [
+        -0.7696510076522829,
+        -0.9244881272315979,
+        0.7
+      ],
+      "bbox_max_world": [
+        1.0504741688899233,
+        0.924486637115479,
+        1.048362624645233
+      ],
+      "table_top_z": 0.7,
+      "provenance": "engineering: supine root rotation + table height; body dimensions come from the M_Medical_01 asset bounding box"
+    },
+    "human_bbox_min": [
+      -0.7696510076522829,
+      -0.9244881272315979,
+      0.7
+    ],
+    "human_bbox_max": [
+      1.0504741688899233,
+      0.924486637115479,
+      1.048362624645233
+    ],
+    "table_bounds": {
+      "x": [
+        -0.85,
+        1.1
+      ],
+      "y": [
+        -0.4,
+        0.4
+      ],
+      "top_z": 0.7
+    },
+    "cameras": {
+      "ThirdView": {
+        "position": [
+          -1.45,
+          -1.35,
+          2.0
+        ],
+        "look_at": [
+          -0.1,
+          0.25,
+          0.8
+        ]
+      },
+      "ChestCloseup": {
+        "position": [
+          -0.1,
+          -0.95,
+          1.3
+        ],
+        "look_at": [
+          0.0,
+          0.0,
+          0.92
+        ]
+      },
+      "PerceptionRGBD": {
+        "position": [
+          -0.35,
+          0.0,
+          2.1
+        ],
+        "look_at": [
+          -0.35,
+          0.05,
+          1.0
+        ]
+      }
+    }
+  },
+  "chest_frame": {
+    "origin_world": [
+      -0.4133832988616213,
+      -3.728038306879955e-09,
+      0.8709316587187641
+    ],
+    "up_world": [
+      -0.9944238733216463,
+      7.689497645510027e-12,
+      -0.10545691142819694
+    ],
+    "lateral_world": [
+      1.4256016085238002e-06,
+      0.9999999999086284,
+      -1.3442879794838559e-05
+    ],
+    "anterior_world": [
+      -0.10545691141856108,
+      1.3518260136742647e-05,
+      0.9944238732307842
+    ],
+    "provenance": {
+      "up": "asset_measurement: Spine02 -> NeckTwist01",
+      "lateral": "asset_measurement: R_Clavicle -> L_Clavicle (orthogonalized)",
+      "anterior": "clinical_definition: lateral x up; sign from anterior_hint",
+      "origin": "asset_measurement: midpoint of L/R_Clavicle (sternoclavicular joints); proxy for the top of the sternum",
+      "caveat": "The rig chest bones are skinning joints, not individual ribs; clinical rib levels are applied with the documented uncertainty in configs/ecg_rules.yaml."
+    }
+  },
+  "targets": {
+    "V1": {
+      "position_world": [
+        -0.2292363005785946,
+        -0.020635929686177928,
+        0.9643881571699584
+      ],
+      "normal_world": [
+        0.11814939598362682,
+        -0.04618596586036928,
+        0.9919211545209875
+      ],
+      "frame_coords_uvn": [
+        -0.193,
+        -0.02064199559579157,
+        0.07351552052068108
+      ],
+      "provenance": {
+        "vertical": {
+          "notch_level": "asset_measurement: clavicle joint midpoint (sternal notch proxy)",
+          "sternal_notch_to_nipple": "published_statistic 0.193 m, 10.1097/SAP.0000000000002018 (PMID 31633544)",
+          "nipple_fourth_ics": "published_statistic 0.75, 10.1097/00006534-200112000-00015",
+          "intercostal_spacing": "published_regression 0.0896 m (published_regression on measured torso width 0.383 m), 10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0); R2=25 \u4e2a\u8eaf\u5e72\u6a21\u578b\uff0cR2=0.81\uff0cRMS=7.3 mm\uff08\u4e0e\u524d\u540e\u5f84\u8f93\u5165\u7684 R2=0.80 \u7b49\u4ef7\uff1b\u4e24\u8005\u5728\u6570\u636e\u96c6\u5185 r=0.97\uff09",
+          "torso_width_m": 0.38259319386663165,
+          "u_4ics_m": -0.193,
+          "u_5ics_m": -0.2826412921268262
+        },
+        "horizontal": {
+          "parasternal": "asset_measurement: |v| of sternoclavicular joint",
+          "midclavicular": "asset_measurement: v of clavicle midpoint",
+          "midaxillary": "asset_measurement: max|v| of chest contour at V4 level",
+          "anterior_axillary": "published_regression: v_mcl + 0.7356 x (v_midax - v_mcl); fitted on 25 GT torso models (DOI 10.5281/zenodo.20086105), LOO V5 error 2.5 mm",
+          "V3": "clinical_definition: midpoint(V2, V4)",
+          "values_m": {
+            "parasternal": 0.02064199559579157,
+            "midclavicular": 0.10867149568182503,
+            "midaxillary": 0.1456360119897002,
+            "anterior_axillary": 0.135862593877898
+          }
+        },
+        "snap": {
+          "status": "ok",
+          "point_count": 1232,
+          "fit_order": 2,
+          "fit_rms_m": 0.000309343854983021,
+          "du_error_m": 2.4195027122364543e-05,
+          "dv_error_m": 5.0758353197129236e-06,
+          "nominal_offset_m": 0.00010882645142051484,
+          "patch_fallback": false,
+          "normal_anterior_deg": 13.111670272123073
+        }
+      }
+    },
+    "V2": {
+      "position_world": [
+        -0.2292248933540182,
+        0.020641841164902187,
+        0.964453108055337
+      ],
+      "normal_world": [
+        0.11601796833703588,
+        0.041905299499767575,
+        0.9923627244595504
+      ],
+      "frame_coords_uvn": [
+        -0.193,
+        0.02064199559579157,
+        0.07357946426466161
+      ],
+      "provenance": {
+        "vertical": {
+          "notch_level": "asset_measurement: clavicle joint midpoint (sternal notch proxy)",
+          "sternal_notch_to_nipple": "published_statistic 0.193 m, 10.1097/SAP.0000000000002018 (PMID 31633544)",
+          "nipple_fourth_ics": "published_statistic 0.75, 10.1097/00006534-200112000-00015",
+          "intercostal_spacing": "published_regression 0.0896 m (published_regression on measured torso width 0.383 m), 10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0); R2=25 \u4e2a\u8eaf\u5e72\u6a21\u578b\uff0cR2=0.81\uff0cRMS=7.3 mm\uff08\u4e0e\u524d\u540e\u5f84\u8f93\u5165\u7684 R2=0.80 \u7b49\u4ef7\uff1b\u4e24\u8005\u5728\u6570\u636e\u96c6\u5185 r=0.97\uff09",
+          "torso_width_m": 0.38259319386663165,
+          "u_4ics_m": -0.193,
+          "u_5ics_m": -0.2826412921268262
+        },
+        "horizontal": {
+          "parasternal": "asset_measurement: |v| of sternoclavicular joint",
+          "midclavicular": "asset_measurement: v of clavicle midpoint",
+          "midaxillary": "asset_measurement: max|v| of chest contour at V4 level",
+          "anterior_axillary": "published_regression: v_mcl + 0.7356 x (v_midax - v_mcl); fitted on 25 GT torso models (DOI 10.5281/zenodo.20086105), LOO V5 error 2.5 mm",
+          "V3": "clinical_definition: midpoint(V2, V4)",
+          "values_m": {
+            "parasternal": 0.02064199559579157,
+            "midclavicular": 0.10867149568182503,
+            "midaxillary": 0.1456360119897002,
+            "anterior_axillary": 0.135862593877898
+          }
+        },
+        "snap": {
+          "status": "ok",
+          "point_count": 1225,
+          "fit_order": 2,
+          "fit_rms_m": 0.000313901839181941,
+          "du_error_m": 6.001891226070644e-06,
+          "dv_error_m": -1.145365819712335e-06,
+          "nominal_offset_m": 2.7225840130999258e-05,
+          "patch_fallback": false,
+          "normal_anterior_deg": 12.942620987689297
+        }
+      }
+    },
+    "V4": {
+      "position_world": [
+        -0.1345792144536948,
+        0.10892094671913673,
+        0.922444706790429
+      ],
+      "normal_world": [
+        0.03349047196933028,
+        0.6791885304181562,
+        0.7331993783655965
+      ],
+      "frame_coords_uvn": [
+        -0.2826412921268262,
+        0.10867149568182503,
+        0.02182545957455135
+      ],
+      "provenance": {
+        "vertical": {
+          "notch_level": "asset_measurement: clavicle joint midpoint (sternal notch proxy)",
+          "sternal_notch_to_nipple": "published_statistic 0.193 m, 10.1097/SAP.0000000000002018 (PMID 31633544)",
+          "nipple_fourth_ics": "published_statistic 0.75, 10.1097/00006534-200112000-00015",
+          "intercostal_spacing": "published_regression 0.0896 m (published_regression on measured torso width 0.383 m), 10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0); R2=25 \u4e2a\u8eaf\u5e72\u6a21\u578b\uff0cR2=0.81\uff0cRMS=7.3 mm\uff08\u4e0e\u524d\u540e\u5f84\u8f93\u5165\u7684 R2=0.80 \u7b49\u4ef7\uff1b\u4e24\u8005\u5728\u6570\u636e\u96c6\u5185 r=0.97\uff09",
+          "torso_width_m": 0.38259319386663165,
+          "u_4ics_m": -0.193,
+          "u_5ics_m": -0.2826412921268262
+        },
+        "horizontal": {
+          "parasternal": "asset_measurement: |v| of sternoclavicular joint",
+          "midclavicular": "asset_measurement: v of clavicle midpoint",
+          "midaxillary": "asset_measurement: max|v| of chest contour at V4 level",
+          "anterior_axillary": "published_regression: v_mcl + 0.7356 x (v_midax - v_mcl); fitted on 25 GT torso models (DOI 10.5281/zenodo.20086105), LOO V5 error 2.5 mm",
+          "V3": "clinical_definition: midpoint(V2, V4)",
+          "values_m": {
+            "parasternal": 0.02064199559579157,
+            "midclavicular": 0.10867149568182503,
+            "midaxillary": 0.1456360119897002,
+            "anterior_axillary": 0.135862593877898
+          }
+        },
+        "snap": {
+          "status": "ok",
+          "point_count": 1026,
+          "fit_order": 2,
+          "fit_rms_m": 0.00025185702257437913,
+          "du_error_m": -4.05523350516801e-05,
+          "dv_error_m": 0.00024915973523582935,
+          "nominal_offset_m": 0.0003629120233789493,
+          "patch_fallback": false,
+          "normal_anterior_deg": 43.48218674159913
+        }
+      }
+    },
+    "V5": {
+      "position_world": [
+        -0.13122422966954841,
+        0.13611555165896827,
+        0.8907538814046709
+      ],
+      "normal_world": [
+        0.05113349649918714,
+        0.8251911974537713,
+        0.5625343128917368
+      ],
+      "frame_coords_uvn": [
+        -0.2826412921268262,
+        0.135862593877898,
+        -0.010042092460883108
+      ],
+      "provenance": {
+        "vertical": {
+          "notch_level": "asset_measurement: clavicle joint midpoint (sternal notch proxy)",
+          "sternal_notch_to_nipple": "published_statistic 0.193 m, 10.1097/SAP.0000000000002018 (PMID 31633544)",
+          "nipple_fourth_ics": "published_statistic 0.75, 10.1097/00006534-200112000-00015",
+          "intercostal_spacing": "published_regression 0.0896 m (published_regression on measured torso width 0.383 m), 10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0); R2=25 \u4e2a\u8eaf\u5e72\u6a21\u578b\uff0cR2=0.81\uff0cRMS=7.3 mm\uff08\u4e0e\u524d\u540e\u5f84\u8f93\u5165\u7684 R2=0.80 \u7b49\u4ef7\uff1b\u4e24\u8005\u5728\u6570\u636e\u96c6\u5185 r=0.97\uff09",
+          "torso_width_m": 0.38259319386663165,
+          "u_4ics_m": -0.193,
+          "u_5ics_m": -0.2826412921268262
+        },
+        "horizontal": {
+          "parasternal": "asset_measurement: |v| of sternoclavicular joint",
+          "midclavicular": "asset_measurement: v of clavicle midpoint",
+          "midaxillary": "asset_measurement: max|v| of chest contour at V4 level",
+          "anterior_axillary": "published_regression: v_mcl + 0.7356 x (v_midax - v_mcl); fitted on 25 GT torso models (DOI 10.5281/zenodo.20086105), LOO V5 error 2.5 mm",
+          "V3": "clinical_definition: midpoint(V2, V4)",
+          "values_m": {
+            "parasternal": 0.02064199559579157,
+            "midclavicular": 0.10867149568182503,
+            "midaxillary": 0.1456360119897002,
+            "anterior_axillary": 0.135862593877898
+          }
+        },
+        "snap": {
+          "status": "ok",
+          "point_count": 705,
+          "fit_order": 2,
+          "fit_rms_m": 0.00032303586946228694,
+          "du_error_m": -3.481273303634902e-05,
+          "dv_error_m": 0.00025309727533753823,
+          "nominal_offset_m": 0.00032262062895345716,
+          "patch_fallback": false,
+          "normal_anterior_deg": 56.35701162606552
+        }
+      }
+    },
+    "V6": {
+      "position_world": [
+        -0.12938121941083489,
+        0.1462046332326847,
+        0.8737606480304854
+      ],
+      "normal_world": [
+        0.06170591655571911,
+        0.8904102317896554,
+        0.4509567595527432
+      ],
+      "frame_coords_uvn": [
+        -0.2826412921268262,
+        0.1456360119897002,
+        -0.027134791194322744
+      ],
+      "provenance": {
+        "vertical": {
+          "notch_level": "asset_measurement: clavicle joint midpoint (sternal notch proxy)",
+          "sternal_notch_to_nipple": "published_statistic 0.193 m, 10.1097/SAP.0000000000002018 (PMID 31633544)",
+          "nipple_fourth_ics": "published_statistic 0.75, 10.1097/00006534-200112000-00015",
+          "intercostal_spacing": "published_regression 0.0896 m (published_regression on measured torso width 0.383 m), 10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0); R2=25 \u4e2a\u8eaf\u5e72\u6a21\u578b\uff0cR2=0.81\uff0cRMS=7.3 mm\uff08\u4e0e\u524d\u540e\u5f84\u8f93\u5165\u7684 R2=0.80 \u7b49\u4ef7\uff1b\u4e24\u8005\u5728\u6570\u636e\u96c6\u5185 r=0.97\uff09",
+          "torso_width_m": 0.38259319386663165,
+          "u_4ics_m": -0.193,
+          "u_5ics_m": -0.2826412921268262
+        },
+        "horizontal": {
+          "parasternal": "asset_measurement: |v| of sternoclavicular joint",
+          "midclavicular": "asset_measurement: v of clavicle midpoint",
+          "midaxillary": "asset_measurement: max|v| of chest contour at V4 level",
+          "anterior_axillary": "published_regression: v_mcl + 0.7356 x (v_midax - v_mcl); fitted on 25 GT torso models (DOI 10.5281/zenodo.20086105), LOO V5 error 2.5 mm",
+          "V3": "clinical_definition: midpoint(V2, V4)",
+          "values_m": {
+            "parasternal": 0.02064199559579157,
+            "midclavicular": 0.10867149568182503,
+            "midaxillary": 0.1456360119897002,
+            "anterior_axillary": 0.135862593877898
+          }
+        },
+        "snap": {
+          "status": "ok",
+          "point_count": 541,
+          "fit_order": 2,
+          "fit_rms_m": 0.00028690729392995333,
+          "du_error_m": -7.549222617991846e-05,
+          "dv_error_m": 0.000568991801721902,
+          "nominal_offset_m": 0.0007053173183128688,
+          "patch_fallback": false,
+          "normal_anterior_deg": 63.77183356878253
+        }
+      }
+    },
+    "V3": {
+      "position_world": [
+        -0.18288239756644364,
+        0.0646603235143229,
+        0.952545387890395
+      ],
+      "normal_world": [
+        0.07777417930205141,
+        0.2969730828023026,
+        0.951713278842314
+      ],
+      "frame_coords_uvn": [
+        -0.2378206460634131,
+        0.0646567456388083,
+        0.05685160163700159
+      ],
+      "provenance": {
+        "vertical": {
+          "notch_level": "asset_measurement: clavicle joint midpoint (sternal notch proxy)",
+          "sternal_notch_to_nipple": "published_statistic 0.193 m, 10.1097/SAP.0000000000002018 (PMID 31633544)",
+          "nipple_fourth_ics": "published_statistic 0.75, 10.1097/00006534-200112000-00015",
+          "intercostal_spacing": "published_regression 0.0896 m (published_regression on measured torso width 0.383 m), 10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0); R2=25 \u4e2a\u8eaf\u5e72\u6a21\u578b\uff0cR2=0.81\uff0cRMS=7.3 mm\uff08\u4e0e\u524d\u540e\u5f84\u8f93\u5165\u7684 R2=0.80 \u7b49\u4ef7\uff1b\u4e24\u8005\u5728\u6570\u636e\u96c6\u5185 r=0.97\uff09",
+          "torso_width_m": 0.38259319386663165,
+          "u_4ics_m": -0.193,
+          "u_5ics_m": -0.2826412921268262
+        },
+        "horizontal": {
+          "parasternal": "asset_measurement: |v| of sternoclavicular joint",
+          "midclavicular": "asset_measurement: v of clavicle midpoint",
+          "midaxillary": "asset_measurement: max|v| of chest contour at V4 level",
+          "anterior_axillary": "published_regression: v_mcl + 0.7356 x (v_midax - v_mcl); fitted on 25 GT torso models (DOI 10.5281/zenodo.20086105), LOO V5 error 2.5 mm",
+          "V3": "clinical_definition: midpoint(V2, V4)",
+          "values_m": {
+            "parasternal": 0.02064199559579157,
+            "midclavicular": 0.10867149568182503,
+            "midaxillary": 0.1456360119897002,
+            "anterior_axillary": 0.135862593877898
+          }
+        },
+        "snap": {
+          "status": "ok",
+          "point_count": 1174,
+          "fit_order": 2,
+          "fit_rms_m": 0.00020024276844539255,
+          "du_error_m": -1.684814748242891e-06,
+          "dv_error_m": 2.813076549562643e-06,
+          "nominal_offset_m": 9.401501356965916e-06,
+          "patch_fallback": false,
+          "normal_anterior_deg": 20.247142798520873
+        }
+      }
+    }
+  },
+  "vertical": {
+    "notch_level": "asset_measurement: clavicle joint midpoint (sternal notch proxy)",
+    "sternal_notch_to_nipple": "published_statistic 0.193 m, 10.1097/SAP.0000000000002018 (PMID 31633544)",
+    "nipple_fourth_ics": "published_statistic 0.75, 10.1097/00006534-200112000-00015",
+    "intercostal_spacing": "published_regression 0.0896 m (published_regression on measured torso width 0.383 m), 10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0); R2=25 \u4e2a\u8eaf\u5e72\u6a21\u578b\uff0cR2=0.81\uff0cRMS=7.3 mm\uff08\u4e0e\u524d\u540e\u5f84\u8f93\u5165\u7684 R2=0.80 \u7b49\u4ef7\uff1b\u4e24\u8005\u5728\u6570\u636e\u96c6\u5185 r=0.97\uff09",
+    "torso_width_m": 0.38259319386663165,
+    "u_4ics_m": -0.193,
+    "u_5ics_m": -0.2826412921268262
+  },
+  "horizontal": {
+    "parasternal": "asset_measurement: |v| of sternoclavicular joint",
+    "midclavicular": "asset_measurement: v of clavicle midpoint",
+    "midaxillary": "asset_measurement: max|v| of chest contour at V4 level",
+    "anterior_axillary": "published_regression: v_mcl + 0.7356 x (v_midax - v_mcl); fitted on 25 GT torso models (DOI 10.5281/zenodo.20086105), LOO V5 error 2.5 mm",
+    "V3": "clinical_definition: midpoint(V2, V4)",
+    "values_m": {
+      "parasternal": 0.02064199559579157,
+      "midclavicular": 0.10867149568182503,
+      "midaxillary": 0.1456360119897002,
+      "anterior_axillary": 0.135862593877898
+    }
+  },
+  "spacing_sensitivity": {
+    "spacings_m": [
+      0.079,
+      0.087,
+      0.095
+    ],
+    "max_v4_shift_m": 0.01091625521922178,
+    "positions": {
+      "0.079": {
+        "V1": [
+          -0.2292363005785946,
+          -0.020635929686177928,
+          0.9643881571699584
+        ],
+        "V2": [
+          -0.2292248933540182,
+          0.020641841164902187,
+          0.964453108055337
+        ],
+        "V4": [
+          -0.145438282316683,
+          0.10866207095739464,
+          0.9235301820311353
+        ],
+        "V5": [
+          -0.14214689972286096,
+          0.13658693629943397,
+          0.8914784307050133
+        ],
+        "V6": [
+          -0.1399372484371525,
+          0.14780252590322313,
+          0.8724390953989606
+        ],
+        "V3": [
+          -0.18830241874827136,
+          0.06462815751460915,
+          0.9529932482905206
+        ]
+      },
+      "0.087": {
+        "V1": [
+          -0.2292363005785946,
+          -0.020635929686177928,
+          0.9643881571699584
+        ],
+        "V2": [
+          -0.2292248933540182,
+          0.020641841164902187,
+          0.964453108055337
+        ],
+        "V4": [
+          -0.13729801174089964,
+          0.1087384927240642,
+          0.922763334527408
+        ],
+        "V5": [
+          -0.1339016921833873,
+          0.13629324618451638,
+          0.8907565686647615
+        ],
+        "V6": [
+          -0.1322246137126696,
+          0.14596882582149948,
+          0.8746320395623206
+        ],
+        "V3": [
+          -0.18424960427055523,
+          0.06461696252597836,
+          0.9526600477318776
+        ]
+      },
+      "0.095": {
+        "V1": [
+          -0.2292363005785946,
+          -0.020635929686177928,
+          0.9643881571699584
+        ],
+        "V2": [
+          -0.2292248933540182,
+          0.020641841164902187,
+          0.964453108055337
+        ],
+        "V4": [
+          -0.12919320396391448,
+          0.10886359781708624,
+          0.9223246899340095
+        ],
+        "V5": [
+          -0.12617073956458516,
+          0.13432801678737283,
+          0.8929952613030622
+        ],
+        "V6": [
+          -0.12445754794037245,
+          0.1441080304760612,
+          0.8772291341775684
+        ],
+        "V3": [
+          -0.1801134000326396,
+          0.0647525770449736,
+          0.952325049813696
+        ]
+      }
+    }
+  },
+  "staging": [
+    {
+      "target": "V1",
+      "staged_q_pre": [
+        1.3068497070647713,
+        0.6077450740053214,
+        -1.1490494743918707,
+        -1.0160109904622372,
+        -1.6973646268271336,
+        1.3109211808116552
+      ]
+    },
+    {
+      "target": "V2",
+      "staged_q_pre": [
+        1.2662625186127296,
+        0.8387392880957792,
+        -1.5839722700393692,
+        -0.9003809546268923,
+        -1.66923240641394,
+        1.2604512997987922
+      ]
+    },
+    {
+      "target": "V3",
+      "staged_q_pre": [
+        1.2833514547339007,
+        -0.48090386785688954,
+        1.1845781127714023,
+        0.5547645126923151,
+        1.5616644563292534,
+        -1.8692896382820134
+      ]
+    },
+    {
+      "target": "V4",
+      "staged_q_pre": [
+        1.2777373883675585,
+        -0.5993514770446038,
+        2.06916007351056,
+        -0.6321417665619536,
+        1.4064607367779316,
+        -1.8192744893339452
+      ]
+    },
+    {
+      "target": "V5",
+      "staged_q_pre": [
+        -0.15205517605170835,
+        0.6199610091038313,
+        2.1756331470021912,
+        -1.093189629885232,
+        0.6044363008207294,
+        2.8724523442877183
+      ]
+    },
+    {
+      "target": "V6",
+      "staged_q_pre": [
+        0.21377183523352788,
+        0.47634966369255544,
+        2.2163307463249136,
+        -1.624280600090528,
+        0.5409400174878619,
+        3.560842859094207
+      ]
+    }
+  ],
+  "staging_note": "M1 executes each target from its pre-approach pose; free-space transit between targets is M4 (multi-target sequencing).",
+  "plans": [
+    {
+      "target": "V1",
+      "goal_backoff_m": 0.0,
+      "goal_tool0_world": [
+        -0.21883915373204582,
+        -0.02470029468188636,
+        1.051677218767718
+      ],
+      "requested_tool0_world": [
+        -0.21883915373204582,
+        -0.02470029468188636,
+        1.051677218767718
+      ],
+      "ik_error_m": 4.6102094638501483e-07,
+      "planned_clearance": {
+        "min_clearance_m": 0.0396576175015517,
+        "link": "wrist_2_link",
+        "capsule": "torso",
+        "waypoint": 60,
+        "ground_box_clearance_m": 0.3516773862890135,
+        "margin_m": 0.02,
+        "ok": true
+      },
+      "branch_joint_distance_rad": 0.23343729236934108
+    },
+    {
+      "target": "V2",
+      "goal_backoff_m": 0.0,
+      "goal_tool0_world": [
+        -0.21901531214036923,
+        0.024329507520878046,
+        1.05178102780769
+      ],
+      "requested_tool0_world": [
+        -0.21901531214036923,
+        0.024329507520878046,
+        1.05178102780769
+      ],
+      "ik_error_m": 2.768826374555228e-07,
+      "planned_clearance": {
+        "min_clearance_m": 0.03973052522464424,
+        "link": "wrist_2_link",
+        "capsule": "torso",
+        "waypoint": 60,
+        "ground_box_clearance_m": 0.3213525224814651,
+        "margin_m": 0.02,
+        "ok": true
+      },
+      "branch_joint_distance_rad": 0.28404082976881173
+    },
+    {
+      "target": "V3",
+      "goal_backoff_m": 0.0,
+      "goal_tool0_world": [
+        -0.17603826978786996,
+        0.0907939548008994,
+        1.036296156428435
+      ],
+      "requested_tool0_world": [
+        -0.17603826978786996,
+        0.0907939548008994,
+        1.036296156428435
+      ],
+      "ik_error_m": 2.7906743725603e-07,
+      "planned_clearance": {
+        "min_clearance_m": 0.04173221163100783,
+        "link": "wrist_2_link",
+        "capsule": "torso",
+        "waypoint": 60,
+        "ground_box_clearance_m": 0.33629619797267646,
+        "margin_m": 0.02,
+        "ok": true
+      },
+      "branch_joint_distance_rad": 0.3307592958007584
+    },
+    {
+      "target": "V4",
+      "goal_backoff_m": 0.0,
+      "goal_tool0_world": [
+        -0.1316320529203967,
+        0.1686895373958747,
+        0.986966252086537
+      ],
+      "requested_tool0_world": [
+        -0.1316320529203967,
+        0.1686895373958747,
+        0.986966252086537
+      ],
+      "ik_error_m": 4.856173790018466e-07,
+      "planned_clearance": {
+        "min_clearance_m": 0.047598846094706944,
+        "link": "wrist_2_link",
+        "capsule": "torso",
+        "waypoint": 60,
+        "ground_box_clearance_m": 0.2869666686751114,
+        "margin_m": 0.02,
+        "ok": true
+      },
+      "branch_joint_distance_rad": 0.3982499980784313
+    },
+    {
+      "target": "V5",
+      "goal_backoff_m": 0.0,
+      "goal_tool0_world": [
+        -0.12672448197762445,
+        0.20873237703482755,
+        0.9402569009390943
+      ],
+      "requested_tool0_world": [
+        -0.12672448197762445,
+        0.20873237703482755,
+        0.9402569009390943
+      ],
+      "ik_error_m": 1.1553539633571107e-06,
+      "planned_clearance": {
+        "min_clearance_m": 0.05414190062993097,
+        "link": "wrist_2_link",
+        "capsule": "torso",
+        "waypoint": 60,
+        "ground_box_clearance_m": 0.23715573872804943,
+        "margin_m": 0.02,
+        "ok": true
+      },
+      "branch_joint_distance_rad": 1.085412988223022
+    },
+    {
+      "target": "V6",
+      "goal_backoff_m": 0.0,
+      "goal_tool0_world": [
+        -0.12395109875393703,
+        0.22456073363009602,
+        0.9134448428710871
+      ],
+      "requested_tool0_world": [
+        -0.12395109875393703,
+        0.22456073363009602,
+        0.9134448428710871
+      ],
+      "ik_error_m": 1.4745896467305254e-06,
+      "planned_clearance": {
+        "min_clearance_m": 0.05814548896321132,
+        "link": "wrist_2_link",
+        "capsule": "torso",
+        "waypoint": 60,
+        "ground_box_clearance_m": 0.2033331143513704,
+        "margin_m": 0.02,
+        "ok": true
+      },
+      "branch_joint_distance_rad": 2.0116533821269176
+    }
+  ],
+  "base_placement": {
+    "status": "PASS",
+    "collision_free_candidates": 991,
+    "skipped_over_table": 270,
+    "targets": 6,
+    "candidates_total": 1080,
+    "candidates_passed": 280,
+    "clearance_margin_m": 0.02,
+    "best_clearance_ok": true,
+    "best": {
+      "position": [
+        -0.18838329886162128,
+        0.4499999962719617,
+        1.070931658718764
+      ],
+      "yaw_deg": 180.0,
+      "ik_success": 6,
+      "targets": 6,
+      "min_clearance_m": 0.03965761750281125,
+      "table_clearance_m": 0.20321069990214116,
+      "max_reach_m": 0.47606581350206695
+    },
+    "top10": [
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965761750281125,
+        "table_clearance_m": 0.20321069990214116,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657429426729125,
+        "table_clearance_m": 0.20328299977079847,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965739297623231,
+        "table_clearance_m": 0.2134444403042101,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657378818459856,
+        "table_clearance_m": 0.213444686540636,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965736155145561,
+        "table_clearance_m": 0.20347200763702392,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965785008820014,
+        "table_clearance_m": 0.21344557748496154,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657647049085844,
+        "table_clearance_m": 0.21344260121961192,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965743705687203,
+        "table_clearance_m": 0.2032702989661729,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965742664401529,
+        "table_clearance_m": 0.20332341425135417,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657354966226,
+        "table_clearance_m": 0.20359472549408844,
+        "max_reach_m": 0.47666887331803004
+      }
+    ],
+    "top30": [
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965761750281125,
+        "table_clearance_m": 0.20321069990214116,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657429426729125,
+        "table_clearance_m": 0.20328299977079847,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965739297623231,
+        "table_clearance_m": 0.2134444403042101,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657378818459856,
+        "table_clearance_m": 0.213444686540636,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965736155145561,
+        "table_clearance_m": 0.20347200763702392,
+        "max_reach_m": 0.47606581350206695
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965785008820014,
+        "table_clearance_m": 0.21344557748496154,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657647049085844,
+        "table_clearance_m": 0.21344260121961192,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965743705687203,
+        "table_clearance_m": 0.2032702989661729,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965742664401529,
+        "table_clearance_m": 0.20332341425135417,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657354966226,
+        "table_clearance_m": 0.20359472549408844,
+        "max_reach_m": 0.47666887331803004
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039658160447041964,
+        "table_clearance_m": 0.21344681038700655,
+        "max_reach_m": 0.47717426644237754
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965741243441263,
+        "table_clearance_m": 0.21344433696216017,
+        "max_reach_m": 0.47717426644237754
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965736532610776,
+        "table_clearance_m": 0.21344516654557968,
+        "max_reach_m": 0.47717426644237754
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965731778421839,
+        "table_clearance_m": 0.213445310920681,
+        "max_reach_m": 0.47717426644237754
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.070931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657102840115706,
+        "table_clearance_m": 0.21344474408084582,
+        "max_reach_m": 0.47717426644237754
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965801409944062,
+        "table_clearance_m": 0.21344427437562133,
+        "max_reach_m": 0.4777759271454732
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965726320729263,
+        "table_clearance_m": 0.2134449932377274,
+        "max_reach_m": 0.4777759271454732
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.032260043308534894,
+        "table_clearance_m": 0.2134459895483545,
+        "max_reach_m": 0.4777759271454732
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03225611308706848,
+        "table_clearance_m": 0.21344390996493903,
+        "max_reach_m": 0.4777759271454732
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.020931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03224613488993437,
+        "table_clearance_m": 0.21344541281471288,
+        "max_reach_m": 0.4777759271454732
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.0396574947216557,
+        "table_clearance_m": 0.21344390420195627,
+        "max_reach_m": 0.4806912759562934
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965747613357599,
+        "table_clearance_m": 0.20346279766327016,
+        "max_reach_m": 0.4806912759562934
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965743277779075,
+        "table_clearance_m": 0.20344353528183892,
+        "max_reach_m": 0.4806912759562934
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965733455543425,
+        "table_clearance_m": 0.2034861525878431,
+        "max_reach_m": 0.4806912759562934
+      },
+      {
+        "position": [
+          -0.18838329886162128,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039618733287343146,
+        "table_clearance_m": 0.21344465218954148,
+        "max_reach_m": 0.4806912759562934
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 225.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965773931176345,
+        "table_clearance_m": 0.21344479437237188,
+        "max_reach_m": 0.48178908720510233
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 270.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657596562908855,
+        "table_clearance_m": 0.2134442188018422,
+        "max_reach_m": 0.48178908720510233
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 135.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.039657591972442764,
+        "table_clearance_m": 0.21344427899604837,
+        "max_reach_m": 0.48178908720510233
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 180.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965757699008791,
+        "table_clearance_m": 0.21344462699738612,
+        "max_reach_m": 0.48178908720510233
+      },
+      {
+        "position": [
+          -0.26338329886162126,
+          0.4499999962719617,
+          1.120931658718764
+        ],
+        "yaw_deg": 90.0,
+        "ik_success": 6,
+        "targets": 6,
+        "min_clearance_m": 0.03965746253284736,
+        "table_clearance_m": 0.21344574289253496,
+        "max_reach_m": 0.48178908720510233
+      }
+    ]
+  },
+  "execution": {
+    "frames": 822,
+    "min_clearance_m": 0.03879851981188768,
+    "min_clearance_info": {
+      "clearance_m": 0.03879851981188768,
+      "link": "wrist_2_link",
+      "capsule": "torso",
+      "frame": 61,
+      "segment": "V1: contact hold"
+    },
+    "segments": [
+      {
+        "label": "V1: stage",
+        "kind": "stage",
+        "min_clearance_m": null
+      },
+      {
+        "label": "V1: approach",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V1: retreat",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V2: stage",
+        "kind": "stage",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V2: approach",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V2: retreat",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V3: stage",
+        "kind": "stage",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V3: approach",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V3: retreat",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V4: stage",
+        "kind": "stage",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V4: approach",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V4: retreat",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V5: stage",
+        "kind": "stage",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V5: approach",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V5: retreat",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V6: stage",
+        "kind": "stage",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V6: approach",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      },
+      {
+        "label": "V6: retreat",
+        "kind": "trajectory",
+        "min_clearance_m": 0.03879851981188768
+      }
+    ],
+    "targets": [
+      {
+        "target": "V1",
+        "reach_error_m": 0.0005782564829830361,
+        "tracking_error_rad": 0.0010252021508215818
+      },
+      {
+        "target": "V2",
+        "reach_error_m": 0.00039278692947176827,
+        "tracking_error_rad": 0.0007805758012679094
+      },
+      {
+        "target": "V3",
+        "reach_error_m": 0.00025838565128711476,
+        "tracking_error_rad": 0.0006157039163426526
+      },
+      {
+        "target": "V4",
+        "reach_error_m": 4.901475916852831e-05,
+        "tracking_error_rad": 0.00015065603321239222
+      },
+      {
+        "target": "V5",
+        "reach_error_m": 0.0001643027898955691,
+        "tracking_error_rad": 0.00047174710408823365
+      },
+      {
+        "target": "V6",
+        "reach_error_m": 0.0001421616406722463,
+        "tracking_error_rad": 0.000440575659154928
+      }
+    ],
+    "video": "/home/jxy/EmbodiedAI/RoboECG/runs/m1/m1_reach.mp4",
+    "patient_motion": []
+  },
+  "safety": {
+    "margin_m": 0.02,
+    "min_clearance_m": 0.03879851981188768,
+    "min_clearance_info": {
+      "clearance_m": 0.03879851981188768,
+      "link": "wrist_2_link",
+      "capsule": "torso",
+      "frame": 61,
+      "segment": "V1: contact hold"
+    }
+  },
+  "scene_usd": "/home/jxy/EmbodiedAI/RoboECG/assets/local/m1_ecg_scene.usd"
+}

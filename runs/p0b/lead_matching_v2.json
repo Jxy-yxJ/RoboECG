@@ -1,0 +1,93 @@
+{
+  "v1_candidate_votes": [
+    137,
+    249,
+    33,
+    33,
+    29
+  ],
+  "consistent": false,
+  "differences": {
+    "V2": {
+      "best_a": 137,
+      "best_b": 220,
+      "score": 0.11249421769287206,
+      "a_position": [
+        0.0848,
+        0.102,
+        0.0573
+      ],
+      "b_position": [
+        0.0854,
+        0.095,
+        -0.0395
+      ],
+      "b_is_electrode": 86
+    },
+    "V3": {
+      "best_a": 249,
+      "best_b": 268,
+      "score": 0.1618327400341642,
+      "a_position": [
+        -0.0881,
+        -0.135,
+        -0.088
+      ],
+      "b_position": [
+        -0.112,
+        -0.125,
+        -0.112
+      ],
+      "b_is_electrode": null
+    },
+    "V4": {
+      "best_a": 33,
+      "best_b": 93,
+      "score": 0.1883881996142596,
+      "a_position": [
+        0.0596,
+        0.0535,
+        0.171
+      ],
+      "b_position": [
+        0.035,
+        0.0891,
+        0.106
+      ],
+      "b_is_electrode": 91
+    },
+    "V5": {
+      "best_a": 33,
+      "best_b": 93,
+      "score": 0.14881467317106917,
+      "a_position": [
+        0.0596,
+        0.0535,
+        0.171
+      ],
+      "b_position": [
+        0.035,
+        0.0891,
+        0.106
+      ],
+      "b_is_electrode": 91
+    },
+    "V6": {
+      "best_a": 29,
+      "best_b": 114,
+      "score": 0.11440339990919406,
+      "a_position": [
+        0.0848,
+        0.009529999999999999,
+        0.186
+      ],
+      "b_position": [
+        0.0575,
+        0.0987,
+        0.0823
+      ],
+      "b_is_electrode": null
+    }
+  },
+  "provenance": "PhysioNet/CinC 2007 case0003: tracking-digitised 15-lead plot, WCT-free difference matching against the 352-node BSPM matrix (ODC-By 1.0)"
+}

@@ -1,0 +1,74 @@
+{
+  "leads": {
+    "V1": {
+      "node_index": 45,
+      "correlation": 0.13637679637377537,
+      "position_m": [
+        0.0356,
+        -0.0335,
+        0.154
+      ],
+      "is_electrode": true,
+      "electrode_index": 39
+    },
+    "V2": {
+      "node_index": 45,
+      "correlation": 0.1501939406292502,
+      "position_m": [
+        0.0356,
+        -0.0335,
+        0.154
+      ],
+      "is_electrode": true,
+      "electrode_index": 39
+    },
+    "V3": {
+      "node_index": 45,
+      "correlation": 0.1613027752035589,
+      "position_m": [
+        0.0356,
+        -0.0335,
+        0.154
+      ],
+      "is_electrode": true,
+      "electrode_index": 39
+    },
+    "V4": {
+      "node_index": 66,
+      "correlation": 0.11216337589703568,
+      "position_m": [
+        0.062200000000000005,
+        -0.0637,
+        0.132
+      ],
+      "is_electrode": false,
+      "electrode_index": null
+    },
+    "V5": {
+      "node_index": 66,
+      "correlation": 0.07889034149864746,
+      "position_m": [
+        0.062200000000000005,
+        -0.0637,
+        0.132
+      ],
+      "is_electrode": false,
+      "electrode_index": null
+    },
+    "V6": {
+      "node_index": 52,
+      "correlation": 0.10559600028255237,
+      "position_m": [
+        0.0845,
+        0.0594,
+        0.154
+      ],
+      "is_electrode": true,
+      "electrode_index": 82
+    }
+  },
+  "electrode_count": 120,
+  "node_count": 352,
+  "provenance": "PhysioNet/CinC 2007 case0003: digitised 15-lead plot matched to the 352-node BSPM matrix by correlation; positions from b120.pts (ODC-By 1.0)",
+  "note": "The matching is validated by the correlation peak and by the matched nodes being actual electrode positions; the V1-V6 order is checked geometrically (parasternal -> midclavicular -> midaxillary)."
+}

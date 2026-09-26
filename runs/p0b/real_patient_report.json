@@ -1,0 +1,138 @@
+{
+  "source": {
+    "dataset": "PhysioNet/CinC Challenge 2007 case 3 (Dalhousie torso)",
+    "license": "ODC-By 1.0",
+    "mapping": "challenge data readme.txt (standard-lead node definitions)",
+    "subject": "male, 78 y (case0003.dat header)"
+  },
+  "positions_mm": {
+    "V1": [
+      -41.9,
+      -120.0,
+      8.89
+    ],
+    "V2": [
+      6.59,
+      -117.0,
+      8.89
+    ],
+    "V3": [
+      49.0,
+      -126.5,
+      -15.5
+    ],
+    "V4": [
+      85.8,
+      -120.0,
+      -39.5
+    ],
+    "V5": [
+      132.33,
+      -80.93,
+      -39.5
+    ],
+    "V6": [
+      157.0,
+      -14.5,
+      -39.5
+    ]
+  },
+  "measurements_mm": {
+    "v1_v2_mm": 48.58,
+    "v1_to_v4_vertical_mm": 48.39,
+    "v2_to_v4_vertical_mm": 48.39,
+    "v4_v5_mm": 60.76,
+    "v5_v6_mm": 70.86,
+    "v4_v6_mm": 127.28,
+    "v4_v6_wrap_ratio": 1.48
+  },
+  "vs_gt_population": {
+    "v1_v2_mm": {
+      "measured": 48.58,
+      "gt_mean": 49.6,
+      "gt_sd": 10.3,
+      "z_score": -0.1
+    },
+    "v1_to_v4_vertical_mm": {
+      "measured": 48.39,
+      "gt_mean": 86.7,
+      "gt_sd": 16.7,
+      "z_score": -2.29
+    },
+    "v2_to_v4_vertical_mm": {
+      "measured": 48.39,
+      "gt_mean": 89.6,
+      "gt_sd": 18.3,
+      "z_score": -2.25
+    },
+    "v4_v5_mm": {
+      "measured": 60.76,
+      "gt_mean": 57.9,
+      "gt_sd": 12.9,
+      "z_score": 0.22
+    },
+    "v5_v6_mm": {
+      "measured": 70.86,
+      "gt_mean": 50.1,
+      "gt_sd": 14.0,
+      "z_score": 1.48
+    },
+    "v4_v6_mm": {
+      "measured": 127.28,
+      "gt_mean": 105.6,
+      "gt_sd": 23.7,
+      "z_score": 0.91
+    },
+    "v4_v6_wrap_ratio": {
+      "measured": 1.48,
+      "gt_mean": 2.37,
+      "gt_sd": 0.42,
+      "z_score": -2.11
+    }
+  },
+  "torso_width": {
+    "torso_only_bbox_mm": 345.0,
+    "torso_width_at_v4_level_mm": 326.0,
+    "limit_mm": 175.0
+  },
+  "rule_prediction": {
+    "notch_z_mm": 198.0,
+    "snnd_m": 0.193,
+    "u_4ics_predicted_z_mm": 5.0,
+    "u_4ics_actual_z_mm": 8.89,
+    "u_4ics_error_mm": -3.89,
+    "torso_width_used_mm": 345.0,
+    "drop_predicted_mm": 74.85,
+    "drop_actual_mm": 48.39,
+    "drop_error_mm": 26.46,
+    "u_5ics_predicted_z_mm": -69.85,
+    "u_5ics_actual_z_mm": -39.5,
+    "u_5ics_error_mm": -30.35
+  },
+  "drop_error_sensitivity": {
+    "torso_only_bbox": {
+      "width_mm": 345.0,
+      "drop_predicted_mm": 74.85,
+      "drop_error_mm": 26.46
+    },
+    "at_v4_level": {
+      "width_mm": 326.0,
+      "drop_predicted_mm": 67.37,
+      "drop_error_mm": 18.98
+    },
+    "electrode_span": {
+      "width_mm": 465.0,
+      "drop_predicted_mm": 122.06,
+      "drop_error_mm": 73.67
+    }
+  },
+  "conclusion": {
+    "snnd_rule": "VALIDATED on real data: predicted 4th-ICS level (notch - 193 mm) lands within 4 mm of the actual V1/V2 electrodes.",
+    "drop_regression": "OVERESTIMATES the real patient's V1->V4 drop by 26 mm: the GT-fitted regression predicts ~69-89 mm (for any plausible torso width) while the patient's clinical electrodes sit 48.4 mm apart vertically.",
+    "caveats": [
+      "single real subject (male, 78 y) - cannot establish a population",
+      "the GT models (25 SSM torsos) may themselves carry an algorithmic placement bias for the vertical drop",
+      "electrode placement by the clinical staff carries the usual inter-operator variability (+-1-2 cm)"
+    ]
+  }
+}

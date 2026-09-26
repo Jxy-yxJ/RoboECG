@@ -1,0 +1,401 @@
+{
+  "status": "PARTIAL",
+  "target_generation_error": "RuntimeError('cannot snap V5 to the chest surface at (u=-0.213, v=0.278)')",
+  "scene": {
+    "layout": {
+      "table_center_xy": [
+        0.125,
+        0.0
+      ],
+      "table_size_xyz": [
+        1.95,
+        0.8,
+        0.08
+      ],
+      "table_top_z": 0.7,
+      "human_root_xy": [
+        1.05,
+        0.0
+      ],
+      "ur3_nominal_base_position": [
+        0.1,
+        0.7,
+        0.5
+      ],
+      "ur3_nominal_base_yaw_deg": 180.0,
+      "tool_electrode_radius_m": 0.01,
+      "tool_electrode_offset_m": 0.088,
+      "video_resolution": [
+        960,
+        540
+      ],
+      "provenance": "engineering: table height/size, pedestal and camera placement; patient body dimensions come from the asset bounding box"
+    },
+    "supine": {
+      "human_root_path": "/World/Human",
+      "root_translate": [
+        1.05,
+        0.0,
+        0.8491305232048034
+      ],
+      "rotation_matrix": [
+        [
+          6.123233995736766e-17,
+          -6.123233995736766e-17,
+          -1.0
+        ],
+        [
+          1.0,
+          3.749399456654644e-33,
+          6.123233995736766e-17
+        ],
+        [
+          0.0,
+          -1.0,
+          6.123233995736766e-17
+        ]
+      ],
+      "rotation": "Rz(yaw) @ Rz(90) @ Rx(-90): supine, head toward -X, chest toward +Z, patient left toward +Y (rig faces -Y when standing)",
+      "bbox_min_world": [
+        -0.7696510076522829,
+        -0.9244881272315979,
+        0.7
+      ],
+      "bbox_max_world": [
+        1.0504741688899233,
+        0.924486637115479,
+        1.048362624645233
+      ],
+      "table_top_z": 0.7,
+      "provenance": "engineering: supine root rotation + table height; body dimensions come from the M_Medical_01 asset bounding box"
+    },
+    "human_bbox_min": [
+      -0.7696510076522829,
+      -0.9244881272315979,
+      0.7
+    ],
+    "human_bbox_max": [
+      1.0504741688899233,
+      0.924486637115479,
+      1.048362624645233
+    ],
+    "table_bounds": {
+      "x": [
+        -0.85,
+        1.1
+      ],
+      "y": [
+        -0.4,
+        0.4
+      ],
+      "top_z": 0.7
+    },
+    "cameras": {
+      "ThirdView": {
+        "position": [
+          -1.45,
+          -1.35,
+          2.0
+        ],
+        "look_at": [
+          -0.1,
+          0.25,
+          0.8
+        ]
+      },
+      "ChestCloseup": {
+        "position": [
+          -0.1,
+          -0.95,
+          1.3
+        ],
+        "look_at": [
+          0.0,
+          0.0,
+          0.92
+        ]
+      },
+      "PerceptionRGBD": {
+        "position": [
+          -0.35,
+          0.0,
+          2.1
+        ],
+        "look_at": [
+          -0.35,
+          0.05,
+          1.0
+        ]
+      }
+    }
+  },
+  "calibration": {
+    "du_m": -0.014531627324701635,
+    "dv_m": -8.419198701533573e-07,
+    "dn_m": 0.055078020123401364,
+    "provenance": "asset_measurement: one-time acromion->SC-joint calibration (simulation-internal); M3b replaces it with a learned detector"
+  },
+  "pose": {
+    "keypoints": {
+      "NOSE": {
+        "visibility": 0.9966585636138916,
+        "u": 508.26324462890625,
+        "v": 383.9230728149414
+      },
+      "LEFT_EYE_INNER": {
+        "visibility": 0.9975651502609253,
+        "u": 492.7665328979492,
+        "v": 390.5840492248535
+      },
+      "LEFT_EYE": {
+        "visibility": 0.9972407817840576,
+        "u": 491.8092727661133,
+        "v": 396.5722846984863
+      },
+      "LEFT_EYE_OUTER": {
+        "visibility": 0.9979857206344604,
+        "u": 490.9775924682617,
+        "v": 402.90624618530273
+      },
+      "RIGHT_EYE_INNER": {
+        "visibility": 0.9979451298713684,
+        "u": 493.9474868774414,
+        "v": 375.39751052856445
+      },
+      "RIGHT_EYE": {
+        "visibility": 0.9973217844963074,
+        "u": 493.87279510498047,
+        "v": 370.62506675720215
+      },
+      "RIGHT_EYE_OUTER": {
+        "visibility": 0.9976958632469177,
+        "u": 493.6771774291992,
+        "v": 365.8017683029175
+      },
+      "LEFT_EAR": {
+        "visibility": 0.9971923232078552,
+        "u": 501.0614013671875,
+        "v": 412.69484996795654
+      },
+      "RIGHT_EAR": {
+        "visibility": 0.9967741370201111,
+        "u": 504.4010925292969,
+        "v": 358.4592533111572
+      },
+      "MOUTH_LEFT": {
+        "visibility": 0.994168758392334,
+        "u": 521.9375991821289,
+        "v": 392.2386074066162
+      },
+      "MOUTH_RIGHT": {
+        "visibility": 0.9927501678466797,
+        "u": 523.2546997070312,
+        "v": 376.77517890930176
+      },
+      "LEFT_SHOULDER": {
+        "visibility": 0.974299967288971,
+        "u": 606.0429382324219,
+        "v": 478.0746603012085
+      },
+      "RIGHT_SHOULDER": {
+        "visibility": 0.9913681149482727,
+        "u": 606.8392944335938,
+        "v": 308.70434045791626
+      },
+      "LEFT_ELBOW": {
+        "visibility": 0.9978850483894348,
+        "u": 601.4469528198242,
+        "v": 621.5424156188965
+      },
+      "RIGHT_ELBOW": {
+        "visibility": 0.9954046010971069,
+        "u": 599.8057174682617,
+        "v": 177.68765687942505
+      },
+      "LEFT_WRIST": {
+        "visibility": 0.9899652600288391,
+        "u": 599.6297454833984,
+        "v": 762.5692749023438
+      },
+      "RIGHT_WRIST": {
+        "visibility": 0.9317337870597839,
+        "u": 609.8362731933594,
+        "v": 59.692068099975586
+      },
+      "LEFT_PINKY": {
+        "visibility": 0.9759569764137268,
+        "u": 602.5283050537109,
+        "v": 796.1762809753418
+      },
+      "RIGHT_PINKY": {
+        "visibility": 0.8858982920646667,
+        "u": 610.6119155883789,
+        "v": 18.078088760375977
+      },
+      "LEFT_INDEX": {
+        "visibility": 0.974082887172699,
+        "u": 596.9846343994141,
+        "v": 797.8511810302734
+      },
+      "RIGHT_INDEX": {
+        "visibility": 0.8798136711120605,
+        "u": 607.4137115478516,
+        "v": 18.52897882461548
+      },
+      "LEFT_THUMB": {
+        "visibility": 0.9434576034545898,
+        "u": 598.5800933837891,
+        "v": 775.9602355957031
+      },
+      "RIGHT_THUMB": {
+        "visibility": 0.8198821544647217,
+        "u": 609.5238494873047,
+        "v": 36.96292161941528
+      },
+      "LEFT_HIP": {
+        "visibility": 0.9128887057304382,
+        "u": 871.7124938964844,
+        "v": 413.8445520401001
+      },
+      "RIGHT_HIP": {
+        "visibility": 0.9261459112167358,
+        "u": 872.6734924316406,
+        "v": 361.470365524292
+      },
+      "LEFT_KNEE": {
+        "visibility": 0.5486048460006714,
+        "u": 1082.4595642089844,
+        "v": 429.3647575378418
+      },
+      "RIGHT_KNEE": {
+        "visibility": 0.7171393036842346,
+        "u": 1079.1596984863281,
+        "v": 337.53255128860474
+      },
+      "LEFT_ANKLE": {
+        "visibility": 0.5746804475784302,
+        "u": 1277.2454833984375,
+        "v": 425.8539390563965
+      },
+      "RIGHT_ANKLE": {
+        "visibility": 0.6272522211074829,
+        "u": 1280.2902221679688,
+        "v": 359.56440925598145
+      },
+      "LEFT_HEEL": {
+        "visibility": 0.6455716490745544,
+        "u": 1299.5619201660156,
+        "v": 422.9556941986084
+      },
+      "RIGHT_HEEL": {
+        "visibility": 0.6641738414764404,
+        "u": 1320.2064514160156,
+        "v": 375.8537006378174
+      },
+      "LEFT_FOOT_INDEX": {
+        "visibility": 0.6092255711555481,
+        "u": 1300.595703125,
+        "v": 396.5536165237427
+      },
+      "RIGHT_FOOT_INDEX": {
+        "visibility": 0.6057616472244263,
+        "u": 1318.0683898925781,
+        "v": 335.35434007644653
+      }
+    },
+    "lifted_count": 26,
+    "anchor": "NOSE",
+    "left_right_swapped_by_mediapipe": true
+  },
+  "frame_difference": {
+    "origin_distance_m": 0.10120861441927831,
+    "up_angle_deg": 1.2044431499237256,
+    "lateral_angle_deg": 1.5510471306182154,
+    "anterior_angle_deg": 0.979235522904054
+  },
+  "gt_frame": {
+    "origin_world": [
+      -0.4133832988616213,
+      -3.728038306879955e-09,
+      0.8709316587187641
+    ],
+    "up_world": [
+      -0.9944238733216463,
+      7.689497645510027e-12,
+      -0.10545691142819694
+    ],
+    "lateral_world": [
+      1.4256016085238002e-06,
+      0.9999999999086284,
+      -1.3442879794838559e-05
+    ],
+    "anterior_world": [
+      -0.10545691141856108,
+      1.3518260136742647e-05,
+      0.9944238732307842
+    ],
+    "provenance": {
+      "up": "asset_measurement: Spine02 -> NeckTwist01",
+      "lateral": "asset_measurement: R_Clavicle -> L_Clavicle (orthogonalized)",
+      "anterior": "clinical_definition: lateral x up; sign from anterior_hint",
+      "origin": "asset_measurement: midpoint of L/R_Clavicle (sternoclavicular joints); proxy for the top of the sternum",
+      "caveat": "The rig chest bones are skinning joints, not individual ribs; clinical rib levels are applied with the documented uncertainty in configs/ecg_rules.yaml."
+    }
+  },
+  "perceptual_frame": {
+    "origin_world": [
+      -0.4034445545798033,
+      -0.007997684049157306,
+      0.971333063610588
+    ],
+    "up_world": [
+      -0.9941039223005388,
+      -0.020998447905251374,
+      -0.10637883648665708
+    ],
+    "lateral_world": [
+      -0.022692492163114805,
+      0.9996338367034565,
+      0.01473917626443708
+    ],
+    "anterior_world": [
+      -0.10603038463625157,
+      -0.017066273849250642,
+      0.9942164250457699
+    ],
+    "provenance": {
+      "up": "pose_estimation: MediaPipe shoulder midpoint -> hip midpoint",
+      "lateral": "pose_estimation: MediaPipe shoulders (acromia)",
+      "anterior": "clinical_definition: lateral x up, sign from hint",
+      "origin": "pose_estimation: shoulder midpoint + one-time calibration (du=-0.0145, dv=-0.0000, dn=0.0551) m"
+    }
+  },
+  "perceptual_info": {
+    "required_visibility": {
+      "LEFT_SHOULDER": 0.974299967288971,
+      "RIGHT_SHOULDER": 0.9913681149482727,
+      "LEFT_HIP": 0.9128887057304382,
+      "RIGHT_HIP": 0.9261459112167358
+    },
+    "optional_visibility": {
+      "NOSE": 0.9966585636138916,
+      "LEFT_EAR": 0.9971923232078552,
+      "RIGHT_EAR": 0.9967741370201111
+    },
+    "calibration": {
+      "du_m": -0.014531627324701635,
+      "dv_m": -8.419198701533573e-07,
+      "dn_m": 0.055078020123401364,
+      "provenance": "asset_measurement: one-time acromion->SC-joint calibration (simulation-internal); M3b replaces it with a learned detector"
+    }
+  },
+  "prior": null,
+  "nominal_errors": null,
+  "fused_errors": null,
+  "targets": {},
+  "screenshots": {
+    "pose_input": "/home/jxy/EmbodiedAI/VLA/farus_ecg_isaac/runs/m3a/pose_input.png",
+    "pose_overlay": "/home/jxy/EmbodiedAI/VLA/farus_ecg_isaac/runs/m3a/pose_overlay.png",
+    "closeup": "/home/jxy/EmbodiedAI/VLA/farus_ecg_isaac/runs/m3a/fusion_closeup.png"
+  }
+}

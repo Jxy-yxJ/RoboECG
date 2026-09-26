@@ -1,0 +1,51 @@
+{
+  "val_samples": 60,
+  "electrode_order": [
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6"
+  ],
+  "direct": {
+    "pixel_error_mean": 0.27061403828362623,
+    "pixel_error_max": 1.0427080392837524,
+    "error_mm_mean": 2.947551412030236,
+    "error_mm_max": 26.036442829962414,
+    "per_electrode_mm": {
+      "V1": {
+        "mean": 1.3984764394808225,
+        "max": 3.770818118603138
+      },
+      "V2": {
+        "mean": 1.3559210703943099,
+        "max": 3.3671638029033892
+      },
+      "V3": {
+        "mean": 1.7973872910307729,
+        "max": 4.42235748374671
+      },
+      "V4": {
+        "mean": 2.889418407996443,
+        "max": 7.817721611818009
+      },
+      "V5": {
+        "mean": 4.212438659220511,
+        "max": 14.065120205719765
+      },
+      "V6": {
+        "mean": 6.031666604058558,
+        "max": 26.036442829962414
+      }
+    }
+  },
+  "rules": {
+    "error_mm_mean": 6.053925056713138,
+    "error_mm_max": 31.697033003006727,
+    "pixel_error_mean": 0.134229767943422,
+    "val_samples": 60,
+    "same_val_split": true
+  },
+  "provenance": "synthetic held-out samples; direct = depth->electrode pixels->lifting, rules = landmark->frame->clinical rules (P0 comparison)"
+}

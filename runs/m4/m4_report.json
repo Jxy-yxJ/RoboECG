@@ -1,0 +1,574 @@
+{
+  "status": "PASS",
+  "target_source": "ground truth landmarks (rules + fusion on the depth cloud)",
+  "scene": {
+    "layout": {
+      "table_center_xy": [
+        0.125,
+        0.0
+      ],
+      "table_size_xyz": [
+        1.95,
+        0.8,
+        0.08
+      ],
+      "table_top_z": 0.7,
+      "human_root_xy": [
+        1.05,
+        0.0
+      ],
+      "ur3_nominal_base_position": [
+        0.1,
+        0.7,
+        0.5
+      ],
+      "ur3_nominal_base_yaw_deg": 180.0,
+      "tool_electrode_radius_m": 0.01,
+      "tool_electrode_offset_m": 0.088,
+      "video_resolution": [
+        960,
+        540
+      ],
+      "provenance": "engineering: table height/size, pedestal and camera placement; patient body dimensions come from the asset bounding box"
+    },
+    "supine": {
+      "human_root_path": "/World/Human",
+      "root_translate": [
+        1.05,
+        0.0,
+        0.8491305232048034
+      ],
+      "rotation_matrix": [
+        [
+          6.123233995736766e-17,
+          -6.123233995736766e-17,
+          -1.0
+        ],
+        [
+          1.0,
+          3.749399456654644e-33,
+          6.123233995736766e-17
+        ],
+        [
+          0.0,
+          -1.0,
+          6.123233995736766e-17
+        ]
+      ],
+      "rotation": "Rz(yaw) @ Rz(90) @ Rx(-90): supine, head toward -X, chest toward +Z, patient left toward +Y (rig faces -Y when standing)",
+      "bbox_min_world": [
+        -0.7696510076522829,
+        -0.9244881272315979,
+        0.7
+      ],
+      "bbox_max_world": [
+        1.0504741688899233,
+        0.924486637115479,
+        1.048362624645233
+      ],
+      "table_top_z": 0.7,
+      "provenance": "engineering: supine root rotation + table height; body dimensions come from the M_Medical_01 asset bounding box"
+    },
+    "human_bbox_min": [
+      -0.7696510076522829,
+      -0.9244881272315979,
+      0.7
+    ],
+    "human_bbox_max": [
+      1.0504741688899233,
+      0.924486637115479,
+      1.048362624645233
+    ],
+    "table_bounds": {
+      "x": [
+        -0.85,
+        1.1
+      ],
+      "y": [
+        -0.4,
+        0.4
+      ],
+      "top_z": 0.7
+    },
+    "cameras": {
+      "ThirdView": {
+        "position": [
+          -1.45,
+          -1.35,
+          2.0
+        ],
+        "look_at": [
+          -0.1,
+          0.25,
+          0.8
+        ]
+      },
+      "ChestCloseup": {
+        "position": [
+          -0.1,
+          -0.95,
+          1.3
+        ],
+        "look_at": [
+          0.0,
+          0.0,
+          0.92
+        ]
+      },
+      "PerceptionRGBD": {
+        "position": [
+          -0.35,
+          0.0,
+          2.1
+        ],
+        "look_at": [
+          -0.35,
+          0.05,
+          1.0
+        ]
+      }
+    }
+  },
+  "sequence": {
+    "order": [
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6"
+    ],
+    "length_m": 0.5208486381961022,
+    "brute_force": true,
+    "start_position": [
+      -0.4450203722871896,
+      4.051750002715914e-06,
+      1.1692588206879995
+    ]
+  },
+  "settings": {
+    "approach_standoff_m": 0.06,
+    "press_depth_m": 0.004,
+    "press_speed_m_s": 0.01,
+    "hold_s": 1.0,
+    "retreat_m": 0.05,
+    "force_target_n": 0.6,
+    "force_limit_n": 1.5,
+    "max_press_depth_m": 0.008,
+    "transit_height_m": 0.3,
+    "provenance": "engineering: press speeds/limits; force target derived from configs/ecg_rules.yaml contact section"
+  },
+  "press_plan": [
+    {
+      "target": "V1",
+      "press_depth_m": 0.004,
+      "force_target_n": 0.6,
+      "contact_world": [
+        -0.22918491293949317,
+        -0.02063467188637926,
+        0.9637663412819804
+      ],
+      "normal_world": [
+        0.12611842275851104,
+        -0.05640204790878033,
+        0.9904104969307428
+      ],
+      "waypoint_count": 4
+    },
+    {
+      "target": "V2",
+      "press_depth_m": 0.004,
+      "force_target_n": 0.6,
+      "contact_world": [
+        -0.22917116579897442,
+        0.020648362745567913,
+        0.9641067175308313
+      ],
+      "normal_world": [
+        0.11551655658853331,
+        0.035251760069551163,
+        0.9926798268142286
+      ],
+      "waypoint_count": 4
+    },
+    {
+      "target": "V3",
+      "press_depth_m": 0.004,
+      "force_target_n": 0.6,
+      "contact_world": [
+        -0.1834422562109674,
+        0.06477626607905884,
+        0.9530419794576164
+      ],
+      "normal_world": [
+        0.053419421856076905,
+        0.28108185539857805,
+        0.9581958859921365
+      ],
+      "waypoint_count": 4
+    },
+    {
+      "target": "V4",
+      "press_depth_m": 0.004,
+      "force_target_n": 0.6,
+      "contact_world": [
+        -0.13696137242409726,
+        0.10663071456504507,
+        0.9292449543783641
+      ],
+      "normal_world": [
+        0.02822625669763204,
+        0.6549984995593952,
+        0.7551028036007947
+      ],
+      "waypoint_count": 4
+    },
+    {
+      "target": "V5",
+      "press_depth_m": 0.004,
+      "force_target_n": 0.6,
+      "contact_world": [
+        -0.13432757167804563,
+        0.13118913286530964,
+        0.9037539677489308
+      ],
+      "normal_world": [
+        0.04459663916313309,
+        0.7478316006564255,
+        0.6623888864051101
+      ],
+      "waypoint_count": 4
+    },
+    {
+      "target": "V6",
+      "press_depth_m": 0.004,
+      "force_target_n": 0.6,
+      "contact_world": [
+        -0.13328242239456176,
+        0.13970109465480857,
+        0.8927946412813685
+      ],
+      "normal_world": [
+        0.05549319993137602,
+        0.8052054262047138,
+        0.590393704547958
+      ],
+      "waypoint_count": 4
+    }
+  ],
+  "base_placement": {
+    "position": [
+      -0.18838329886162128,
+      0.4499999962719617,
+      1.020931658718764
+    ],
+    "yaw_deg": 90.0,
+    "ik_success": 6,
+    "screening_clearance_m": 0.038963982303887625,
+    "planned_backoff_m": 0.0,
+    "planned_trajectory_clearance_m": 0.035044406095989224,
+    "candidates_tried": 10
+  },
+  "execution": {
+    "frames": 1440,
+    "min_clearance_m": 0.03399979896273834,
+    "min_clearance_info": {
+      "clearance_m": 0.03399979896273834,
+      "link": "wrist_2_link",
+      "capsule": "torso",
+      "frame": 120,
+      "segment": "V1: hold"
+    },
+    "segments": [
+      {
+        "label": "transit",
+        "kind": "stage",
+        "min_clearance_m": null
+      },
+      {
+        "label": "V1: standoff",
+        "kind": "interp",
+        "min_clearance_m": 0.09699731302432632
+      },
+      {
+        "label": "V1: press",
+        "kind": "interp",
+        "min_clearance_m": 0.03506564171035773
+      },
+      {
+        "label": "V1: hold",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V1: retreat",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V2: standoff",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V2: press",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V2: hold",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V2: retreat",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V3: standoff",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V3: press",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V3: hold",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V3: retreat",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V4: standoff",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V4: press",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V4: hold",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V4: retreat",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V5: standoff",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V5: press",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V5: hold",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V5: retreat",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V6: standoff",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V6: press",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V6: hold",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      },
+      {
+        "label": "V6: retreat",
+        "kind": "interp",
+        "min_clearance_m": 0.03399979896273834
+      }
+    ],
+    "targets": [
+      {
+        "target": "V1",
+        "label": "V1: press",
+        "reach_error_m": 0.0010630734094473925,
+        "tracking_error_rad": 0.002366777258093705
+      },
+      {
+        "target": "V1",
+        "label": "V1: hold",
+        "reach_error_m": 0.000538181611117862,
+        "tracking_error_rad": 0.0009814559902122896
+      },
+      {
+        "target": "V2",
+        "label": "V2: press",
+        "reach_error_m": 0.0008131255602435094,
+        "tracking_error_rad": 0.0025648173851607428
+      },
+      {
+        "target": "V2",
+        "label": "V2: hold",
+        "reach_error_m": 0.0003541336078384225,
+        "tracking_error_rad": 0.0007282609267128448
+      },
+      {
+        "target": "V3",
+        "label": "V3: press",
+        "reach_error_m": 0.0005281408282107114,
+        "tracking_error_rad": 0.0036172983345438515
+      },
+      {
+        "target": "V3",
+        "label": "V3: hold",
+        "reach_error_m": 0.00020294717454125087,
+        "tracking_error_rad": 0.0005269741959306491
+      },
+      {
+        "target": "V4",
+        "label": "V4: press",
+        "reach_error_m": 0.0006505635773849644,
+        "tracking_error_rad": 0.003411199387186173
+      },
+      {
+        "target": "V4",
+        "label": "V4: hold",
+        "reach_error_m": 0.00018777391298151842,
+        "tracking_error_rad": 0.0005131372355725518
+      },
+      {
+        "target": "V5",
+        "label": "V5: press",
+        "reach_error_m": 0.0009534736895678796,
+        "tracking_error_rad": 0.002869471570516875
+      },
+      {
+        "target": "V5",
+        "label": "V5: hold",
+        "reach_error_m": 0.00017181324364747065,
+        "tracking_error_rad": 0.0004689131325229334
+      },
+      {
+        "target": "V6",
+        "label": "V6: press",
+        "reach_error_m": 0.0010408576836487427,
+        "tracking_error_rad": 0.0028904424378913894
+      },
+      {
+        "target": "V6",
+        "label": "V6: hold",
+        "reach_error_m": 0.00015653588645477806,
+        "tracking_error_rad": 0.0004347053177006023
+      }
+    ],
+    "video": "/home/jxy/EmbodiedAI/RoboECG/runs/m4/m4_place.mp4",
+    "patient_motion": []
+  },
+  "verification": [
+    {
+      "target": "V1",
+      "status": "ok",
+      "error_mm": 0.538181611117862,
+      "contact": {
+        "indentation_m": 0.004,
+        "force_n": 0.6,
+        "depth_ok": true,
+        "force_ok": true,
+        "violation": null
+      },
+      "attempts": 1
+    },
+    {
+      "target": "V2",
+      "status": "ok",
+      "error_mm": 0.3541336078384225,
+      "contact": {
+        "indentation_m": 0.004,
+        "force_n": 0.6,
+        "depth_ok": true,
+        "force_ok": true,
+        "violation": null
+      },
+      "attempts": 1
+    },
+    {
+      "target": "V4",
+      "status": "ok",
+      "error_mm": 0.1877739129815184,
+      "contact": {
+        "indentation_m": 0.004,
+        "force_n": 0.6,
+        "depth_ok": true,
+        "force_ok": true,
+        "violation": null
+      },
+      "attempts": 1
+    },
+    {
+      "target": "V5",
+      "status": "ok",
+      "error_mm": 0.17181324364747066,
+      "contact": {
+        "indentation_m": 0.004,
+        "force_n": 0.6,
+        "depth_ok": true,
+        "force_ok": true,
+        "violation": null
+      },
+      "attempts": 1
+    },
+    {
+      "target": "V6",
+      "status": "ok",
+      "error_mm": 0.15653588645477806,
+      "contact": {
+        "indentation_m": 0.004,
+        "force_n": 0.6,
+        "depth_ok": true,
+        "force_ok": true,
+        "violation": null
+      },
+      "attempts": 1
+    },
+    {
+      "target": "V3",
+      "status": "ok",
+      "error_mm": 0.20294717454125086,
+      "contact": {
+        "indentation_m": 0.004,
+        "force_n": 0.6,
+        "depth_ok": true,
+        "force_ok": true,
+        "violation": null
+      },
+      "attempts": 1
+    }
+  ],
+  "acceptance": {
+    "verify_tolerance_m": 0.01,
+    "max_attempts": 2,
+    "targets": 6,
+    "verified_ok": 6,
+    "first_attempt_success_rate": 1.0
+  },
+  "video": "/home/jxy/EmbodiedAI/RoboECG/runs/m4/m4_place.mp4"
+}
