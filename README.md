@@ -1,5 +1,10 @@
 # RoboECG
 
+**English** | [简体中文](README.zh-CN.md)
+
+![tests](https://github.com/Jxy-yxJ/RoboECG/actions/workflows/tests.yml/badge.svg)
+![license](https://img.shields.io/github/license/Jxy-yxJ/RoboECG)
+
 **Autonomous robotic placement of 12-lead ECG precordial electrodes (V1–V6) in Isaac Sim.**
 
 ![overview](media/teaser.png)
@@ -141,6 +146,17 @@ These are the things I would fix first if this were a hardware project:
 * **Stylised body.** The patient asset is smooth (no sternum ridge, no ribs, weaker lateral wrap than a
   real chest), so absolute geometric accuracy should be read as "consistent with the simulation asset".
 
+## Roadmap
+
+The simulation loop is complete; the parts that a real system needs are still open:
+
+- [ ] Force-controlled press (admittance control with a calibrated skin stiffness) instead of a fixed
+      press depth — the breathing experiment already quantifies why.
+- [ ] A second view or a wrist camera to measure the lateral wall (V5/V6) directly.
+- [ ] A learned approach policy (VLA / RL) on top of the rule-based target generator.
+- [ ] Signal-side verification: acquire a short 12-lead record after placement and check for
+      misplacement, closing the loop on the physiological signal rather than on geometry.
+
 ## Documentation
 
 Detailed milestone reports (Chinese) are in [`docs/`](docs), including the pipeline plan, per-milestone
@@ -152,4 +168,10 @@ Biped body asset from the NVIDIA Isaac Sim sample assets. External validation da
 (CC-BY-4.0 and ODC-By 1.0); the datasets are redistributed here with attribution and keep their
 original licences. The robot model is the official UR3 USD shipped with Isaac Sim.
 
-Code: MIT (see `LICENSE`).
+Code: MIT (see `LICENSE`). If you use this software, see [`CITATION.cff`](CITATION.cff).
+
+## Author
+
+Xinyu Jiang ([@Jxy-yxJ](https://github.com/Jxy-yxJ), jiaoxiangyue3@gmail.com) — medical robotics,
+embodied AI and multimodal perception. Happy to answer questions or discuss collaboration; issues and
+emails are both fine.

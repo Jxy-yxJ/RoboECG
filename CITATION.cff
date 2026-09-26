@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "RoboECG: autonomous robotic placement of 12-lead ECG precordial electrodes in Isaac Sim"
+abstract: >-
+  Simulation study of a robot arm that perceives a supine patient's chest with an
+  overhead depth camera, localises the six precordial ECG electrodes (V1-V6) from
+  explicit clinical rules, presses them onto the skin and verifies its own work.
+  The localisation rules are checked against two independently published electrode
+  datasets (25 statistical-shape torso models; PhysioNet/CinC 2007 case 3).
+type: software
+authors:
+  - family-names: Jiang
+    given-names: Xinyu
+    alias: Jxy-yxJ
+    website: "https://github.com/Jxy-yxJ"
+repository-code: "https://github.com/Jxy-yxJ/RoboECG"
+url: "https://github.com/Jxy-yxJ/RoboECG"
+license: MIT
+keywords:
+  - medical robotics
+  - ECG electrode placement
+  - robot manipulation
+  - depth perception
+  - Isaac Sim
