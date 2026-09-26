@@ -1,0 +1,7 @@
+# Logic layer only (tests + rule calibration). The Isaac Sim demos additionally
+# need NVIDIA Isaac Sim 6.0.1, which ships its own Python environment with
+# numpy, torch, pillow and the USD/PhysX bindings.
+numpy>=1.24
+PyYAML>=6.0
+pytest>=7.0
+pillow>=9.0

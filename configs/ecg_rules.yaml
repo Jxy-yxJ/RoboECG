@@ -1,0 +1,197 @@
+# ECG 规则参数与证据来源（provenance）
+#
+# 硬规则（加载时校验，见 roboecg/target_localization/ecg_rules.py）：
+#   1. 每个解剖量必须声明 provenance，且不允许出现无来源的固定解剖常数；
+#   2. 无法从资产/文献/模型得到的量一律为 null，标注 measured_or_learned，
+#      由 M1 的 mesh 测量或 M3b 的检测器补上；
+#   3. engineering / simulation_assumption 只允许用于安全与性能参数，不得伪装成医学事实。
+#
+# provenance 取值：
+#   clinical_definition   临床标准中的拓扑关系或参考线定义
+#   asset_measurement     仿真资产（rig 关节 / mesh / 点云）直接测量
+#   published_regression  已发表回归模型
+#   published_statistic   已发表统计量（含不确定性）
+#   learned_model         神经网络输出（M3b）
+#   measured_or_learned   尚未确定，必须由测量或学习给出（禁止填常数）
+#   engineering           工程参数（非医学事实）
+#   simulation_assumption 仿真假设（显式标注，尽量少）
+
+anatomy:
+  # ---- 纵向（肋间）----
+  sternal_notch_level:
+    value: null
+    landmark: clavicle_joint_midpoint
+    provenance: asset_measurement
+    evidence: >-
+      rig 的 L/R_Clavicle 关节位于胸锁关节；胸锁关节水平 ≈ 胸骨切迹（胸骨上端）
+      水平，为解剖近似（caveat：不是逐人测量的切迹）。
+    usage: "ChestFrame 原点即该水平（u=0），作为纵向基准。"
+
+  sternal_notch_to_nipple:
+    value: 0.193
+    provenance: published_statistic
+    citation: "10.1097/SAP.0000000000002018 (PMID 31633544)"
+    uncertainty: "SD 1.7 cm（11 项研究的男性 SNND 汇总均值 19.3 cm）"
+    evidence: >-
+      男性胸骨切迹→乳头距离（SNND）的系统综述：均值 19.3 cm、SD 1.7 cm。
+      另一项前瞻研究（Aesthet Surg J 2018, PMID 29329370）报告 20.4 cm。
+    usage: >-
+      u_4ics = u_notch − SNND（乳头线≈第 4 肋间，见 nipple_fourth_ics）。
+      不确定性 ±1.7 cm 必须随结果一起报告。
+
+  nipple_fourth_ics:
+    value: 0.75
+    provenance: published_statistic
+    citation: "10.1097/00006534-200112000-00015"
+    uncertainty: "乳头中心位于第 4 肋间 75%、第 5 肋间 23%（n=100 男性）"
+    usage: "乳头线作为第 4 肋间的代理；其余 23% 会造成 1 个肋间的系统偏差。"
+
+  fourth_to_fifth_ics:
+    value: null
+    provenance: published_regression
+    citation: "10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0)"
+    regression: "vertical_drop_m = (-60.89 + 0.39345 * torso_width_mm) / 1000"
+    coefficients:
+      input: torso_width_mm
+      intercept_mm: -60.89
+      slope_mm_per_mm: 0.39345
+    fit_quality: "25 个躯干模型，R2=0.81，RMS=7.3 mm（与前后径输入的 R2=0.80 等价；两者在数据集内 r=0.97）"
+    fallback_m: 0.0867
+    fallback_evidence: "数据集实测均值 86.7 mm（宽度不可测时的回退值，±16.7 mm）"
+    input_rationale: >-
+      选宽度而非前后径：单视角（俯视）深度点云原理上测不到躯干背面，
+      而横向轮廓（肩宽限幅后）可直接测得；前后径若从点云测量会被桌面污染
+      （实测 276-314 mm，而网格真值 256 mm，属巧合性正确）。
+    evidence: >-
+      独立真值（25 个统计形状模型躯干 + 标准 12 导联电极位置，CC-BY-4.0）实测：
+      胸骨旁第 4 肋间（V1/V2）到锁骨中线第 5 肋间（V4）的纵向落差为
+      86.7 ± 16.7 mm，与躯干宽度强相关（r=0.90）、与前后径 r=0.89。该落差包含
+      肋骨向两侧下斜的坡度（实测斜率 ≈33°），而旧版 2 cm 假设只计了肋距，低估约 4.3 倍。
+    usage: >-
+      u_5ics = u_4ics − vertical_drop(实测躯干深度)。这是 V4–V6 行的纵向位置，
+      必须随体型缩放；禁止使用固定 2 cm。
+
+  # ---- 横向（参考线）----
+  sternal_border:
+    value: null
+    landmark: clavicle_joints
+    provenance: asset_measurement
+    evidence: >-
+      V1/V2 位于胸骨缘。biped 网格为平滑人体、无胸骨嵴特征（M0 中线剖面实测无
+      切迹/剑突），因此胸骨缘横向偏移取 rig 的胸锁关节横向坐标（L/R_Clavicle 的
+      |v|），胸锁关节即位于胸骨上缘两侧。caveat：胸骨宽度向下收窄，此为近似。
+    usage: "v_parasternal = |v(clavicle joint)|；M3b 应改为网络输出胸骨缘。"
+
+  midclavicular_line:
+    value: null
+    landmark: clavicle_midpoint
+    provenance: asset_measurement
+    evidence: "锁骨中线 = 锁骨中点的垂线；锁骨中点 = rig 的 Clavicle（胸锁端）与 UpArm（肩端）关节中点。"
+    usage: "v_mcl = v(0.5 × (Clavicle + UpArm))，逐人测量。"
+
+  midaxillary_line:
+    value: null
+    landmark: chest_lateral_extent
+    provenance: asset_measurement
+    evidence: >-
+      腋中线 = 躯干最外侧垂线。在 V4 水平对胸部表面做横向轮廓测量，
+      取 |v| 的最大值（该高度胸廓无手臂干扰，M0 剖面已确认）。
+    usage: "v_midax = max|v| of the chest contour at the V4 level。"
+
+  anterior_axillary_line:
+    value: null
+    landmark: fraction_mcl_midax
+    provenance: published_regression
+    citation: "10.5281/zenodo.20086105 (Bender et al., CC-BY-4.0)"
+    fraction: 0.7356
+    fit_quality: >-
+      25 个躯干模型：α = (V5−V4)/(V6−V4) 横向占比 = 0.736 ± 0.070；
+      留一交叉验证的 V5 横向误差 2.5 mm（横向中点规则 9.6 mm、前表面弧长中点 15.8 mm）。
+    evidence: >-
+      临床 V5 位于腋前线。胸壁向后卷曲，使 V4→V6 的横向中点落在 V5 内侧：
+      真值 V4–V5/V5–V6 = 57.9/50.1 mm 近等长（弧长意义），但其横向占比为 0.736。
+      真实患者交叉验证（PhysioNet/CinC 2007 case 3，ODC-By 1.0，V1–V6 节点映射
+      来自挑战赛 readme）：α = 0.653，同一量级。
+      旧版横向中点规则（α=0.5）在真值上偏差 −2.3 SD，已弃用。
+    usage: >-
+      v_v5 = v_mcl + 0.7356 × (v_midax − v_mcl)；
+      拟合脚本 scripts/fit_v5_lateral_fraction.py，报告 runs/gt_validation/v5_fraction_fit.json。
+
+# 统计回退模型：仅在 landmark 检测失败时使用（误差大，必须记录使用状态）
+nipple_regression_fallback:
+  provenance: published_regression
+  citation: "10.1097/00006534-200112000-00015"
+  horizontal_midsternal_to_nipple_cm: "2.4 + 0.09 * thorax_circumference_cm"
+  vertical_sternal_notch_to_line_A_cm: "1.2 + 0.28 * sternum_length_cm + 0.1 * thorax_circumference_cm"
+  fit_quality: "r=0.68 / R=0.50"
+  usage: >-
+    需要真实测量的胸围与胸骨长；仿真中若无法提供这两个量则不得使用本回退，
+    改为报告定位失败。
+
+contact:
+  target_pressure_pa:
+    value: 2000
+    provenance: published_statistic
+    citation: "10.3390/s20216233"
+    evidence: >-
+      银印刷织物干电极在 15 mmHg（≈2000 Pa）压力下，ECG 波形质量与标准
+      Ag/AgCl 电极相当（SNR 33.10/30.17 vs 33.52 dB）。
+    usage: "按压力目标 = 该压力 × 电极接触面积。"
+  contact_area_m2:
+    value: 0.0003
+    provenance: engineering
+    note: "干电极设计参数（约 3 cm²）；真机阶段需以实测接触面积标定。"
+  force_target_n:
+    value: null
+    derived: "target_pressure_pa * contact_area_m2"
+    provenance: engineering
+    derived_from: >-
+      contact.target_pressure_pa (published_statistic, 10.3390/s20216233)
+      x contact.contact_area_m2 (engineering)
+    note: "力目标由已发表压力与工程接触面积导出，真机阶段以实测接触力标定。"
+  force_limit_n:
+    value: 1.5
+    provenance: engineering
+    note: "按压安全上限（= 2.5 × 力目标 0.6 N）；超过判定违规并终止该次按压。"
+  max_press_depth_m:
+    value: 0.008
+    provenance: engineering
+    note: "压深硬上限；皮肤压陷超过该值判定违规（真机以力控为准）。"
+
+engineering:
+  normal_max_angle_deg: 25.0
+  normal_max_angle_source: >-
+    甲状腺复现 M4 实测：实测 PCA 法向偏斜曾把探头带偏 13 cm；收紧到与先验夹角
+    ≤25° 后降至 3.8-4.4 cm。
+  approach_standoff_m: 0.05
+  surface_snap_max_m: 0.05
+  verify_position_tolerance_m: 0.01
+  verify_position_tolerance_note: >-
+    设计需求 ≤1 cm；参考 Shashank 目标 ±0.5 cm 与前胸导联 2 cm 位移即改变
+    波形/诊断的阈值。
+  max_retries: 2
+  clearance_margin_m: 0.02
+  clearance_margin_source: "沿用甲状腺复现的安全余量（执行期逐帧校验）。"
+
+reachability:
+  superior_landmark: clavicle_joints
+  inferior_landmark: breast_joints
+  inferior_margin_m: 0.10
+  inferior_margin_provenance: engineering
+  note: >-
+    M0 只验证机器人能否覆盖胸导联所在区域，使用显式工程包络；临床 V4 的纵向
+    位置在 M1 由测量/学习确定，不在此处定义。
+
+# M2 RGB-D 融合设置（工程参数，非医学数据）
+depth_fusion:
+  provenance: engineering
+  depth_median_window: 3      # 深度中值窗口（像素）
+  normal_window: 12           # 法向 PCA 窗口（像素）
+  normal_radius_m: 0.03       # PCA 邻域半径
+  max_depth_m: 2.0            # 有效深度上限（俯视相机到胸壁 ~1.1 m）
+  max_skin_offset_m: 0.05     # 皮肤点与名义目标的最大允许距离
+  normal_max_angle_deg: 25.0  # 实测法向 vs 局部曲面先验的最大夹角
+  max_incidence_deg: 65.0     # 相机入射角上限；超过则深度测量不可靠（掠射）
+  note: >-
+    25° 阈值沿用甲状腺复现的经验值，但比较对象已从"全局前向"改为
+    "按 (u,v) 的曲面先验"（M0 实测胸廓法向相对全局前向最大偏 62°）。

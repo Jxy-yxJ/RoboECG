@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# generated at runtime
+assets/local/
+runs/*/frames/
+runs/m3b/dataset/
+dist/
+
+# editor / OS
+.vscode/
+.DS_Store
