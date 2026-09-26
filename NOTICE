@@ -1,0 +1,18 @@
+Third-party data and assets
+===========================
+
+1. ECG electrode ground truth - "Spatial Distribution of Wilson's Central Terminal on the Body Surface",
+   Bender et al., Zenodo, DOI 10.5281/zenodo.20086105. Licence: CC-BY-4.0.
+   Files: assets/external/torso_models/
+   Redistributed unchanged with this attribution, as required by the licence.
+
+2. PhysioNet/CinC Challenge 2007 (Dalhousie torso with 120 leads), case 3.
+   https://physionet.org/content/challenge-2007/1.0.0/  Licence: ODC-By 1.0.
+   Files: assets/external/physionet_cinc2007/
+   Includes the challenge readme that defines the standard-lead node indices, the torso and electrode
+   coordinate files, the surface figures and the reference ECG plots.
+
+3. Body asset: NVIDIA Isaac Sim sample asset (biped_demo). Robot: official UR3 USD shipped with
+   Isaac Sim. Neither is redistributed here; both are loaded at runtime from the Isaac Sim asset root.
+
+The learned model weights in assets/models/ were trained on renders produced by this project.
