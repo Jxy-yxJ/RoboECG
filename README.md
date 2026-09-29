@@ -84,7 +84,7 @@ roboecg/          core package
   task_manager/   scene, supine pose, M0-M4 demos, perception pipeline
 scripts/          entry points (one per milestone / experiment)
 configs/          clinical rule parameters with provenance tags
-tests/            36 logic-only tests (no Isaac Sim needed)
+tests/            42 logic-only tests (no Isaac Sim needed)
 assets/           trained models + the two external validation datasets
 docs/             detailed technical reports (Chinese)
 runs/             reports, figures and videos produced by the scripts
@@ -96,7 +96,7 @@ The logic layer — chest frame, rule generation, fusion gates, press planning �
 
 ```bash
 pip install numpy pyyaml pytest
-python -m pytest tests/            # 36 tests, < 1 s
+python -m pytest tests/            # 42 tests, < 1 s
 ```
 
 The perception and execution demos need Isaac Sim 6.0.1 (Python 3.11+, GPU):
@@ -139,10 +139,12 @@ These are the things I would fix first if this were a hardware project:
   camera would remove the problem.
 * **The drop regression is a population prior, not clinical accuracy.** It is fitted on 25 shape
   models, and the one real patient we could check sits ~27 mm below the prediction.
-* **Simulation only.** No real arm, no real skin. The press uses a position controller with a linear
+* **Simulation only.** No real arm, no real skin. The stock press is position-controlled with a linear
   engineering contact model; the breathing experiment (a ±8 mm chest motion during the hold) pushes
-  the indentation to 12 mm and the force to 1.8 N, i.e. past both limits — a real system needs force
-  control, not a fixed press depth.
+  the indentation to 12 mm and the force to 1.8 N, i.e. past both limits. A compliant force-feedback
+  press is now designed and evaluated in simulation (21 scenarios: position control violates a cap in
+  6/6, the force loop in 0/15, including a +5 mm perception error on a stiff chest) — see the
+  [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md); real-robot admittance control is still open.
 * **Stylised body.** The patient asset is smooth (no sternum ridge, no ribs, weaker lateral wrap than a
   real chest), so absolute geometric accuracy should be read as "consistent with the simulation asset".
 
@@ -150,8 +152,9 @@ These are the things I would fix first if this were a hardware project:
 
 The simulation loop is complete; the parts that a real system needs are still open:
 
-- [ ] Force-controlled press (admittance control with a calibrated skin stiffness) instead of a fixed
-      press depth — the breathing experiment already quantifies why.
+- [ ] Force-controlled press — the controller-level design and simulation study are done
+      (`roboecg/robot_controller/compliant_press.py`, 21 scenarios); the real-robot admittance
+      control with a calibrated skin stiffness is open. The breathing experiment quantifies why.
 - [ ] A second view or a wrist camera to measure the lateral wall (V5/V6) directly.
 - [ ] A learned approach policy (VLA / RL) on top of the rule-based target generator.
 - [ ] Signal-side verification: acquire a short 12-lead record after placement and check for
@@ -160,7 +163,8 @@ The simulation loop is complete; the parts that a real system needs are still op
 ## Documentation
 
 Detailed milestone reports (Chinese) are in [`docs/`](docs), including the pipeline plan, per-milestone
-findings, the independent ground-truth validation, and the real-patient check.
+findings, the independent ground-truth validation, the real-patient check, and the literature-driven
+[v3 plan for the open limitations](docs/ECG_V3_SOLUTION_PLAN.md).
 
 ## Acknowledgements
 
