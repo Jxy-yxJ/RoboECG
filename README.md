@@ -32,6 +32,12 @@ independently published electrode data instead of against its own assumptions.
 | Direct-regression upper bound on the same split | 2.9 mm vs 6.1 mm for the landmark → frame → rule chain |
 | Patient-size sweep | clearance ≥ 21 mm for all five body scales |
 
+> Metric note: the localisation numbers above are measured against the project's **own rule targets
+> on the same simulated surface** (perception-chain deviation / surface-source difference) — they
+> are **not** clinical accuracy. The independent placement evidence is the rule check against the
+> two public electrode datasets (25-shape-model cohort and one real patient). Full metric taxonomy:
+> [`docs/ECG_V3_SOLUTION_PLAN.md`](docs/ECG_V3_SOLUTION_PLAN.md) §7.1.
+
 ## Demos
 
 Autonomous cycle — the perception path (depth → learned landmarks → clinical rules → fusion → press →
@@ -136,15 +142,17 @@ These are the things I would fix first if this were a hardware project:
 
 * **One overhead view.** V5/V6 sit on a near-vertical wall that the camera cannot see; the depth path
   is usable (front-of-wall surface + model fallback) but not a measurement. A second camera or a wrist
-  camera would remove the problem.
+  camera would remove the problem — a lateral-view POC already closes the gap to millimetres
+  (V5/V6 nearest-surface error 35–61 mm → 1.6–3.8 mm, [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md) §1.4).
 * **The drop regression is a population prior, not clinical accuracy.** It is fitted on 25 shape
   models, and the one real patient we could check sits ~27 mm below the prediction.
 * **Simulation only.** No real arm, no real skin. The stock press is position-controlled with a linear
   engineering contact model; the breathing experiment (a ±8 mm chest motion during the hold) pushes
   the indentation to 12 mm and the force to 1.8 N, i.e. past both limits. A compliant force-feedback
-  press is now designed and evaluated in simulation (21 scenarios: position control violates a cap in
-  6/6, the force loop in 0/15, including a +5 mm perception error on a stiff chest) — see the
-  [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md); real-robot admittance control is still open.
+  press is now designed, simulated (21 scenarios) and **validated inside the Isaac execution chain**
+  (`--force-tracking`: 6/6 electrodes, force 0.64–0.66 N, indentation 4.3–4.5 mm under breathing,
+  zero cap violations, settled force RMSE ≤ 0.03 N) — see the [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md);
+  real-robot admittance control is still open.
 * **Stylised body.** The patient asset is smooth (no sternum ridge, no ribs, weaker lateral wrap than a
   real chest), so absolute geometric accuracy should be read as "consistent with the simulation asset".
 
@@ -152,10 +160,11 @@ These are the things I would fix first if this were a hardware project:
 
 The simulation loop is complete; the parts that a real system needs are still open:
 
-- [ ] Force-controlled press — the controller-level design and simulation study are done
-      (`roboecg/robot_controller/compliant_press.py`, 21 scenarios); the real-robot admittance
-      control with a calibrated skin stiffness is open. The breathing experiment quantifies why.
-- [ ] A second view or a wrist camera to measure the lateral wall (V5/V6) directly.
+- [ ] Force-controlled press — design + numeric study (`roboecg/robot_controller/compliant_press.py`,
+      21 scenarios) and an in-Isaac validation run (`--force-tracking`, 6/6, zero violations) are done;
+      the real-robot admittance control with a calibrated skin stiffness is open.
+- [ ] A second view or a wrist camera to measure the lateral wall (V5/V6) directly — lateral-view POC
+      done (nearest-surface error 35–61 mm → 1.6–3.8 mm); fusion into the pipeline is open.
 - [ ] A learned approach policy (VLA / RL) on top of the rule-based target generator.
 - [ ] Signal-side verification: acquire a short 12-lead record after placement and check for
       misplacement, closing the loop on the physiological signal rather than on geometry.

@@ -5,6 +5,8 @@ import numpy as np
 
 from roboecg.robot_controller.compliant_press import (
     CompliantPressConfig,
+    admittance_step,
+    contact_force_n,
     run_scenarios,
     simulate_hold,
 )
@@ -87,3 +89,45 @@ def test_scenario_grid_outcomes():
     assert not missed, missed
     assert by_tag["compliant_k50"]["max_force_n"] < 0.6
     assert by_tag["position_k150"]["violation"] == "depth"
+
+
+def _gain(settings) -> float:
+    return 1.0 / (settings.contact_stiffness_n_m * 0.05)
+
+
+def test_admittance_step_presses_in_below_target():
+    settings = make_settings()
+    depth = admittance_step(0.0, 0.0, settings, _gain(settings), 1.0 / 60.0)
+    assert 0.0 < depth < settings.max_press_depth_m
+
+
+def test_admittance_step_retracts_above_target():
+    settings = make_settings()
+    depth = admittance_step(0.004, 2.0, settings, _gain(settings), 1.0 / 60.0)
+    assert depth < 0.004
+    assert depth >= -0.010
+
+
+def test_admittance_step_saturates_at_caps():
+    settings = make_settings()
+    gain = _gain(settings)
+    depth_hi = admittance_step(
+        settings.max_press_depth_m, 0.0, settings, gain, 1.0
+    )
+    assert depth_hi == settings.max_press_depth_m
+    depth_lo = admittance_step(-0.010, 10.0, settings, gain, 1.0)
+    assert depth_lo == -0.010
+
+
+def test_contact_force_no_tension():
+    assert contact_force_n(-0.002, 150.0) == 0.0
+    assert np.isclose(contact_force_n(0.004, 150.0), 0.6)
+
+
+def test_admittance_step_respects_max_step():
+    settings = make_settings()
+    gain = _gain(settings)
+    depth = admittance_step(0.0, 0.0, settings, gain, 1.0, max_step_m=0.0005)
+    assert np.isclose(depth, 0.0005)
+    depth = admittance_step(0.004, 2.0, settings, gain, 1.0, max_step_m=0.0005)
+    assert np.isclose(depth, 0.004 - 0.0005)

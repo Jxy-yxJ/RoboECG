@@ -1,0 +1,172 @@
+{
+  "provenance": "simulation planning evaluation: V4-V6 shifted by additional drop along the chest frame; normal re-fitted on the mesh; standard approach ladder; nominal M4 base reused (no re-search)",
+  "settings": {
+    "biases_mm": [
+      -30.0,
+      0.0,
+      30.0
+    ],
+    "shifted_targets": [
+      "V4",
+      "V5",
+      "V6"
+    ],
+    "base": {
+      "position": [
+        -0.18838329886162128,
+        0.4499999962719617,
+        1.020931658718764
+      ],
+      "yaw_deg": 90.0,
+      "source": "m4_report.json"
+    }
+  },
+  "rows": [
+    {
+      "bias_mm": -30.0,
+      "planned_ok": 4,
+      "targets": [
+        {
+          "target": "V1",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.03960073222472033
+        },
+        {
+          "target": "V2",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.03960076561719864
+        },
+        {
+          "target": "V3",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.04143633284666782
+        },
+        {
+          "target": "V4",
+          "ok": true,
+          "shift_mm": -30.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.04497432357889728
+        },
+        {
+          "target": "V5",
+          "ok": false
+        },
+        {
+          "target": "V6",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "bias_mm": 0.0,
+      "planned_ok": 6,
+      "targets": [
+        {
+          "target": "V1",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.03960073222472033
+        },
+        {
+          "target": "V2",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.03960076561719864
+        },
+        {
+          "target": "V3",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.04143633284666782
+        },
+        {
+          "target": "V4",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.04833543807474106
+        },
+        {
+          "target": "V5",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.045824327519730375
+        },
+        {
+          "target": "V6",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.051480816298636226
+        }
+      ]
+    },
+    {
+      "bias_mm": 30.0,
+      "planned_ok": 4,
+      "targets": [
+        {
+          "target": "V1",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.03960073222472033
+        },
+        {
+          "target": "V2",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.03960076561719864
+        },
+        {
+          "target": "V3",
+          "ok": true,
+          "shift_mm": 0.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.04143633284666782
+        },
+        {
+          "target": "V4",
+          "ok": true,
+          "shift_mm": 30.0,
+          "backoff_mm": 0.0,
+          "tilt_deg": 0.0,
+          "trajectory_clearance_m": 0.05052877204666501
+        },
+        {
+          "target": "V5",
+          "ok": false
+        },
+        {
+          "target": "V6",
+          "ok": false
+        }
+      ]
+    }
+  ]
+}

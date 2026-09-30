@@ -29,6 +29,22 @@ def main() -> None:
         action="store_true",
         help="move the patient chest with a 15/min +-8 mm breathing motion",
     )
+    parser.add_argument(
+        "--force-tracking",
+        action="store_true",
+        help=(
+            "compliant force-feedback hold instead of the fixed press depth "
+            "(implies --breathing; see docs/ECG_V3_SOLUTION_PLAN.md)"
+        ),
+    )
+    parser.add_argument(
+        "--multiview",
+        action="store_true",
+        help=(
+            "perception path with the lateral second view for the V5/V6 wall "
+            "(see docs/ECG_V3_SOLUTION_PLAN.md section 1.4)"
+        ),
+    )
     args = parser.parse_args()
 
     app = boot(headless=not args.gui, width=1280, height=720)
@@ -43,9 +59,15 @@ def main() -> None:
             video=not args.no_video,
             perception=args.perception,
             breathing=args.breathing,
+            force_tracking=args.force_tracking,
+            multiview=args.multiview,
         )
         RUNS_DIR.mkdir(parents=True, exist_ok=True)
-        if args.perception:
+        if args.force_tracking:
+            report_name = "m4_report_force_tracking.json"
+        elif args.perception and args.multiview:
+            report_name = "m4_report_perception_multiview.json"
+        elif args.perception:
             report_name = "m4_report_perception.json"
         elif args.breathing:
             report_name = "m4_report_breathing.json"
@@ -64,10 +86,12 @@ def main() -> None:
         )
         if report.get("perception"):
             print(
-                "M4: perception mean error vs cloud GT = "
-                f"{report['perception']['target_error_vs_cloud_gt_mean_mm'] * 1000:.2f} mm, "
-                "vs mesh GT = "
-                f"{report['perception']['target_error_vs_mesh_gt_mean_mm'] * 1000:.2f} mm"
+                "M4: perception mean diff vs rules-on-cloud = "
+                f"{report['perception']['target_diff_vs_cloud_rules_mean_mm'] * 1000:.2f} mm, "
+                "vs rules-on-mesh = "
+                f"{report['perception']['target_diff_vs_mesh_rules_mean_mm'] * 1000:.2f} mm, "
+                "landmark error = "
+                f"{report['perception']['detector_landmark_error_mean_mm'] * 1000:.2f} mm"
             )
         if report.get("video"):
             print(f"M4: video = {report['video']}")

@@ -8,7 +8,11 @@ from roboecg.coordinate_transform.camera import CameraIntrinsics
 from roboecg.perception.chest_landmarks import ChestLandmarks
 from roboecg.perception.torso_prior import ChestSurfacePrior
 from roboecg.target_localization.chest_frame import build_chest_frame
-from roboecg.target_localization.fusion import evaluate_fusion, fuse_target
+from roboecg.target_localization.fusion import (
+    best_view_index,
+    evaluate_fusion,
+    fuse_target,
+)
 
 SETTINGS = {
     "depth_median_window": 3,
@@ -191,3 +195,13 @@ def test_evaluate_fusion_reports_errors(setup):
     assert report["position_error_m"]["max"] < 5e-3
     assert report["fused_normal_angle_vs_mesh_deg"]["max"] < 0.01
     assert report["normal_acceptance_rate"] == 1.0
+
+
+def test_best_view_index_picks_the_frontal_camera():
+    normal = np.array([0.0, 1.0, 0.0])  # surface faces +Y
+    position = np.zeros(3)
+    overhead = np.array([0.0, 0.0, 1.0])  # grazing on this surface
+    lateral = np.array([0.0, 1.0, 0.0])  # frontal
+    assert best_view_index(normal, position, [overhead, lateral]) == 1
+    assert best_view_index(normal, position, [lateral, overhead]) == 0
+    assert best_view_index(normal, position, [overhead]) == 0

@@ -84,6 +84,47 @@ def test_measures_are_positive_and_plausible(setup):
     assert 0.15 < lateral < 0.30
 
 
+def test_snap_anchor_selects_the_anchored_sheet():
+    """A second surface sheet at the same (u, v) must not capture the snap."""
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    us = np.linspace(-0.04, 0.04, 9)
+    vs = np.linspace(-0.04, 0.04, 9)
+    sheet_a = [frame.from_frame(u, v, 0.0) for u in us for v in vs]
+    sheet_b = [
+        frame.from_frame(u, v, 0.07)
+        for u in np.linspace(-0.01, 0.01, 5)
+        for v in np.linspace(-0.01, 0.01, 5)
+    ]
+    points = np.array(sheet_a + sheet_b)
+    point, normal, info = snap_to_surface(
+        points, frame, 0.0, 0.0, anchor_height=0.07
+    )
+    assert info["status"] == "ok"
+    assert point is not None
+    _, _, n = frame.to_frame(point)
+    assert abs(n - 0.07) < 5e-3, n
+
+
+def test_snap_anchor_band_falls_back_when_empty():
+    """An anchor far from every sheet must not break the snap."""
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = np.array(
+        [
+            frame.from_frame(u, v, 0.0)
+            for u in np.linspace(-0.04, 0.04, 9)
+            for v in np.linspace(-0.04, 0.04, 9)
+        ]
+    )
+    point, normal, info = snap_to_surface(
+        points, frame, 0.0, 0.0, anchor_height=0.5
+    )
+    assert info["status"] == "ok"
+    _, _, n = frame.to_frame(point)
+    assert abs(n) < 5e-3
+
+
 def test_snap_returns_surface_point_and_outward_normal(setup):
     _, frame, points = setup
     point, normal, info = snap_to_surface(points, frame, -0.16, 0.0)

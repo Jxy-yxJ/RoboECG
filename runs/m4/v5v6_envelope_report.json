@@ -1,0 +1,259 @@
+{
+  "provenance": "simulation: approach-envelope probe for the +-30 mm shifted V5/V6; static = goal IK + capsule clearance at the goal pose; plan = full plan_reach with 0.15 m backoff",
+  "settings": {
+    "biases_mm": [
+      -30.0,
+      30.0
+    ],
+    "tilts_deg": [
+      0.0,
+      10.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0,
+      60.0
+    ],
+    "azimuths_deg": [
+      0.0,
+      45.0,
+      90.0,
+      135.0,
+      180.0,
+      225.0,
+      270.0,
+      315.0
+    ],
+    "clearance_margin_m": 0.02
+  },
+  "rows": [
+    {
+      "base": "nominal",
+      "position": [
+        -0.188383,
+        0.45,
+        1.020932
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": -30.0,
+      "target": "V5",
+      "shifted_position": [
+        -0.1514954233033806,
+        0.13916618044845566,
+        0.8030566615739165
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "nominal",
+      "position": [
+        -0.188383,
+        0.45,
+        1.020932
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": -30.0,
+      "target": "V6",
+      "shifted_position": [
+        -0.15440963636788535,
+        0.14849287003551065,
+        0.8282379075541807
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "nominal",
+      "position": [
+        -0.188383,
+        0.45,
+        1.020932
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": 30.0,
+      "target": "V5",
+      "shifted_position": [
+        -0.09182999090408182,
+        0.1391661804479943,
+        0.8093840762596083
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "nominal",
+      "position": [
+        -0.188383,
+        0.45,
+        1.020932
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": 30.0,
+      "target": "V6",
+      "shifted_position": [
+        -0.09474420396858658,
+        0.1484928700350493,
+        0.8345653222398725
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_side",
+      "position": [
+        -0.263,
+        0.5,
+        1.071
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": -30.0,
+      "target": "V5",
+      "shifted_position": [
+        -0.1514954233033806,
+        0.13916618044845566,
+        0.8030566615739165
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_side",
+      "position": [
+        -0.263,
+        0.5,
+        1.071
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": -30.0,
+      "target": "V6",
+      "shifted_position": [
+        -0.15440963636788535,
+        0.14849287003551065,
+        0.8282379075541807
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_side",
+      "position": [
+        -0.263,
+        0.5,
+        1.071
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": 30.0,
+      "target": "V5",
+      "shifted_position": [
+        -0.09182999090408182,
+        0.1391661804479943,
+        0.8093840762596083
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_side",
+      "position": [
+        -0.263,
+        0.5,
+        1.071
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": 30.0,
+      "target": "V6",
+      "shifted_position": [
+        -0.09474420396858658,
+        0.1484928700350493,
+        0.8345653222398725
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_low",
+      "position": [
+        -0.113,
+        0.5,
+        0.871
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": -30.0,
+      "target": "V5",
+      "shifted_position": [
+        -0.1514954233033806,
+        0.13916618044845566,
+        0.8030566615739165
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_low",
+      "position": [
+        -0.113,
+        0.5,
+        0.871
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": -30.0,
+      "target": "V6",
+      "shifted_position": [
+        -0.15440963636788535,
+        0.14849287003551065,
+        0.8282379075541807
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_low",
+      "position": [
+        -0.113,
+        0.5,
+        0.871
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": 30.0,
+      "target": "V5",
+      "shifted_position": [
+        -0.09182999090408182,
+        0.1391661804479943,
+        0.8093840762596083
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    },
+    {
+      "base": "grid_low",
+      "position": [
+        -0.113,
+        0.5,
+        0.871
+      ],
+      "yaw_deg": 90.0,
+      "bias_mm": 30.0,
+      "target": "V6",
+      "shifted_position": [
+        -0.09474420396858658,
+        0.1484928700350493,
+        0.8345653222398725
+      ],
+      "static_feasible_count": 0,
+      "static_feasible_first": [],
+      "first_plan": null
+    }
+  ]
+}

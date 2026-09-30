@@ -1,0 +1,22 @@
+{
+  "provenance": "pure-logic Monte-Carlo: worst-case landmark perturbations at the measured detector errors (M4 scene); frame = build_chest_frame; target shift evaluated at a V6-like (u, v) = -0.28, 0.15",
+  "used_landmarks": {
+    "errors_mm": {
+      "chest": 0.1,
+      "neck_base": 1.7,
+      "clavicle_left": 0.8,
+      "clavicle_right": 0.8
+    },
+    "worst_up_angle_deg": 0.4870170073973669,
+    "worst_origin_shift_mm": 0.4000000000001281,
+    "worst_target_shift_mm": 3.3996439355108454,
+    "mean_target_shift_mm": 1.3154378093362034
+  },
+  "counterfactual_back_axis": {
+    "errors_mm": {
+      "neck_top": 43.4,
+      "spine_mid": 50.3
+    },
+    "worst_target_shift_mm": 66.41856280151647
+  }
+}

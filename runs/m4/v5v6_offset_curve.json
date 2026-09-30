@@ -1,0 +1,206 @@
+{
+  "provenance": "simulation: V5/V6 vertical-offset envelope curve; best goal clearance over tilt 0-60 deg x 4 azimuths x seed bank; static hit = clearance >= margin",
+  "settings": {
+    "offsets_mm": [
+      0.0,
+      -30.0,
+      30.0
+    ],
+    "clearance_margin_m": 0.02,
+    "n_seeds": 15
+  },
+  "rows": [
+    {
+      "target": "V5",
+      "offset_mm": 0.0,
+      "normal_source": "pipeline",
+      "static_hits": 330,
+      "best_clearance_m": 0.04956307145142822,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j3_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "offset_mm": 0.0,
+      "normal_source": "refit",
+      "static_hits": 0,
+      "best_clearance_m": -0.02620917040084727,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "offset_mm": -30.0,
+      "normal_source": "pipeline",
+      "static_hits": 330,
+      "best_clearance_m": 0.05015798667575886,
+      "best_combo": {
+        "tilt_deg": 30.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "offset_mm": -30.0,
+      "normal_source": "refit",
+      "static_hits": 0,
+      "best_clearance_m": -0.017414729738067784,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "offset_mm": 30.0,
+      "normal_source": "pipeline",
+      "static_hits": 330,
+      "best_clearance_m": 0.04826821781808933,
+      "best_combo": {
+        "tilt_deg": 30.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j3_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "offset_mm": 30.0,
+      "normal_source": "refit",
+      "static_hits": 0,
+      "best_clearance_m": -0.021730374062791234,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "offset_mm": 0.0,
+      "normal_source": "pipeline",
+      "static_hits": 345,
+      "best_clearance_m": 0.056483934731308534,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "offset_mm": 0.0,
+      "normal_source": "refit",
+      "static_hits": 0,
+      "best_clearance_m": -0.035760127256673706,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "offset_mm": -30.0,
+      "normal_source": "pipeline",
+      "static_hits": 345,
+      "best_clearance_m": 0.057424829542239854,
+      "best_combo": {
+        "tilt_deg": 30.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j3_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "offset_mm": -30.0,
+      "normal_source": "refit",
+      "static_hits": 0,
+      "best_clearance_m": -0.03562282597336557,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "offset_mm": 30.0,
+      "normal_source": "pipeline",
+      "static_hits": 345,
+      "best_clearance_m": 0.05649046925075891,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "offset_mm": 30.0,
+      "normal_source": "refit",
+      "static_hits": 0,
+      "best_clearance_m": -0.03225200169087602,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "nominal_V5"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    }
+  ]
+}

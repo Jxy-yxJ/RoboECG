@@ -278,6 +278,7 @@ def execute_sequence(
     per_segment = []
     target_metrics = []
     patient_motion_log = []
+    force_track_log = []
 
     def move_to(q_target, label):
         nonlocal frame_index, min_clearance, min_clearance_info
@@ -332,7 +333,13 @@ def execute_sequence(
             for _ in range(3):
                 world.step(render=True)
         elif segment["kind"] == "interp":
-            start_q = np.asarray(segment["start"], dtype=float)
+            start_q = (
+                np.asarray(segment["start"], dtype=float)
+                if segment.get("start") is not None
+                else np.asarray(
+                    robot.get_dof_positions(), dtype=float
+                ).reshape(-1)
+            )
             end_q = np.asarray(segment["end"], dtype=float)
             frames = max(2, int(segment["frames"]))
             for s_value in np.linspace(0.0, 1.0, frames):
@@ -357,6 +364,168 @@ def execute_sequence(
                         ),
                     }
                 )
+        elif segment["kind"] == "force_track":
+            from roboecg.robot_controller.compliant_press import (
+                admittance_step,
+            )
+            from roboecg.robot_controller.press_plan import PressSettings
+            from roboecg.robot_controller.reach_plan import solve_tool_pose
+
+            controller = segment["controller"]
+            contact = np.asarray(segment["contact_world"], dtype=float)
+            normal = np.asarray(segment["normal_world"], dtype=float)
+            normal = normal / (np.linalg.norm(normal) + 1e-12)
+            rotation = np.asarray(segment["rotation_world"], dtype=float)
+            offset_electrode = float(segment["electrode_offset_m"])
+            ctrl_settings = PressSettings(
+                press_depth_m=float(segment.get("initial_depth_m", 0.004)),
+                force_target_n=float(controller["force_target_n"]),
+                max_press_depth_m=float(controller["depth_cap_m"]),
+            )
+            gain = 1.0 / (
+                float(controller["k_est_n_m"]) * float(controller["tau_s"])
+            )
+            dt = 1.0 / float(controller.get("rate_hz", 60.0))
+            k_plant = float(controller["plant_stiffness_n_m"])
+            noise = float(controller.get("sensor_noise_n", 0.0))
+            retract = float(controller.get("retract_limit_m", 0.010))
+            max_step_value = controller.get("max_step_m")
+            max_step = float(max_step_value) if max_step_value else None
+            rng = np.random.default_rng(int(controller.get("seed", 0)))
+            depth_cmd = float(
+                segment.get("initial_depth_m", ctrl_settings.press_depth_m)
+            )
+            q_cmd = np.asarray(segment["q_seed"], dtype=float).reshape(-1)
+            trace = []
+            ik_failures = 0
+            requested_flange = None
+            for _ in range(int(segment["frames"])):
+                offset = 0.0
+                if patient_motion is not None:
+                    value = patient_motion(stage, frame_index, label)
+                    if value is not None:
+                        offset = float(value)
+                flange, _ = tool0_world(q_cmd)
+                tip = flange - normal * offset_electrode
+                surface = contact + np.array([0.0, 0.0, offset])
+                indentation = max(0.0, float((surface - tip) @ normal))
+                force_meas = k_plant * indentation
+                if noise > 0.0:
+                    force_meas += float(rng.normal(0.0, noise))
+                depth_cmd = admittance_step(
+                    depth_cmd,
+                    force_meas,
+                    ctrl_settings,
+                    gain,
+                    dt,
+                    retract,
+                    max_step,
+                )
+                # The command is relative to the *tracked* surface (the depth
+                # camera keeps tracking the chest during the hold), so the
+                # depth cap bounds the skin indentation, not the excursion
+                # below the nominal plane.
+                requested_flange = (
+                    surface + normal * (offset_electrode - depth_cmd)
+                )
+                q_new, ok = solve_tool_pose(
+                    ik,
+                    base_matrix,
+                    requested_flange,
+                    rotation,
+                    q_cmd,
+                    position_tolerance=5e-4,
+                    orientation_tolerance=0.05,
+                )
+                if ok:
+                    q_cmd = q_new
+                else:
+                    ik_failures += 1
+                move_to(q_cmd, label)
+                flange_new, _ = tool0_world(q_cmd)
+                tip_new = flange_new - normal * offset_electrode
+                indent_after = max(0.0, float((surface - tip_new) @ normal))
+                trace.append(
+                    {
+                        "step": len(trace),
+                        "offset_m": offset,
+                        "indentation_m": indentation,
+                        "indentation_after_m": indent_after,
+                        "flange_error_mm": float(
+                            np.linalg.norm(flange_new - requested_flange) * 1000.0
+                        ),
+                        "force_n": force_meas,
+                        "depth_cmd_m": depth_cmd,
+                        "ik_ok": bool(ok),
+                    }
+                )
+            indents = [entry["indentation_m"] for entry in trace]
+            indents_after = [entry["indentation_after_m"] for entry in trace]
+            forces = [entry["force_n"] for entry in trace]
+            flange_errors = [entry["flange_error_mm"] for entry in trace]
+            max_force = float(max(forces)) if forces else 0.0
+            max_indent = (
+                max(max(indents), max(indents_after)) if indents else 0.0
+            )
+            depth_ok = bool(
+                max_indent <= ctrl_settings.max_press_depth_m + 1e-9
+            )
+            force_ok = bool(max_force <= float(controller["force_limit_n"]) + 1e-9)
+            q_final = np.asarray(
+                robot.get_dof_positions(), dtype=float
+            ).reshape(-1)
+            flange_final, _ = tool0_world(q_final)
+            metrics = {
+                "frames": len(trace),
+                "force_target_n": ctrl_settings.force_target_n,
+                "max_force_n": max_force,
+                "max_indentation_m": max_indent,
+                "depth_ok": depth_ok,
+                "force_ok": force_ok,
+                "violation": None
+                if (depth_ok and force_ok)
+                else ("depth" if not depth_ok else "force"),
+                "contact_loss_fraction": float(
+                    np.mean([d <= 1e-9 for d in indents])
+                )
+                if indents
+                else 0.0,
+                "ik_failures": int(ik_failures),
+                "depth_cmd_final_m": float(depth_cmd),
+                "max_flange_error_mm": float(max(flange_errors))
+                if flange_errors
+                else 0.0,
+            }
+            if segment.get("target_name"):
+                target_metrics.append(
+                    {
+                        "target": segment["target_name"],
+                        "label": label,
+                        "mode": "force_tracking",
+                        "reach_error_m": (
+                            float(
+                                np.linalg.norm(
+                                    flange_final
+                                    - np.asarray(requested_flange, dtype=float)
+                                )
+                            )
+                            if requested_flange is not None
+                            else None
+                        ),
+                        "tracking_error_rad": float(
+                            np.linalg.norm(q_final - q_cmd)
+                        ),
+                    }
+                )
+            force_track_log.append(
+                {
+                    "target": segment.get("target_name"),
+                    "label": label,
+                    "metrics": metrics,
+                    "controller": dict(controller),
+                    "trace": trace,
+                }
+            )
         else:
             trajectory = segment["trajectory"]
             for q in trajectory:
@@ -404,6 +573,7 @@ def execute_sequence(
         "targets": target_metrics,
         "video": str(video_path) if video_path else None,
         "patient_motion": patient_motion_log,
+        "force_track": force_track_log,
     }
 
 

@@ -1,0 +1,237 @@
+{
+  "provenance": "simulation: seed-sensitivity probe, V4-V6 shifted by -30 mm drop; static = goal IK + capsule clearance over a seed bank; plan = full plan_reach",
+  "settings": {
+    "bias_mm": -30.0,
+    "n_seeds": 18,
+    "seed_names": [
+      "home",
+      "nominal_V5",
+      "nominal_V6",
+      "interp_1",
+      "interp_2",
+      "interp_3",
+      "ref_j0_-0.2",
+      "ref_j0_+0.2",
+      "ref_j1_-0.2",
+      "ref_j1_+0.2",
+      "ref_j2_-0.2",
+      "ref_j2_+0.2",
+      "ref_j3_-0.2",
+      "ref_j3_+0.2",
+      "ref_j4_-0.2",
+      "ref_j4_+0.2",
+      "ref_j5_-0.2",
+      "ref_j5_+0.2"
+    ]
+  },
+  "rows": [
+    {
+      "target": "V5_shifted",
+      "static_hits": [],
+      "n_static_hits": 0,
+      "ik_ok_count": 450,
+      "best_clearance_m": -0.017414729738067784,
+      "best_clearance_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "first_plan": null
+    },
+    {
+      "target": "V6_shifted",
+      "static_hits": [],
+      "n_static_hits": 0,
+      "ik_ok_count": 450,
+      "best_clearance_m": -0.03562260414487466,
+      "best_clearance_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "interp_3"
+      },
+      "first_plan": null
+    },
+    {
+      "target": "V5_nominal",
+      "static_hits": [
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "home",
+          "clearance_mm": 45.82339880156253
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "nominal_V5",
+          "clearance_mm": 45.82339880156253
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "nominal_V6",
+          "clearance_mm": 45.82251489127593
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "interp_1",
+          "clearance_mm": 45.82289684150268
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "interp_2",
+          "clearance_mm": 45.823178889277926
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "interp_3",
+          "clearance_mm": 45.82225511865027
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j0_-0.2",
+          "clearance_mm": 45.822552575834735
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j0_+0.2",
+          "clearance_mm": 45.823060254232644
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j1_-0.2",
+          "clearance_mm": 45.82331742622379
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j1_+0.2",
+          "clearance_mm": 45.821630694891596
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j2_-0.2",
+          "clearance_mm": 45.82438909247192
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j2_+0.2",
+          "clearance_mm": 45.82362452164166
+        }
+      ],
+      "n_static_hits": 396,
+      "ik_ok_count": 450,
+      "best_clearance_m": 0.049561163524977365,
+      "best_clearance_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "nominal_V5"
+      },
+      "first_plan": {
+        "tilt_deg": 0.0,
+        "azimuth_deg": 0.0,
+        "seed": "home",
+        "backoff_mm": 0.0
+      }
+    },
+    {
+      "target": "V6_nominal",
+      "static_hits": [
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "home",
+          "clearance_mm": 37.58286403271079
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "nominal_V5",
+          "clearance_mm": 37.5451290532262
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "nominal_V6",
+          "clearance_mm": 37.58286403271079
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "interp_1",
+          "clearance_mm": 37.55950557383654
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "interp_2",
+          "clearance_mm": 37.55224449782753
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "interp_3",
+          "clearance_mm": 37.55295149004474
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j0_-0.2",
+          "clearance_mm": 37.5412825478751
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j0_+0.2",
+          "clearance_mm": 37.58853647112474
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j1_-0.2",
+          "clearance_mm": 37.52932592103499
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j1_+0.2",
+          "clearance_mm": 37.537070665033134
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j2_-0.2",
+          "clearance_mm": 37.58326046152431
+        },
+        {
+          "tilt_deg": 0.0,
+          "azimuth_deg": 0.0,
+          "seed": "ref_j2_+0.2",
+          "clearance_mm": 37.58897937139634
+        }
+      ],
+      "n_static_hits": 414,
+      "ik_ok_count": 450,
+      "best_clearance_m": 0.056483934731308534,
+      "best_clearance_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "ref_j1_+0.2"
+      },
+      "first_plan": {
+        "tilt_deg": 0.0,
+        "azimuth_deg": 0.0,
+        "seed": "home",
+        "backoff_mm": 0.0
+      }
+    }
+  ]
+}

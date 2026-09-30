@@ -58,6 +58,40 @@ PROVENANCE = (
 )
 
 
+def contact_force_n(indentation_m: float, k_true_n_m: float) -> float:
+    """Plant contact force: linear skin stiffness, no tension (engineering)."""
+    return float(k_true_n_m * max(0.0, indentation_m))
+
+
+def admittance_step(
+    depth_cmd_m: float,
+    measured_force_n: float,
+    settings: PressSettings,
+    gain_m_per_n_s: float,
+    dt_s: float,
+    retract_limit_m: float = 0.010,
+    max_step_m: float | None = None,
+) -> float:
+    """One admittance update: integrate the force error into the depth command.
+
+    The command is clamped to ``[-retract_limit_m, max_press_depth_m]`` so the
+    hard indentation cap is enforced by construction and the tool may retract
+    when the surface is higher than believed.  ``max_step_m`` caps the per-step
+    motion (a guarded-approach speed limit; None = unlimited).
+    """
+    error = settings.force_target_n - measured_force_n
+    step = gain_m_per_n_s * error * dt_s
+    if max_step_m is not None:
+        step = float(np.clip(step, -max_step_m, max_step_m))
+    return float(
+        np.clip(
+            depth_cmd_m + step,
+            -retract_limit_m,
+            settings.max_press_depth_m,
+        )
+    )
+
+
 @dataclass(frozen=True)
 class CompliantPressConfig:
     duration_s: float = 4.0
@@ -115,13 +149,13 @@ def simulate_hold(
         else:
             if config.sensor_noise_n > 0.0:
                 measured_force += float(rng.normal(0.0, config.sensor_noise_n))
-            error = settings.force_target_n - measured_force
-            i_cmd = float(
-                np.clip(
-                    i_cmd + gain * error * dt,
-                    -config.retract_limit_m,
-                    settings.max_press_depth_m,
-                )
+            i_cmd = admittance_step(
+                i_cmd,
+                measured_force,
+                settings,
+                gain,
+                dt,
+                config.retract_limit_m,
             )
         indentation_cmd[i] = i_cmd
         true_indentation = max(
@@ -129,7 +163,7 @@ def simulate_hold(
             i_cmd + config.surface_error_m + residual_m[i],
         )
         indentation[i] = true_indentation
-        force[i] = k_true_n_m * true_indentation
+        force[i] = contact_force_n(true_indentation, k_true_n_m)
         measured_force = force[i]
         depth_saturated[i] = bool(
             i_cmd >= settings.max_press_depth_m - 1e-12

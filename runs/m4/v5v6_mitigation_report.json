@@ -1,0 +1,508 @@
+{
+  "provenance": "simulation: mitigation probe; A = tool-length scan for the nominal/+-30 mm V5/V6; B = vertical-offset envelope at the nominal 0.088 m tool; static hit = clearance >= margin",
+  "settings": {
+    "tool_offsets_m": [
+      0.088,
+      0.12,
+      0.15
+    ],
+    "shift_cases_mm": [
+      -30.0,
+      30.0
+    ],
+    "delta_curve_mm": [
+      0.0,
+      -30.0,
+      -15.0,
+      -10.0,
+      10.0,
+      15.0,
+      30.0
+    ],
+    "clearance_margin_m": 0.02
+  },
+  "tool_length_scan": [
+    {
+      "tool_offset_m": 0.088,
+      "case": "nominal",
+      "hits": 330,
+      "best_clearance_m": 0.04956307145361755,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j3_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.088,
+      "case": "nominal",
+      "hits": 345,
+      "best_clearance_m": 0.056483934731308534,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.088,
+      "case": "-30mm",
+      "hits": 0,
+      "best_clearance_m": -0.017414729738067784,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.088,
+      "case": "-30mm",
+      "hits": 0,
+      "best_clearance_m": -0.03562282597336557,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.088,
+      "case": "+30mm",
+      "hits": 0,
+      "best_clearance_m": -0.021730374062791234,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.088,
+      "case": "+30mm",
+      "hits": 0,
+      "best_clearance_m": -0.03225200169087602,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "nominal_V5"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.12,
+      "case": "nominal",
+      "hits": 358,
+      "best_clearance_m": 0.08143507036756806,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.12,
+      "case": "nominal",
+      "hits": 360,
+      "best_clearance_m": 0.08846770794987655,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j2_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.12,
+      "case": "-30mm",
+      "hits": 0,
+      "best_clearance_m": -0.0025264909246654962,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.12,
+      "case": "-30mm",
+      "hits": 0,
+      "best_clearance_m": -0.02727964361874679,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j2_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.12,
+      "case": "+30mm",
+      "hits": 0,
+      "best_clearance_m": -0.004944566766190504,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j2_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.12,
+      "case": "+30mm",
+      "hits": 0,
+      "best_clearance_m": -0.02101924764536197,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.15,
+      "case": "nominal",
+      "hits": 360,
+      "best_clearance_m": 0.11145526764700034,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 0.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.15,
+      "case": "nominal",
+      "hits": 373,
+      "best_clearance_m": 0.11845273891760169,
+      "best_combo": {
+        "tilt_deg": 20.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j2_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.15,
+      "case": "-30mm",
+      "hits": 0,
+      "best_clearance_m": 0.015166054321989121,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.15,
+      "case": "-30mm",
+      "hits": 0,
+      "best_clearance_m": -0.01414739764620234,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "nominal_V5"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.15,
+      "case": "+30mm",
+      "hits": 0,
+      "best_clearance_m": 0.01419213658977856,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j1_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "tool_offset_m": 0.15,
+      "case": "+30mm",
+      "hits": 0,
+      "best_clearance_m": -0.006174167087018505,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    }
+  ],
+  "offset_curve": [
+    {
+      "target": "V5",
+      "delta_mm": 0.0,
+      "hits": 0,
+      "best_clearance_m": -0.02620917040084727,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "delta_mm": -30.0,
+      "hits": 0,
+      "best_clearance_m": -0.017414729738067784,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "delta_mm": -15.0,
+      "hits": 0,
+      "best_clearance_m": -0.01832942153656133,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "delta_mm": -10.0,
+      "hits": 0,
+      "best_clearance_m": -0.037798610609388286,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "forearm_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "delta_mm": 10.0,
+      "hits": 0,
+      "best_clearance_m": -0.02659444766707205,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V6_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "delta_mm": 15.0,
+      "hits": 0,
+      "best_clearance_m": -0.023869024483051386,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j3_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V5",
+      "delta_mm": 30.0,
+      "hits": 0,
+      "best_clearance_m": -0.021730374062791234,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "delta_mm": 0.0,
+      "hits": 0,
+      "best_clearance_m": -0.035760127256673706,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "delta_mm": -30.0,
+      "hits": 0,
+      "best_clearance_m": -0.03562282597336557,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_-0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "delta_mm": -15.0,
+      "hits": 0,
+      "best_clearance_m": -0.04424919620035333,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "nominal_V5"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "delta_mm": -10.0,
+      "hits": 0,
+      "best_clearance_m": -0.037275725525648194,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "home"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "delta_mm": 10.0,
+      "hits": 0,
+      "best_clearance_m": -0.0402714314986311,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "V5_j1_+0.2"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "delta_mm": 15.0,
+      "hits": 0,
+      "best_clearance_m": -0.03649405094245938,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "nominal_V6"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    },
+    {
+      "target": "V6",
+      "delta_mm": 30.0,
+      "hits": 0,
+      "best_clearance_m": -0.03225200169087602,
+      "best_combo": {
+        "tilt_deg": 60.0,
+        "azimuth_deg": 90.0,
+        "seed": "nominal_V5"
+      },
+      "best_blocker": {
+        "link": "wrist_2_link",
+        "capsule": "torso"
+      }
+    }
+  ]
+}

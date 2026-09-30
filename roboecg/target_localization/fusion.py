@@ -153,6 +153,31 @@ def fuse_target(
     return FusedTarget(target.name, position, normal, source, info)
 
 
+def best_view_index(normal, position, camera_positions) -> int:
+    """Index of the camera with the smallest incidence angle on the surface.
+
+    Used by the multi-view perception path: each electrode is routed to the
+    view that sees its patch most frontally (the lateral wall V5/V6 is grazing
+    in the overhead view but frontal in the side view).
+    """
+    normal = np.asarray(normal, dtype=float)
+    position = np.asarray(position, dtype=float)
+    best_index = 0
+    best_incidence = None
+    for index, camera_position in enumerate(camera_positions):
+        ray = np.asarray(camera_position, dtype=float) - position
+        ray = ray / (np.linalg.norm(ray) + 1e-12)
+        incidence = float(
+            np.degrees(
+                np.arccos(np.clip(float(np.dot(normal, ray)), -1.0, 1.0))
+            )
+        )
+        if best_incidence is None or incidence < best_incidence:
+            best_incidence = incidence
+            best_index = index
+    return best_index
+
+
 def evaluate_fusion(fused_targets, mesh_targets, frame: ChestFrame) -> dict:
     """Position/normal errors of the fused targets against the mesh targets."""
     by_name = {t.name: t for t in mesh_targets}

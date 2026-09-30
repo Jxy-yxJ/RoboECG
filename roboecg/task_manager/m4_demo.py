@@ -73,6 +73,31 @@ BREATHING_PERIOD_S = 4.0
 BREATHING_AMPLITUDE_M = 0.008
 SIM_FPS = 60.0
 
+# Compliant force-tracking press (v3): the approach + hold become one closed
+# force loop (see roboecg/robot_controller/compliant_press.py and
+# docs/ECG_V3_SOLUTION_PLAN.md).  Engineering parameters, documented:
+#  * the loop starts at the standoff and descends at <= max_step per frame
+#    (guarded approach), so the first contact cannot over-press when the chest
+#    has risen;
+#  * ~3.5 s per electrode (approach + ~2 s of hold, half a breathing period);
+#  * controller gain from tau at k_est; k_est defaults to the nominal
+#    engineering stiffness and the simulated plant uses the same stiffness
+#    (a simulation choice - a real robot would identify it).
+FORCE_TRACKING = {
+    "rate_hz": SIM_FPS,
+    "frames_per_target": int(3.5 * SIM_FPS),
+    "tau_s": 0.05,
+    "max_step_m": 0.001,
+    "sensor_noise_n": 0.0,
+    "k_est_n_m": None,
+    "plant_stiffness_n_m": None,
+    "provenance": (
+        "engineering: compliant press loop (guarded approach + force feedback "
+        "+ depth cap + retract) with gain from tau at k_est; plant = nominal "
+        "engineering skin stiffness; simulation only, not a clinical number"
+    ),
+}
+
 
 def make_breathing_callback(period_s=BREATHING_PERIOD_S,
                             amplitude_m=BREATHING_AMPLITUDE_M,
@@ -134,10 +159,29 @@ def _plan_waypoint(
     return None
 
 
+# Multi-view perception (v3, I1): a fixed lateral view of the left chest wall,
+# at the pose validated in docs/ECG_V3_SOLUTION_PLAN.md section 1.4 (best of
+# three candidates by V5/V6 visibility).  The perception pipeline routes each
+# electrode to the more frontal view.
+LATERAL_CAMERA = {
+    "prim_path": "/World/Cameras/PerceptionLateral",
+    "position": (0.00, 0.75, 0.95),
+    "look_at": (-0.133, 0.14, 0.89),
+}
+
+
 def run_m4(app, gui: bool = False, video: bool = True,
-           perception: bool = False, breathing: bool = False) -> dict:
+           perception: bool = False, breathing: bool = False,
+           force_tracking: bool = False,
+           multiview: bool = False) -> dict:
     from isaacsim.core.experimental.prims import Articulation
     from isaacsim.core.api import World
+
+    if force_tracking and not breathing:
+        # the compliant-press demo targets the breathing disturbance
+        breathing = True
+        print("M4: --force-tracking enables the breathing disturbance",
+              flush=True)
 
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     world = World(stage_units_in_meters=1.0)
@@ -156,7 +200,13 @@ def run_m4(app, gui: bool = False, video: bool = True,
         from roboecg.task_manager.perception_pipeline import perceive_targets
 
         detector = ChestLandmarkDetector()
-        perceived = perceive_targets(stage, detector, rules)
+        perceived = perceive_targets(
+            stage,
+            detector,
+            rules,
+            world=world,
+            lateral_camera=LATERAL_CAMERA if multiview else None,
+        )
         frame = perceived["frame"]
         targets = {t.name: t for t in perceived["fused"]}
         gt_frame = build_chest_frame(landmarks, anterior_hint=(0.0, 0.0, 1.0))
@@ -172,12 +222,16 @@ def run_m4(app, gui: bool = False, video: bool = True,
         gt_cloud = {
             t.name: t
             for t in generate_v1_v6(
-                landmarks, gt_frame, perceived["points"], rules
+                landmarks, gt_frame, perceived["points"], rules,
+                prior=perceived["prior"],
             ).targets
         }
         gt_mesh = {
             t.name: t
-            for t in generate_v1_v6(landmarks, gt_frame, mesh_points, rules).targets
+            for t in generate_v1_v6(
+                landmarks, gt_frame, mesh_points, rules,
+                prior=perceived["prior"],
+            ).targets
         }
 
         def _errors(reference):
@@ -193,9 +247,27 @@ def run_m4(app, gui: bool = False, video: bool = True,
 
         errors_cloud = _errors(gt_cloud)
         errors_mesh = _errors(gt_mesh)
+        # True, non-circular sim metric: the detector's landmarks against the
+        # rig joints (the asset rig is the simulation ground truth for
+        # landmarks, independent of the project's own placement rules).
+        import dataclasses as _dataclasses
+
+        landmark_errors = {}
+        for _field in _dataclasses.fields(perceived["landmarks"]):
+            if _field.name in ("provenance", "joint_positions"):
+                continue
+            predicted = np.asarray(
+                getattr(perceived["landmarks"], _field.name), dtype=float
+            )
+            truth = np.asarray(getattr(landmarks, _field.name), dtype=float)
+            landmark_errors[_field.name] = float(
+                np.linalg.norm(predicted - truth)
+            )
         perception_info = {
             "source": "detector + rules + M2 fusion",
             "camera": "/World/Cameras/PerceptionRGBD",
+            "multiview": bool(multiview),
+            "views": perceived.get("views"),
             "prior_fit_rms_m": perceived["prior"].fit_rms_m,
             "fusion": [
                 {
@@ -203,30 +275,66 @@ def run_m4(app, gui: bool = False, video: bool = True,
                     "source": t.source,
                     "reason": t.info.get("reason"),
                     "incidence_deg": t.info.get("incidence_deg"),
+                    "view": t.info.get("view"),
                     "normal_angle_vs_prior_deg": t.info.get(
                         "normal_angle_vs_prior_deg"
                     ),
                 }
                 for t in perceived["fused"]
             ],
-            "target_error_vs_cloud_gt_mm": errors_cloud,
-            "target_error_vs_cloud_gt_mean_mm": float(np.mean(list(errors_cloud.values()))),
-            "target_error_vs_cloud_gt_max_mm": float(np.max(list(errors_cloud.values()))),
-            "target_error_vs_mesh_gt_mm": errors_mesh,
-            "target_error_vs_mesh_gt_mean_mm": float(np.mean(list(errors_mesh.values()))),
-            "target_error_vs_mesh_gt_max_mm": float(np.max(list(errors_mesh.values()))),
-            "note": (
-                "cloud GT isolates detector/calibration error; mesh GT adds the "
-                "single-view surface-source difference, which is dominated by "
-                "V5/V6 at the lateral wall (self-occlusion + degenerate (u, v))"
+            "detector_landmark_error_mm": landmark_errors,
+            "detector_landmark_error_mean_mm": float(
+                np.mean(list(landmark_errors.values()))
             ),
+            "detector_landmark_error_max_mm": float(
+                np.max(list(landmark_errors.values()))
+            ),
+            "target_diff_vs_cloud_rules_mm": errors_cloud,
+            "target_diff_vs_cloud_rules_mean_mm": float(
+                np.mean(list(errors_cloud.values()))
+            ),
+            "target_diff_vs_cloud_rules_max_mm": float(
+                np.max(list(errors_cloud.values()))
+            ),
+            "target_diff_vs_mesh_rules_mm": errors_mesh,
+            "target_diff_vs_mesh_rules_mean_mm": float(
+                np.mean(list(errors_mesh.values()))
+            ),
+            "target_diff_vs_mesh_rules_max_mm": float(
+                np.max(list(errors_mesh.values()))
+            ),
+            "metric_definitions": {
+                "detector_landmark_error_mm": (
+                    "true sim error: predicted chest landmarks vs the rig "
+                    "joint ground truth (independent of the placement rules)"
+                ),
+                "target_diff_vs_cloud_rules_mm": (
+                    "perceived targets vs the project's OWN rules evaluated on "
+                    "the SAME depth cloud (perception-chain deviation; "
+                    "self-referential)"
+                ),
+                "target_diff_vs_mesh_rules_mm": (
+                    "perceived targets vs the project's OWN rules evaluated on "
+                    "the asset mesh (surface-source difference; "
+                    "self-referential, NOT placement truth)"
+                ),
+                "placement_truth": (
+                    "clinical-accuracy evidence lives in "
+                    "docs/ECG_GT_VALIDATION.md (25 statistical-shape torso "
+                    "models) and docs/ECG_P0B_FINDINGS.md (one real patient); "
+                    "the simulation metrics above must not be reported as "
+                    "placement accuracy"
+                ),
+            },
         }
         print(
             "M4: perception targets "
-            f"mean error vs cloud GT = "
-            f"{perception_info['target_error_vs_cloud_gt_mean_mm'] * 1000:.2f} mm, "
-            f"vs mesh GT = "
-            f"{perception_info['target_error_vs_mesh_gt_mean_mm'] * 1000:.2f} mm",
+            "mean diff vs rules-on-cloud = "
+            f"{perception_info['target_diff_vs_cloud_rules_mean_mm'] * 1000:.2f} mm, "
+            "vs rules-on-mesh = "
+            f"{perception_info['target_diff_vs_mesh_rules_mean_mm'] * 1000:.2f} mm; "
+            "landmark error = "
+            f"{perception_info['detector_landmark_error_mean_mm'] * 1000:.2f} mm",
             flush=True,
         )
     else:
@@ -257,8 +365,8 @@ def run_m4(app, gui: bool = False, video: bool = True,
             model_normals_for_grazing,
         )
 
-        generated = generate_v1_v6(landmarks, frame, cloud, rules)
         prior = fit_chest_surface_prior(cloud, frame)
+        generated = generate_v1_v6(landmarks, frame, cloud, rules, prior=prior)
         model_targets = model_normals_for_grazing(
             generated.targets,
             frame,
@@ -375,25 +483,97 @@ def run_m4(app, gui: bool = False, video: bool = True,
                 total_backoff += float(plan.get("goal_backoff_m", 0.0))
                 waypoints.append((waypoint, plan))
                 q_local = np.asarray(plan["q_goal"], dtype=float)
+            previous_kind = None
+            standoff_plan = next(
+                (
+                    plan
+                    for waypoint, plan in waypoints
+                    if waypoint["label"] == "standoff"
+                ),
+                None,
+            )
             for waypoint, plan in waypoints:
                 label = f"{name}: {waypoint['label']}"
-                built_segments.append(
-                    {
-                        "kind": "interp",
-                        "start": previous_q.tolist(),
-                        "end": plan["q_goal"].tolist(),
-                        "frames": LAYOUT_M1["motion_steps"],
-                        "label": label,
-                        "trajectory": plan["trajectory"],
-                        "hold": 4 if waypoint["label"] == "hold" else 0,
-                        "hold_label": f"{name}: hold",
-                        "target_name": name if waypoint["contact"] else None,
-                        "requested_tool0_world": np.asarray(
-                            waypoint["tool0_world"], dtype=float
-                        ).tolist(),
-                    }
-                )
+                if force_tracking and waypoint["label"] == "press":
+                    # the guarded approach + hold are handled by the force loop
+                    continue
+                if force_tracking and waypoint["label"] == "hold":
+                    if standoff_plan is None:
+                        raise RuntimeError(
+                            f"{name}: no standoff plan for force tracking"
+                        )
+                    built_segments.append(
+                        {
+                            "kind": "force_track",
+                            "label": f"{name}: force_track",
+                            "frames": int(FORCE_TRACKING["frames_per_target"]),
+                            "target_name": name,
+                            "contact_world": press["contact_world"],
+                            "normal_world": press["normal_world"],
+                            "rotation_world": rotation_world.tolist(),
+                            "electrode_offset_m": float(offset),
+                            "q_seed": np.asarray(
+                                standoff_plan["q_goal"], dtype=float
+                            ).tolist(),
+                            "initial_depth_m": -float(
+                                settings.approach_standoff_m
+                            ),
+                            "controller": {
+                                "force_target_n": float(press["force_target_n"]),
+                                "force_limit_n": float(press["force_limit_n"]),
+                                "depth_cap_m": float(
+                                    settings.max_press_depth_m
+                                ),
+                                "k_est_n_m": float(
+                                    FORCE_TRACKING["k_est_n_m"]
+                                    if FORCE_TRACKING["k_est_n_m"] is not None
+                                    else settings.contact_stiffness_n_m
+                                ),
+                                "tau_s": float(FORCE_TRACKING["tau_s"]),
+                                "max_step_m": float(
+                                    FORCE_TRACKING["max_step_m"]
+                                ),
+                                "retract_limit_m": float(
+                                    settings.approach_standoff_m
+                                )
+                                + 0.010,
+                                "sensor_noise_n": float(
+                                    FORCE_TRACKING["sensor_noise_n"]
+                                ),
+                                "plant_stiffness_n_m": float(
+                                    FORCE_TRACKING["plant_stiffness_n_m"]
+                                    if FORCE_TRACKING["plant_stiffness_n_m"]
+                                    is not None
+                                    else settings.contact_stiffness_n_m
+                                ),
+                                "rate_hz": float(FORCE_TRACKING["rate_hz"]),
+                                "provenance": FORCE_TRACKING["provenance"],
+                            },
+                        }
+                    )
+                    previous_q = np.asarray(plan["q_goal"], dtype=float)
+                    previous_kind = "force_track"
+                    continue
+                segment = {
+                    "kind": "interp",
+                    "start": previous_q.tolist(),
+                    "end": plan["q_goal"].tolist(),
+                    "frames": LAYOUT_M1["motion_steps"],
+                    "label": label,
+                    "trajectory": plan["trajectory"],
+                    "hold": 4 if waypoint["label"] == "hold" else 0,
+                    "hold_label": f"{name}: hold",
+                    "target_name": name if waypoint["contact"] else None,
+                    "requested_tool0_world": np.asarray(
+                        waypoint["tool0_world"], dtype=float
+                    ).tolist(),
+                }
+                if previous_kind == "force_track":
+                    # continue from the pose the force loop actually ended in
+                    segment["start"] = None
+                built_segments.append(segment)
                 previous_q = np.asarray(plan["q_goal"], dtype=float)
+                previous_kind = "interp"
             built_rows.append(
                 {
                     "target": name,
@@ -487,7 +667,9 @@ def run_m4(app, gui: bool = False, video: bool = True,
         if perception
         else "RoboECG - V1-V6 placement (ground-truth targets)"
     )
-    patient_motion = make_breathing_callback() if breathing else None
+    patient_motion = (
+        make_breathing_callback() if (breathing or force_tracking) else None
+    )
     execution = execute_sequence(
         app,
         world,
@@ -523,6 +705,12 @@ def run_m4(app, gui: bool = False, video: bool = True,
     for entry in execution.get("patient_motion", []):
         target_name = str(entry.get("segment", "")).split(":")[0].strip()
         motion_by_target.setdefault(target_name, []).append(entry["offset_m"])
+    # compliant force-tracking results per target (v3)
+    force_track_by_target = {
+        row["target"]: row
+        for row in execution.get("force_track", [])
+        if row.get("target")
+    }
     verification = []
     for name in targets:
         measured = measured_by_target.get(name)
@@ -536,19 +724,41 @@ def run_m4(app, gui: bool = False, video: bool = True,
         # indentation equals the commanded press depth; the force follows the
         # documented engineering contact model.  With breathing, the worst
         # chest rise during the target's press/hold adds to the indentation.
-        contact = check_contact(settings.press_depth_m, settings)
-        offsets = motion_by_target.get(name, [])
-        if offsets:
-            worst_rise = max(offsets)
-            contact_dynamic = check_contact(
-                settings.press_depth_m + worst_rise, settings
-            )
-            contact = dict(contact)
-            contact["dynamic"] = {
-                "worst_chest_rise_m": float(worst_rise),
-                "force_n": contact_dynamic["force_n"],
-                "violation": contact_dynamic["violation"],
+        # In force-tracking mode the recorded closed-loop trace replaces this
+        # open-loop worst-case estimate.
+        trace_entry = force_track_by_target.get(name)
+        if trace_entry is not None:
+            metrics = trace_entry["metrics"]
+            contact = {
+                "mode": "force_tracking",
+                "force_target_n": metrics["force_target_n"],
+                "max_force_n": metrics["max_force_n"],
+                "max_indentation_m": metrics["max_indentation_m"],
+                "depth_ok": metrics["depth_ok"],
+                "force_ok": metrics["force_ok"],
+                "violation": metrics["violation"],
+                "ik_failures": metrics["ik_failures"],
+                "dynamic": {
+                    "mode": "force_tracking",
+                    "max_force_n": metrics["max_force_n"],
+                    "max_indentation_m": metrics["max_indentation_m"],
+                    "violation": metrics["violation"],
+                },
             }
+        else:
+            contact = check_contact(settings.press_depth_m, settings)
+            offsets = motion_by_target.get(name, [])
+            if offsets:
+                worst_rise = max(offsets)
+                contact_dynamic = check_contact(
+                    settings.press_depth_m + worst_rise, settings
+                )
+                contact = dict(contact)
+                contact["dynamic"] = {
+                    "worst_chest_rise_m": float(worst_rise),
+                    "force_n": contact_dynamic["force_n"],
+                    "violation": contact_dynamic["violation"],
+                }
         verification.append(
             {
                 "target": name,
@@ -565,6 +775,7 @@ def run_m4(app, gui: bool = False, video: bool = True,
             "perception (depth -> detector -> rules -> fusion)" if perception
             else "ground truth landmarks (rules + fusion on the depth cloud)"
         ),
+        "press_mode": "force_tracking" if force_tracking else "position",
         "scene": scene_report,
         "sequence": cycle["sequence"],
         "settings": cycle["settings"],

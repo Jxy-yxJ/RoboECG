@@ -40,6 +40,10 @@ from roboecg.target_localization.chest_frame import ChestFrame
 NORMAL_FIT_RADIUS_M = 0.03
 SURFACE_FIT_RADIUS_M = 0.035
 SURFACE_FIT_MIN_POINTS = 8
+# Multi-sheet guard: a multi-view cloud can contain a second surface sheet at
+# the same (u, v) (measured ~75 mm apart at V5); the patch is restricted to the
+# sheet within this band of the anchor height when enough points remain.
+SURFACE_ANCHOR_BAND_M = 0.040
 TORSO_HALF_WIDTH_LIMIT_M = 0.50  # excludes rest-pose arms from chest contours
 # Fallback V5 lateral fraction (see configs/ecg_rules.yaml
 # -> anatomy.anterior_axillary_line); fitted on 25 GT torso models.
@@ -247,7 +251,8 @@ def arc_midpoint_v(
 
 
 def snap_to_surface(points, frame: ChestFrame, u: float, v: float,
-                    v_limit: float | None = None):
+                    v_limit: float | None = None,
+                    anchor_height: float | None = None):
     """Contact point and normal at nominal (u, v) via a local surface fit.
 
     The fit lives in a local PCA frame (not in (u, v)): parameterising the
@@ -256,6 +261,12 @@ def snap_to_surface(points, frame: ChestFrame, u: float, v: float,
     a quadratic in the local tangent frame stays well-posed everywhere on the
     torso.  Evaluating it at the nominal point removes the mesh-vertex
     quantisation of a nearest-vertex snap (~2 cm on the biped asset).
+
+    ``anchor_height`` (the frame normal coordinate, e.g. from the smooth
+    surface prior at (u, v)) restricts the patch to the sheet within
+    SURFACE_ANCHOR_BAND_M of it whenever that sheet keeps enough points; with
+    a multi-view cloud a second sheet at the same (u, v) can otherwise capture
+    the nearest-point height guess and displace the contact by ~75 mm.
     """
     limit = TORSO_HALF_WIDTH_LIMIT_M if v_limit is None else float(v_limit)
     along, lateral, normal = _frame_components(points, frame)
@@ -274,6 +285,12 @@ def snap_to_surface(points, frame: ChestFrame, u: float, v: float,
             & (normal > -0.10)
             & (np.abs(lateral) <= limit)
         )
+        if anchor_height is not None:
+            band = mask & (
+                np.abs(normal - float(anchor_height)) <= SURFACE_ANCHOR_BAND_M
+            )
+            if int(np.count_nonzero(band)) >= SURFACE_FIT_MIN_POINTS:
+                mask = band
         count = int(np.count_nonzero(mask))
         if count >= SURFACE_FIT_MIN_POINTS:
             break
@@ -413,11 +430,13 @@ def generate_v1_v6(
     points,
     rules: dict,
     spacing_m: float | None = None,
+    prior=None,
 ) -> V1V6Result:
     """Generate the six precordial targets with full provenance.
 
     `spacing_m` overrides the configured intercostal spacing (used by the
-    sensitivity sweep).
+    sensitivity sweep); `prior` (a fitted ChestSurfacePrior) anchors the
+    surface snap when the cloud contains several sheets at the same (u, v).
     """
     anatomy = rules["anatomy"]
     snnd = float(anatomy["sternal_notch_to_nipple"]["value"])
@@ -517,8 +536,11 @@ def generate_v1_v6(
 
     targets = []
     for name, (u, v) in nominal.items():
+        anchor = None
+        if prior is not None:
+            anchor = float(prior.height(u, v))
         point, normal, info = snap_to_surface(
-            points, frame, u, v, v_limit=v_shoulder
+            points, frame, u, v, v_limit=v_shoulder, anchor_height=anchor
         )
         if point is None:
             raise RuntimeError(

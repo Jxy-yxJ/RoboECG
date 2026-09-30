@@ -1,0 +1,139 @@
+{
+  "provenance": "simulation POC: overhead (PerceptionRGBD) + lateral depth clouds in world coordinates; extrinsics known exactly, no registration step; metric = mesh ground-truth contact points",
+  "settings": {
+    "width": 640,
+    "height": 360,
+    "fov_deg": 90.0,
+    "fit_radius_m": 0.025,
+    "near_radius_m": 0.01
+  },
+  "targets": {
+    "V5": {
+      "gt_world": [
+        -0.12166270710373121,
+        0.13916618044822499,
+        0.8062203689167624
+      ],
+      "normal_ref": [
+        0.30510567877564443,
+        0.8205193938645367,
+        -0.4833823011561623
+      ],
+      "mesh_inliers": 8
+    },
+    "V6": {
+      "gt_world": [
+        -0.12457692016823597,
+        0.14849287003527997,
+        0.8314016148970266
+      ],
+      "normal_ref": [
+        0.24591360256047196,
+        0.941728019825914,
+        -0.22950999270291716
+      ],
+      "mesh_inliers": 11
+    }
+  },
+  "candidates": {
+    "side_mid": {
+      "position": [
+        -0.2,
+        0.85,
+        1.05
+      ],
+      "look_at": [
+        -0.135,
+        0.135,
+        0.9
+      ],
+      "points": 31579,
+      "points_near_v5v6_10cm": 1880,
+      "incidence_deg": {
+        "V5": 54.2420153965589,
+        "V6": 36.740365972780204
+      }
+    },
+    "side_high": {
+      "position": [
+        -0.13,
+        0.6,
+        1.35
+      ],
+      "look_at": [
+        -0.133,
+        0.14,
+        0.89
+      ],
+      "points": 47597,
+      "points_near_v5v6_10cm": 1547,
+      "incidence_deg": {
+        "V5": 80.90119741353192,
+        "V6": 63.68404953844519
+      }
+    },
+    "side_feet": {
+      "position": [
+        0.0,
+        0.75,
+        0.95
+      ],
+      "look_at": [
+        -0.133,
+        0.14,
+        0.89
+      ],
+      "points": 32456,
+      "points_near_v5v6_10cm": 2917,
+      "incidence_deg": {
+        "V5": 42.82488801719356,
+        "V6": 24.370458354878735
+      }
+    }
+  },
+  "best_candidate": "side_feet",
+  "incidence_deg": {
+    "V5": {
+      "overhead": 52.22639638026675,
+      "lateral:side_feet": 42.82488801719356
+    },
+    "V6": {
+      "overhead": 67.97303226797965,
+      "lateral:side_feet": 24.370458354878735
+    }
+  },
+  "metrics": {
+    "V5": {
+      "overhead": {
+        "nearest_mm": 60.981303636450804,
+        "coverage_points": 0,
+        "points": 0,
+        "normal_error_deg": null,
+        "plane_rms_mm": null
+      },
+      "fused": {
+        "nearest_mm": 3.80613595042919,
+        "coverage_points": 15,
+        "points": 88,
+        "normal_error_deg": 2.7530078693637963,
+        "plane_rms_mm": 1.2605125498746101
+      }
+    },
+    "V6": {
+      "overhead": {
+        "nearest_mm": 35.53668288172392,
+        "coverage_points": 0,
+        "points": 0,
+        "normal_error_deg": null,
+        "plane_rms_mm": null
+      },
+      "fused": {
+        "nearest_mm": 1.6413290991041705,
+        "coverage_points": 20,
+        "points": 120,
+        "normal_error_deg": 0.3005649697396766,
+        "plane_rms_mm": 1.4804484479119953
+      }
+    }
+  }
+}

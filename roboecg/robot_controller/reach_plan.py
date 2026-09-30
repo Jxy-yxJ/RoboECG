@@ -41,8 +41,20 @@ def link_world_positions(ik, base_matrix, joints):
     return positions
 
 
-def solve_tool_pose(ik, base_matrix, position_world, rotation_world, warm_start):
-    """Solve IK for a tool0 world pose; returns (joints, success)."""
+def solve_tool_pose(
+    ik,
+    base_matrix,
+    position_world,
+    rotation_world,
+    warm_start,
+    position_tolerance: float = 0.005,
+    orientation_tolerance: float = 0.2,
+):
+    """Solve IK for a tool0 world pose; returns (joints, success).
+
+    The tolerance defaults follow the planning path (5 mm / 0.2 rad); tight
+    loops (e.g. the compliant-press hold) pass smaller values.
+    """
     base_rotation = base_matrix[:3, :3]
     base_translation = base_matrix[:3, 3]
     position_base = base_rotation.T @ (
@@ -50,10 +62,16 @@ def solve_tool_pose(ik, base_matrix, position_world, rotation_world, warm_start)
     )
     quaternion_base = quat_wxyz_from_rotation(base_rotation.T @ rotation_world)
     q, ok = ik.solve_pose(
-        position_base, quaternion_base, warm_start, orientation_tolerance=0.2
+        position_base,
+        quaternion_base,
+        warm_start,
+        position_tolerance=position_tolerance,
+        orientation_tolerance=orientation_tolerance,
     )
     if not ok:
-        q, ok = ik.solve_position(position_base, warm_start)
+        q, ok = ik.solve_position(
+            position_base, warm_start, position_tolerance=position_tolerance
+        )
     return np.asarray(q, dtype=float), bool(ok)
 
 
