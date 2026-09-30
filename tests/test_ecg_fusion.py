@@ -205,3 +205,23 @@ def test_best_view_index_picks_the_frontal_camera():
     assert best_view_index(normal, position, [overhead, lateral]) == 1
     assert best_view_index(normal, position, [lateral, overhead]) == 0
     assert best_view_index(normal, position, [overhead]) == 0
+
+
+def test_out_of_view_target_is_kept_unchanged(setup):
+    """A target projecting outside the depth image must not crash the fusion."""
+    frame, prior = setup
+    point = frame.from_frame(0.0, -0.80, 0.0)  # far off the optical axis
+    target = SimpleTarget("Vx", point, frame.anterior, [0.0, -0.80, 0.0])
+    fused = fuse_target(
+        target,
+        frame,
+        prior,
+        synthetic_depth(1.0),
+        INTRINSICS,
+        CAMERA_POSITION,
+        CV_ROTATION,
+        SETTINGS,
+    )
+    assert fused.info["reason"] == "outside_view"
+    np.testing.assert_allclose(fused.position, point)
+    np.testing.assert_allclose(fused.normal, frame.anterior)

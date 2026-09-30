@@ -182,9 +182,15 @@ def main() -> None:
 
         detector = ChestLandmarkDetector()
         perceived = perceive_targets(
-            stage, detector, rules, world=world, lateral_camera=LATERAL_CAMERA
+            stage,
+            detector,
+            rules,
+            world=world,
+            lateral_camera=LATERAL_CAMERA,
+            allow_snap_fallback=True,
         )
         fused = {t.name: t for t in perceived["fused"]}
+        generated = {t.name: t for t in perceived["generated"].targets}
 
         rows = []
         for index, name in enumerate(NAMES):
@@ -214,6 +220,9 @@ def main() -> None:
                     "incidence_deg": target.info.get("incidence_deg"),
                     "normal_angle_vs_prior_deg": target.info.get(
                         "normal_angle_vs_prior_deg"
+                    ),
+                    "snap_status": generated[name].provenance.get("snap", {}).get(
+                        "status"
                     ),
                     "position_world": [float(c) for c in position],
                     "gt_world": [float(c) for c in gt_position],
@@ -330,6 +339,13 @@ def main() -> None:
             json.dumps(report, indent=2, default=str) + "\n", encoding="utf-8"
         )
         print(f"ssm_torso: report -> {report_path}", flush=True)
+    except BaseException:
+        # SimulationApp.close() terminates the process, so the traceback must
+        # be captured before the finally block runs.
+        import traceback
+
+        traceback.print_exc()
+        raise
     finally:
         app.close()
 

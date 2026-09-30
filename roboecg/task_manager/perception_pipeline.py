@@ -34,35 +34,6 @@ from roboecg.task_manager.rendering import capture_depth
 DEFAULT_CAMERA_PATH = "/World/Cameras/PerceptionRGBD"
 
 
-def model_normals_for_grazing(targets, frame, prior, camera_position,
-                              max_incidence_deg: float = 65.0):
-    """Substitute the smooth model normal where the depth surface is unusable.
-
-    On the lateral chest wall (V5/V6) the overhead camera sees the surface at
-    a grazing angle: the depth adds nothing and the normal of a cloud-snapped
-    target is unreliable.  The fitted prior supplies a usable approach
-    direction; the fusion then falls back to these model targets verbatim.
-    """
-    import dataclasses
-
-    out = []
-    for target in targets:
-        position = np.asarray(target.position, dtype=float)
-        normal = np.asarray(target.normal, dtype=float)
-        to_camera = np.asarray(camera_position, dtype=float) - position
-        to_camera = to_camera / (np.linalg.norm(to_camera) + 1e-12)
-        incidence = float(
-            np.degrees(
-                np.arccos(np.clip(float(np.dot(normal, to_camera)), -1.0, 1.0))
-            )
-        )
-        if incidence > max_incidence_deg:
-            u, v = float(target.frame_coords[0]), float(target.frame_coords[1])
-            normal = np.asarray(prior.normal_world(frame, u, v), dtype=float)
-        out.append(dataclasses.replace(target, normal=normal))
-    return out
-
-
 def perceive_targets(
     stage,
     detector: ChestLandmarkDetector,
@@ -73,6 +44,7 @@ def perceive_targets(
     fov_deg: float = 90.0,
     surface_stride: int = 1,
     lateral_camera: dict | None = None,
+    allow_snap_fallback: bool = False,
     world=None,
 ) -> dict:
     """Run the perception path once and return fused V1-V6 targets.
@@ -153,7 +125,14 @@ def perceive_targets(
         )
 
     prior = fit_chest_surface_prior(points, frame)
-    generated = generate_v1_v6(landmarks, frame, points, rules, prior=prior)
+    generated = generate_v1_v6(
+        landmarks,
+        frame,
+        points,
+        rules,
+        prior=prior,
+        allow_snap_fallback=allow_snap_fallback,
+    )
 
     fusion_settings = rules["depth_fusion"]
     camera_positions = [view["camera_position"] for view in views]
@@ -167,15 +146,8 @@ def perceive_targets(
                     target.normal, target.position, camera_positions
                 )
             ]
-        model_target = model_normals_for_grazing(
-            [target],
-            frame,
-            prior,
-            view["camera_position"],
-            fusion_settings.get("max_incidence_deg", 65.0),
-        )[0]
         result = fuse_target(
-            model_target,
+            target,
             frame,
             prior,
             view["depth"],

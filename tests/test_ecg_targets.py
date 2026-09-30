@@ -5,13 +5,20 @@ import numpy as np
 import pytest
 
 from roboecg.perception.chest_landmarks import ChestLandmarks
-from roboecg.target_localization.chest_frame import build_chest_frame
+from roboecg.target_localization.chest_frame import (
+    ChestFrame,
+    build_chest_frame,
+    cloud_blended_frame,
+)
 from roboecg.target_localization.ecg import (
     V5_LATERAL_FRACTION_DEFAULT,
     generate_v1_v6,
     measure_lateral_extent,
     measure_thorax_circumference,
+    measure_lateral_extent,
     measure_torso_width,
+    robust_lateral_extent,
+    robust_torso_width,
     snap_to_surface,
 )
 
@@ -198,7 +205,7 @@ def test_v1_v6_topology_and_provenance(setup):
     # the 4th->5th ICS drop is predicted from the measured torso width
     coefficients = RULES["anatomy"]["fourth_to_fifth_ics"]["coefficients"]
     v_shoulder = abs(float(frame.to_frame(landmarks.shoulder_left)[1]))
-    width_m = measure_torso_width(points, frame, half_width_limit=v_shoulder)
+    width_m = robust_torso_width(points, frame, landmark_limit=v_shoulder)
     expected_drop = (
         coefficients["intercept_mm"]
         + coefficients["slope_mm_per_mm"] * width_m * 1000.0
@@ -307,3 +314,101 @@ def test_generate_u_5ics_override_replaces_the_regression(setup):
     assert abs(u_default - u_corrected) > 5e-3
     provenance = by_corrected["V4"].provenance["vertical"]["intercostal_spacing"]
     assert "probe_corrected" in provenance
+
+
+def _profile_cloud(frame, half_width, rows=12, n_v=41, arm=0.0, gap=0.18):
+    """Front-facing surface rows with an optional axilla gap + arm lobe."""
+    points = []
+    for u in np.linspace(-0.30, 0.05, rows):
+        for v in np.linspace(-half_width, half_width, n_v):
+            points.append(frame.from_frame(u, v, -0.01 * abs(v)))
+        if arm > half_width:
+            for v in np.linspace(gap, arm, 9):
+                points.append(frame.from_frame(u, +v, -0.05))
+                points.append(frame.from_frame(u, -v, -0.05))
+    return np.array(points)
+
+
+def test_robust_width_recovers_from_clipped_landmark():
+    """A landmark far inside the true silhouette must not clip the width."""
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _profile_cloud(frame, half_width=0.20)
+    clipped = measure_torso_width(points, frame, half_width_limit=0.10)
+    robust = robust_torso_width(points, frame, landmark_limit=0.10)
+    assert clipped < 0.25
+    assert 0.34 < robust < 0.44
+
+
+def test_robust_width_keeps_the_axilla_gap():
+    """With a rest-pose arm lobe the measurement must stop at the chest edge."""
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _profile_cloud(frame, half_width=0.18, arm=0.29, gap=0.21)
+    robust = robust_torso_width(points, frame, landmark_limit=0.22)
+    assert 0.30 < robust < 0.42
+
+
+def test_robust_lateral_extent_uses_the_silhouette_edge():
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _profile_cloud(frame, half_width=0.20)
+    extent = robust_lateral_extent(points, frame, u_level=-0.30, landmark_limit=0.10)
+    clipped = measure_lateral_extent(
+        points, frame, u_level=-0.30, half_width_limit=0.10
+    )
+    assert clipped < 0.15
+    assert 0.15 < extent < 0.25
+
+
+def _rotate(vec, axis, angle):
+    axis = np.asarray(axis, dtype=float)
+    axis = axis / (np.linalg.norm(axis) + 1e-12)
+    vec = np.asarray(vec, dtype=float)
+    return (
+        vec * np.cos(angle)
+        + np.cross(axis, vec) * np.sin(angle)
+        + axis * float(np.dot(axis, vec)) * (1.0 - np.cos(angle))
+    )
+
+
+def test_cloud_blended_frame_recovers_axes():
+    """A tilted landmark frame must be straightened by the cloud's PCA."""
+    landmarks = make_landmarks()
+    true_frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    rng = np.random.default_rng(0)
+    points = np.array(
+        [
+            true_frame.from_frame(u, v, n)
+            for u, v, n in zip(
+                rng.uniform(-0.35, 0.15, 4000),
+                rng.uniform(-0.15, 0.15, 4000),
+                rng.uniform(-0.05, 0.05, 4000),
+            )
+        ]
+    )
+    angle = np.radians(25.0)
+    tilted = ChestFrame(
+        origin=true_frame.origin,
+        up=_rotate(true_frame.up, true_frame.anterior, angle),
+        lateral=_rotate(true_frame.lateral, true_frame.anterior, angle),
+        anterior=true_frame.anterior,
+        provenance={},
+    )
+    blended = cloud_blended_frame(tilted, points)
+    for axis, reference in (("up", true_frame.up), ("lateral", true_frame.lateral)):
+        got = getattr(blended, axis)
+        got = got if np.dot(got, reference) >= 0 else -got
+        cosine = float(np.clip(np.dot(got, reference), -1.0, 1.0))
+        assert np.degrees(np.arccos(cosine)) < 3.0, axis
+    assert np.isclose(
+        float(np.dot(blended.up, blended.lateral)), 0.0, atol=1e-9
+    )
+
+
+def test_cloud_blended_frame_falls_back_when_sparse():
+    landmarks = make_landmarks()
+    true_frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    sparse = np.zeros((10, 3))
+    blended = cloud_blended_frame(true_frame, sparse)
+    assert blended is true_frame

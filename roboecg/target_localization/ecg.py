@@ -35,7 +35,10 @@ import numpy as np
 
 from roboecg.perception.chest_landmarks import ChestLandmarks
 from roboecg.perception.depth import estimate_surface_normal
-from roboecg.target_localization.chest_frame import ChestFrame
+from roboecg.target_localization.chest_frame import (
+    ChestFrame,
+    near_layer_mask,
+)
 
 NORMAL_FIT_RADIUS_M = 0.03
 SURFACE_FIT_RADIUS_M = 0.035
@@ -131,19 +134,7 @@ def _front_layer_extent(
     """
     if lateral.size < 8:
         return None
-    low, high = float(normal.min()), float(normal.max())
-    n_bins = max(int(np.ceil((high - low) / bin_m)), 1)
-    counts, edges = np.histogram(normal, bins=n_bins)
-    populated = np.where(counts > 0)[0]
-    if populated.size < 2:
-        return None
-    keep = np.ones(lateral.size, dtype=bool)
-    gaps = np.diff(populated)
-    gap_bins = int(np.ceil(min_layer_gap_m / bin_m))
-    if int(gaps.max()) >= gap_bins:
-        last_near_bin = populated[int(np.argmax(gaps))]
-        threshold = float(edges[last_near_bin + 1])
-        keep = normal >= threshold
+    keep = near_layer_mask(normal, bin_m=bin_m, min_layer_gap_m=min_layer_gap_m)
     if int(np.count_nonzero(keep)) < 8:
         return None
     return float(np.percentile(np.abs(lateral[keep]), 98.0))
@@ -176,6 +167,101 @@ def measure_lateral_extent(
     # fallback: 98th percentile (isolated depth pixels must not define the
     # contour, but the table layer is only handled by the guard above)
     return float(np.percentile(np.abs(lateral[mask]), 98.0))
+
+
+def _silhouette_edge(
+    v_abs, landmark_limit,
+    absolute_limit: float = TORSO_HALF_WIDTH_LIMIT_M,
+    bin_m: float = 0.005, min_empty_m: float = 0.010,
+):
+    """Outermost |v| before the first sustained empty band, or None.
+
+    The overhead projection gives a |v| density profile; the chest silhouette
+    edge appears as a sustained empty band (the depth shadows the gap beyond
+    the chest and, in the biped scene, the axilla separates a rest-pose arm).
+    The search starts a few centimetres inside ``landmark_limit`` so an
+    accurate or slightly over-estimated landmark still lets the search see
+    the gap; None means the surface stays populated up to ``absolute_limit``
+    (an arm-free torso, e.g. the SSM models).
+    """
+    v_abs = np.asarray(v_abs, dtype=float)
+    edges = np.arange(0.0, float(absolute_limit) + bin_m, bin_m)
+    counts, _ = np.histogram(v_abs, bins=edges)
+    empty_needed = max(int(round(min_empty_m / bin_m)), 1)
+    start = max(int(np.floor((float(landmark_limit) - 0.06) / bin_m)), 1)
+    run = 0
+    for index in range(start, len(counts)):
+        if counts[index] <= 0:
+            run += 1
+            if run >= empty_needed:
+                return float(edges[index - run + 1])
+        else:
+            run = 0
+    return None
+
+
+def robust_torso_width(
+    points, frame: ChestFrame, landmark_limit: float,
+    u_top: float = 0.02, u_bottom: float = -0.42,
+) -> float:
+    """Torso width robust to a shoulder landmark detected too close to the midline.
+
+    A clipped ``landmark_limit`` would truncate ``measure_torso_width`` to
+    exactly 2 x limit and collapse the intercostal-drop regression (measured
+    on arm-free SSM torsos: width 0.20 m instead of 0.44 m, endpoint scale
+    error ~2x).  The silhouette edge from the cloud's |v| profile replaces the
+    hard limit; the landmark limit only bounds where the drop search starts.
+    """
+    along, lateral, normal = _frame_components(points, frame)
+    rows = (
+        (along <= u_top)
+        & (along >= u_bottom)
+        & (np.abs(lateral) <= TORSO_HALF_WIDTH_LIMIT_M)
+    )
+    lateral_m = lateral[rows]
+    normal_m = normal[rows]
+    if lateral_m.size < 32:
+        return 0.0
+    near = near_layer_mask(normal_m)
+    if int(np.count_nonzero(near)) >= 32:
+        lateral_m = lateral_m[near]
+    v_abs = np.abs(lateral_m)
+    edge = _silhouette_edge(v_abs, landmark_limit)
+    if edge is not None and edge >= 0.08:
+        kept = v_abs[v_abs <= edge]
+        if kept.size >= 32:
+            v_abs = kept
+    return float(2.0 * np.percentile(v_abs, 98.0))
+
+
+def robust_lateral_extent(
+    points, frame: ChestFrame, u_level: float, landmark_limit: float,
+    band: float = 0.01,
+) -> float:
+    """`measure_lateral_extent` with the silhouette-edge rule for the limit."""
+    along, lateral, normal = _frame_components(points, frame)
+    mask = (
+        (np.abs(along - u_level) <= band)
+        & (np.abs(lateral) <= TORSO_HALF_WIDTH_LIMIT_M)
+    )
+    if np.count_nonzero(mask) < 8:
+        return 0.0
+    lateral_m = lateral[mask]
+    normal_m = normal[mask]
+    near = near_layer_mask(normal_m)
+    if int(np.count_nonzero(near)) >= 8:
+        lateral_m = lateral_m[near]
+        normal_m = normal_m[near]
+    edge = _silhouette_edge(np.abs(lateral_m), landmark_limit)
+    if edge is not None and edge >= 0.08:
+        keep = np.abs(lateral_m) <= edge
+        if np.count_nonzero(keep) >= 8:
+            lateral_m = lateral_m[keep]
+            normal_m = normal_m[keep]
+    extent = _front_layer_extent(lateral_m, normal_m)
+    if extent is not None:
+        return extent
+    return float(np.percentile(np.abs(lateral_m), 98.0))
 
 
 def measure_torso_width(
@@ -281,6 +367,13 @@ def snap_to_surface(points, frame: ChestFrame, u: float, v: float,
     distance_sq = delta_u**2 + delta_v**2
     mask = None
     count = 0
+    # Absolute floor on the surface height (rejects the table ~17 cm below the
+    # chest).  With a prior anchor the floor follows it, so a chest region that
+    # genuinely sits far below the frame's origin plane (measured on SSM
+    # torsos: the 5th-ICS row at n ~ -0.15) is not cut away.
+    normal_floor = -0.10
+    if anchor_height is not None:
+        normal_floor = min(normal_floor, float(anchor_height) - 0.12)
     for radius in (
         SURFACE_FIT_RADIUS_M,
         2.0 * SURFACE_FIT_RADIUS_M,
@@ -288,7 +381,7 @@ def snap_to_surface(points, frame: ChestFrame, u: float, v: float,
     ):
         mask = (
             (distance_sq <= radius**2)
-            & (normal > -0.10)
+            & (normal > normal_floor)
             & (np.abs(lateral) <= limit)
         )
         if anchor_height is not None:
@@ -440,6 +533,7 @@ def generate_v1_v6(
     spacing_m: float | None = None,
     prior=None,
     u_5ics_override: float | None = None,
+    allow_snap_fallback: bool = False,
 ) -> V1V6Result:
     """Generate the six precordial targets with full provenance.
 
@@ -468,6 +562,11 @@ def generate_v1_v6(
         width_m = float("nan")
     else:
         width_m = measure_torso_width(points, frame, half_width_limit=v_shoulder)
+        if 0.0 < width_m >= 1.98 * v_shoulder:
+            # The measurement sits exactly at the landmark clip: the shoulder
+            # landmark is too close to the midline (out-of-domain torso) and
+            # the width is truncated; re-measure with the silhouette edge.
+            width_m = robust_torso_width(points, frame, landmark_limit=v_shoulder)
         if width_m > 0.0:
             vertical_drop = (
                 float(coefficients["intercept_mm"])
@@ -494,6 +593,11 @@ def generate_v1_v6(
     v_midax = measure_lateral_extent(
         points, frame, u_5ics, half_width_limit=v_shoulder
     )
+    if 0.0 < v_midax >= 0.98 * v_shoulder:
+        # clipped at the landmark limit: use the silhouette edge instead
+        v_midax = robust_lateral_extent(
+            points, frame, u_5ics, landmark_limit=v_shoulder
+        )
     # V5 (anterior axillary line) sits at a FITTED fraction of the V4->V6
     # lateral span, not at the midpoint: the chest wall wraps towards the
     # axilla, so the clinical V5 projects laterally close to V6.  The 25-model
@@ -564,13 +668,35 @@ def generate_v1_v6(
         anchor = None
         if prior is not None:
             anchor = float(prior.height(u, v))
+        # The search window must always contain the target's own neighbourhood:
+        # on out-of-domain geometry a shoulder landmark detected too close to
+        # the midline would otherwise clip the window inside the target's |v|
+        # and the snap fails ("cannot snap V5 ... v=0.190" with v_shoulder 0.10).
+        v_limit = max(v_shoulder, abs(float(v)) + 0.05)
         point, normal, info = snap_to_surface(
-            points, frame, u, v, v_limit=v_shoulder, anchor_height=anchor
+            points, frame, u, v, v_limit=v_limit, anchor_height=anchor
         )
         if point is None:
-            raise RuntimeError(
-                f"cannot snap {name} to the chest surface at (u={u:.3f}, v={v:.3f})"
+            if not allow_snap_fallback:
+                along_all, lat_all, n_all = _frame_components(points, frame)
+                distance = (along_all - u) ** 2 + (lat_all - v) ** 2
+                nearest = int(np.argmin(distance))
+                raise RuntimeError(
+                    f"cannot snap {name} to the chest surface at (u={u:.3f}, "
+                    f"v={v:.3f}); nearest cloud point (u={along_all[nearest]:.3f}, "
+                    f"v={lat_all[nearest]:.3f}, n={n_all[nearest]:.3f}) at "
+                    f"{np.sqrt(distance[nearest]) * 1000:.0f} mm"
+                )
+            # Out-of-domain evaluation mode: keep the target at the nominal
+            # (u, v) and the prior height, explicitly marked in the info.
+            height = 0.0 if anchor is None else float(anchor)
+            point = frame.from_frame(u, v, height)
+            normal = (
+                np.asarray(prior.normal_world(frame, u, v), dtype=float)
+                if prior is not None
+                else np.asarray(frame.anterior, dtype=float)
             )
+            info = {"status": "fallback_nominal"}
         targets.append(
             ElectrodeTarget(
                 name=name,

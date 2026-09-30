@@ -76,6 +76,17 @@ def fuse_target(
         info["reason"] = "projection_failed"
         return FusedTarget(target.name, position, normal, source, info)
     info["pixel"] = [float(pixel[0]), float(pixel[1])]
+    height, width = depth.shape[:2]
+    margin = 16  # the deprojection window must stay inside the image
+    if not (
+        margin <= float(pixel[0]) < width - margin
+        and margin <= float(pixel[1]) < height - margin
+    ):
+        # A nominal fallback can land off the body in out-of-domain
+        # evaluations; the window would otherwise be built from negative
+        # indices.  Keep the input pose untouched.
+        info["reason"] = "outside_view"
+        return FusedTarget(target.name, position, normal, source, info)
 
     # Grazing incidence: on the lateral chest wall (V6 midaxillary) the camera
     # ray meets the surface at ~70 deg, so a small depth error displaces the
@@ -91,14 +102,15 @@ def fuse_target(
     info["incidence_deg"] = incidence_deg
     grazing = incidence_deg > float(settings.get("max_incidence_deg", 65.0))
     if grazing:
-        # At grazing incidence the depth measurement adds nothing: keep the
-        # model target supplied by the caller.  A deployment pipeline that
-        # builds its model targets from the depth cloud should substitute the
-        # smooth prior normal for such targets beforehand
-        # (see task_manager.perception_pipeline.model_normals_for_grazing).
+        # At grazing incidence the depth measurement adds nothing and the
+        # local surface normal (e.g. from a cloud-snapped lateral-wall point)
+        # is unreliable: keep the nominal contact but take the MODEL normal
+        # from the fitted surface prior, otherwise the press approach tilts
+        # sideways and the arm collides with the patient.
         info["reason"] = "grazing_incidence"
         info["measured_normal_world"] = None
-        return FusedTarget(target.name, position, normal, source, info)
+        info["prior_normal_used"] = True
+        return FusedTarget(target.name, position, prior_normal, source, info)
 
     skin_point, depth_m = surface_point_from_depth(
         depth,

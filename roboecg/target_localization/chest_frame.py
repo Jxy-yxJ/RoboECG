@@ -120,3 +120,93 @@ def build_chest_frame(landmarks: ChestLandmarks, anterior_hint) -> ChestFrame:
             ),
         },
     )
+
+
+def near_layer_mask(
+    normal: np.ndarray, bin_m: float = 0.02, min_layer_gap_m: float = 0.06,
+) -> np.ndarray:
+    """Boolean mask of the near (chest) depth layer, by the n-histogram gap.
+
+    A depth cloud from the overhead camera contains a second, far layer beyond
+    the body silhouette (the table, ~17 cm below the chest surface); the two
+    layers are separated by an empty band in the surface-height histogram.  A
+    sparse mesh without a far layer has no such gap and the mask keeps
+    everything.
+    """
+    normal = np.asarray(normal, dtype=float)
+    if normal.size < 8:
+        return np.ones(normal.size, dtype=bool)
+    low, high = float(normal.min()), float(normal.max())
+    n_bins = max(int(np.ceil((high - low) / bin_m)), 1)
+    counts, edges = np.histogram(normal, bins=n_bins)
+    populated = np.where(counts > 0)[0]
+    if populated.size < 2:
+        return np.ones(normal.size, dtype=bool)
+    gaps = np.diff(populated)
+    gap_bins = int(np.ceil(min_layer_gap_m / bin_m))
+    if int(gaps.max()) >= gap_bins:
+        last_near_bin = populated[int(np.argmax(gaps))]
+        threshold = float(edges[last_near_bin + 1])
+        return normal >= threshold
+    return np.ones(normal.size, dtype=bool)
+
+
+def cloud_blended_frame(
+    frame: ChestFrame, points, torso_lateral_limit: float = 0.30,
+    torso_u_range: tuple = (-0.45, 0.25),
+) -> ChestFrame:
+    """Chest frame whose axis DIRECTIONS come from the torso cloud (PCA).
+
+    Landmark-based axes amplify the detector's out-of-domain landmark errors
+    (measured on real SSM torsos: a 31 deg lateral tilt that displaces the
+    V5/V6 rows off the body).  The cloud's principal axes -- up: longest,
+    lateral: second (the torso and a rest-pose arm are wider than deep),
+    anterior: lateral x up -- are robust to a few noisy landmarks; the signs
+    and the origin still come from the landmark frame.  Falls back to the
+    landmark frame when the cloud is too sparse or degenerate.
+    """
+    points = np.asarray(points, dtype=float)
+    if points.ndim != 2 or points.shape[0] < 200:
+        return frame
+    up0 = np.asarray(frame.up, dtype=float)
+    lateral0 = np.asarray(frame.lateral, dtype=float)
+    anterior0 = np.asarray(frame.anterior, dtype=float)
+    rel = points - np.asarray(frame.origin, dtype=float)
+    along = rel @ up0
+    lateral = rel @ lateral0
+    normal = rel @ anterior0
+    region = (
+        (np.abs(lateral) <= torso_lateral_limit)
+        & (along >= torso_u_range[0])
+        & (along <= torso_u_range[1])
+    )
+    pts = points[region]
+    if pts.shape[0] < 200:
+        return frame
+    near = near_layer_mask(normal[region])
+    if int(np.count_nonzero(near)) >= 200:
+        pts = pts[near]
+    centred = pts - pts.mean(axis=0)
+    _, _, vt = np.linalg.svd(centred, full_matrices=False)
+    up = vt[0] if float(vt[0] @ up0) >= 0.0 else -vt[0]
+    lateral_axis = vt[1] - float(vt[1] @ up) * up
+    norm = float(np.linalg.norm(lateral_axis))
+    if norm < 1e-6:
+        return frame
+    lateral_axis = lateral_axis / norm
+    if float(lateral_axis @ lateral0) < 0.0:
+        lateral_axis = -lateral_axis
+    anterior = np.cross(lateral_axis, up)
+    anterior = anterior / (np.linalg.norm(anterior) + 1e-12)
+    if float(anterior @ anterior0) < 0.0:
+        anterior = -anterior
+    provenance = dict(frame.provenance)
+    provenance["cloud_blended"] = (
+        "axis directions from torso-cloud PCA (up: longest, lateral: second, "
+        f"anterior: lateral x up) over {int(pts.shape[0])} points; signs and "
+        "origin from the landmark frame"
+    )
+    return ChestFrame(
+        origin=frame.origin, up=up, lateral=lateral_axis, anterior=anterior,
+        provenance=provenance,
+    )
