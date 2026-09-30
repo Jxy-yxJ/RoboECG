@@ -53,3 +53,43 @@ def write_obj(points_m: np.ndarray, faces: np.ndarray, path: Path) -> None:
     lines = [f"v {p[0]:.9g} {p[1]:.9g} {p[2]:.9g}" for p in points_m]
     lines += [f"f {f[0] + 1} {f[1] + 1} {f[2] + 1}" for f in faces]
     Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def anatomical_axes(points_m: np.ndarray, electrodes_m: np.ndarray):
+    """Anatomical axes of an SSM torso: (left, anterior, down), right-handed.
+
+    left: V1->V2 (the parasternal pair is unambiguous); anterior: the mean
+    outward surface normal at V1/V2 (frontal electrodes) orthogonalised
+    against left -- an electrode-cloud centroid offset would be dominated by
+    the lateral component and pick the wrong axis; down: left x anterior (the
+    anatomical identity, no extra sign needed).  Raises when the mesh does not
+    support the construction or the axes are inconsistent.
+    """
+    from roboecg.perception.depth import estimate_surface_normal
+
+    a = electrodes_m[1] - electrodes_m[0]
+    a = a / (np.linalg.norm(a) + 1e-12)
+    centroid = points_m.mean(axis=0)
+    normals = []
+    for index in (0, 1):
+        position = electrodes_m[index]
+        outward = position + (position - centroid)
+        normal, _ = estimate_surface_normal(
+            points_m, position, radius=0.030, orient_toward=outward
+        )
+        if normal is None:
+            raise RuntimeError(f"no surface patch near V{index + 1}")
+        normals.append(np.asarray(normal, dtype=float))
+    b = np.mean(normals, axis=0)
+    b = b - float(np.dot(b, a)) * a
+    b = b / (np.linalg.norm(b) + 1e-12)
+    c = np.cross(a, b)
+    down_check = float(
+        np.dot(c, electrodes_m[3:6].mean(axis=0) - electrodes_m[0:2].mean(axis=0))
+    )
+    if down_check <= 0.0:
+        raise ValueError(
+            f"model axes inconsistent: left x anterior = {down_check:.4f} "
+            "(expected > 0, pointing towards V4-V6)"
+        )
+    return a, b, c
