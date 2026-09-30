@@ -44,7 +44,7 @@ from roboecg.robot_controller.reach_plan import (
 )
 from roboecg.robot_controller.ur3_lula import UR3LulaIK, find_articulation_roots
 from roboecg.target_localization.chest_frame import build_chest_frame
-from roboecg.target_localization.ecg import generate_v1_v6
+from roboecg.target_localization.ecg import ElectrodeTarget, generate_v1_v6
 from roboecg.target_localization.ecg_rules import load_ecg_rules
 from roboecg.task_manager import ecg_scene
 from roboecg.task_manager.ecg_scene import world_matrix
@@ -173,6 +173,8 @@ LATERAL_CAMERA = {
 def run_m4(app, gui: bool = False, video: bool = True,
            perception: bool = False, breathing: bool = False,
            force_tracking: bool = False,
+           drop_bias_mm: float = 0.0,
+           base_override=None,
            multiview: bool = False) -> dict:
     from isaacsim.core.experimental.prims import Articulation
     from isaacsim.core.api import World
@@ -247,6 +249,16 @@ def run_m4(app, gui: bool = False, video: bool = True,
 
         errors_cloud = _errors(gt_cloud)
         errors_mesh = _errors(gt_mesh)
+
+        # Normal-gate evidence (roadmap item 3): fused/measured normals against
+        # the mesh reference, plus the per-target acceptance flags.  The gate
+        # itself lives in fuse_target (configs/ecg_rules.yaml: 25 deg vs the
+        # surface prior, 65 deg incidence, 5 cm skin offset).
+        from roboecg.target_localization.fusion import evaluate_fusion
+
+        fusion_evaluation = evaluate_fusion(
+            perceived["fused"], list(gt_mesh.values()), frame
+        )
         # True, non-circular sim metric: the detector's landmarks against the
         # rig joints (the asset rig is the simulation ground truth for
         # landmarks, independent of the project's own placement rules).
@@ -279,9 +291,15 @@ def run_m4(app, gui: bool = False, video: bool = True,
                     "normal_angle_vs_prior_deg": t.info.get(
                         "normal_angle_vs_prior_deg"
                     ),
+                    "normal_accepted": bool(t.info.get("normal_accepted")),
+                    "normal_rejected": bool(t.info.get("normal_rejected")),
+                    "skin_point_rejected": bool(
+                        t.info.get("skin_point_rejected")
+                    ),
                 }
                 for t in perceived["fused"]
             ],
+            "fusion_evaluation": fusion_evaluation,
             "detector_landmark_error_mm": landmark_errors,
             "detector_landmark_error_mean_mm": float(
                 np.mean(list(landmark_errors.values()))
@@ -361,19 +379,8 @@ def run_m4(app, gui: bool = False, video: bool = True,
         cloud = depth_to_world_points(
             depth, intrinsics, camera_position, cv_rotation, stride=1
         )
-        from roboecg.task_manager.perception_pipeline import (
-            model_normals_for_grazing,
-        )
-
         prior = fit_chest_surface_prior(cloud, frame)
         generated = generate_v1_v6(landmarks, frame, cloud, rules, prior=prior)
-        model_targets = model_normals_for_grazing(
-            generated.targets,
-            frame,
-            prior,
-            camera_position,
-            rules["depth_fusion"].get("max_incidence_deg", 65.0),
-        )
         targets = {
             t.name: t
             for t in (
@@ -387,7 +394,7 @@ def run_m4(app, gui: bool = False, video: bool = True,
                     cv_rotation,
                     rules["depth_fusion"],
                 )
-                for target in model_targets
+                for target in generated.targets
             )
         }
     print(
@@ -395,6 +402,29 @@ def run_m4(app, gui: bool = False, video: bool = True,
         {name: np.round(t.position, 3).tolist() for name, t in targets.items()},
         flush=True,
     )
+
+    if drop_bias_mm:
+        # v3 study: inject a V4-V6 vertical rule error (additional drop along
+        # -frame.up) to test plan/base robustness; see
+        # docs/ECG_V3_SOLUTION_PLAN.md (drop-regression uncertainty).
+        bias_m = float(drop_bias_mm) / 1000.0
+        shifted = {}
+        for name, target in targets.items():
+            if name in ("V4", "V5", "V6"):
+                shifted[name] = ElectrodeTarget(
+                    name=name,
+                    position=np.asarray(target.position, dtype=float)
+                    - frame.up * bias_m,
+                    normal=np.asarray(target.normal, dtype=float),
+                    frame_coords=target.frame_coords,
+                )
+            else:
+                shifted[name] = target
+        targets = shifted
+        print(
+            f"M4: drop bias {drop_bias_mm:+.0f} mm applied to V4-V6",
+            flush=True,
+        )
 
     settings = PressSettings(
         electrode_offset_m=float(ecg_scene.LAYOUT["tool_electrode_offset_m"])
@@ -613,6 +643,28 @@ def run_m4(app, gui: bool = False, video: bool = True,
         flush=True,
     )
 
+    # v3 study: a caller-supplied base (e.g. the interval-robust base found by
+    # scripts/m4_robust_base_eval.py) replaces the screening candidates.
+    if base_override is not None:
+        candidates = [
+            {
+                "position": np.asarray(base_override["position"], dtype=float),
+                "yaw_deg": float(base_override["yaw_deg"]),
+                "ik_success": None,
+                "min_clearance_m": None,
+                "max_reach_m": None,
+                "provenance": str(
+                    base_override.get("provenance", "override: caller base")
+                ),
+            }
+        ]
+        print(
+            "M4: base override "
+            f"{np.round(candidates[0]['position'], 3).tolist()} "
+            f"yaw {candidates[0]['yaw_deg']:.1f}",
+            flush=True,
+        )
+
     best_plan = None
     failure_notes = []
     for candidate in candidates[:12]:
@@ -662,11 +714,6 @@ def run_m4(app, gui: bool = False, video: bool = True,
     annotator = make_render_product("/World/Cameras/ThirdView", width, height)
     closeup = make_render_product("/World/Cameras/ChestCloseup", width, height)
     video_name = "m4_place_perception.mp4" if perception else "m4_place.mp4"
-    video_title = (
-        "RoboECG - autonomous V1-V6 placement (depth -> detector -> press)"
-        if perception
-        else "RoboECG - V1-V6 placement (ground-truth targets)"
-    )
     patient_motion = (
         make_breathing_callback() if (breathing or force_tracking) else None
     )
@@ -688,7 +735,6 @@ def run_m4(app, gui: bool = False, video: bool = True,
         runs_dir=RUNS_DIR,
         video_name=video_name,
         patient_motion=patient_motion,
-        video_title=video_title,
     )
     print(
         f"M4: executed, frames={execution['frames']} "
