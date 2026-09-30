@@ -6,7 +6,7 @@ Improvements over v1 (direct coordinate regression, 1.38 px / 21.8 mm):
   * on-the-fly augmentation (depth noise, gain jitter, translation, occlusion)
 
 Run:
-    $ISAACSIM_ENV/bin/python scripts/train_chest_landmark_v2.py
+    /home/jxy/isaacsim-compat/env/bin/python scripts/train_chest_landmark_v2.py
 """
 from __future__ import annotations
 
@@ -17,6 +17,8 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import torch.nn.functional as F
+from torch import nn
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -95,6 +97,15 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=2e-3)
     parser.add_argument("--val-samples", type=int, default=60)
     parser.add_argument("--seed", type=int, default=11)
+    parser.add_argument(
+        "--split-seed",
+        type=int,
+        default=None,
+        help=(
+            "seed for the train/val split (default: --seed); fix it while "
+            "varying --seed to measure training variance on one split"
+        ),
+    )
     parser.add_argument("--no-augment", action="store_true")
     args = parser.parse_args()
 
@@ -107,7 +118,10 @@ def main() -> None:
     width, height = manifest["width"], manifest["height"]
     heatmap_h = height // HEATMAP_STRIDE
     heatmap_w = width // HEATMAP_STRIDE
-    permutation = np.random.permutation(n)
+    split_rng = np.random.default_rng(
+        args.seed if args.split_seed is None else args.split_seed
+    )
+    permutation = split_rng.permutation(n)
     val_idx = permutation[: args.val_samples]
     train_idx = permutation[args.val_samples:]
 
