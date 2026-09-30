@@ -177,9 +177,15 @@ def verify_placed_electrodes(
     width: int = 320,
     height: int = 180,
     fov_deg: float = 90.0,
+    lateral_camera_path: str | None = None,
 ) -> dict:
     """Place markers at the planned contacts, render, detect, and score.
 
+    With ``lateral_camera_path`` the detection also runs on the second view
+    and the detections are pooled before the unique assignment: the V5/V6
+    markers (~18 mm apart on the 5th-ICS row) merge into one blob in the
+    overhead view, but the side view separates them, which closes the 5/6
+    detection gap of the single-view check (docs/ECG_V3_SOLUTION_PLAN.md).
     Returns per-electrode detection errors (mm) and the raw detections.
     """
     for name, entry in planned_contacts.items():
@@ -189,18 +195,28 @@ def verify_placed_electrodes(
             np.asarray(entry["contact_world"], dtype=float),
             np.asarray(entry["normal_world"], dtype=float),
         )
-    camera_matrix = ecg_scene.world_matrix(stage, camera_path)
-    camera_position = camera_matrix[:3, 3]
-    cv_rotation = cv_rotation_from_usd(camera_matrix[:3, :3])
-    intrinsics = CameraIntrinsics.from_horizontal_fov(width, height, fov_deg)
-    rgb = capture_rgb(camera_path, width, height)
-    depth = capture_depth(camera_path, width, height)
-    detections = detect_markers(
-        rgb, depth, intrinsics, camera_position, cv_rotation
-    )
 
-    # Greedy unique assignment: a target and a detection are used at most once,
-    # so two merged markers cannot both claim the same blob.
+    def _detect(view_path: str):
+        camera_matrix = ecg_scene.world_matrix(stage, view_path)
+        camera_position = camera_matrix[:3, 3]
+        cv_rotation = cv_rotation_from_usd(camera_matrix[:3, :3])
+        intrinsics = CameraIntrinsics.from_horizontal_fov(width, height, fov_deg)
+        rgb = capture_rgb(view_path, width, height)
+        depth = capture_depth(view_path, width, height)
+        found = detect_markers(rgb, depth, intrinsics, camera_position, cv_rotation)
+        for detection in found:
+            detection["view"] = view_path
+        return found
+
+    detections = _detect(camera_path)
+    views = [camera_path]
+    if lateral_camera_path and stage.GetPrimAtPath(lateral_camera_path).IsValid():
+        detections = detections + _detect(lateral_camera_path)
+        views.append(lateral_camera_path)
+
+    # Greedy unique assignment over the pooled detections: a target and a
+    # detection are used at most once, so two merged markers cannot both claim
+    # the same blob and the view with the best-separated marker wins.
     pairs = []
     for name, entry in planned_contacts.items():
         planned = np.asarray(entry["contact_world"], dtype=float)
@@ -225,8 +241,9 @@ def verify_placed_electrodes(
             error, index = assigned[name]
             detected = detections[index]["position"]
             pixels = detections[index]["pixels"]
+            view = detections[index]["view"]
         else:
-            error, detected, pixels = None, None, 0
+            error, detected, pixels, view = None, None, 0, None
         rows.append(
             {
                 "target": name,
@@ -234,21 +251,25 @@ def verify_placed_electrodes(
                 "detected_contact": None if detected is None else detected.tolist(),
                 "error_mm": None if error is None else error * 1000.0,
                 "marker_pixels": pixels,
+                "view": view,
             }
         )
     errors = [row["error_mm"] for row in rows if row["error_mm"] is not None]
     return {
+        "views": views,
         "detections": [
             {
                 "pixel": d["pixel"],
                 "depth_m": d["depth_m"],
                 "position": d["position"].tolist(),
                 "pixels": d["pixels"],
+                "view": d["view"],
             }
             for d in detections
         ],
         "per_target": rows,
-        "detected_count": len(detections),
+        "detected_count": len(used_detections),
+        "components": len(detections),
         "targets": len(planned_contacts),
         "error_mm": {
             "mean": float(np.mean(errors)) if errors else None,

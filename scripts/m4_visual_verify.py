@@ -32,6 +32,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--report", type=str, default=str(DEFAULT_REPORT))
     parser.add_argument("--gui", action="store_true")
+    parser.add_argument(
+        "--lateral",
+        action="store_true",
+        help=(
+            "also detect on the lateral view and pool the detections "
+            "(separates the merged V5/V6 markers; see docs/ECG_V3_SOLUTION_PLAN.md)"
+        ),
+    )
     args = parser.parse_args()
 
     app = boot(headless=not args.gui, width=640, height=360)
@@ -52,12 +60,32 @@ def main() -> None:
 
         world = World(stage_units_in_meters=1.0)
         stage, _ = ecg_scene.build_scene(world)
-        result = verify_placed_electrodes(stage, planned, width=640, height=360)
+        lateral_path = None
+        if args.lateral:
+            from roboecg.task_manager.m4_demo import LATERAL_CAMERA
+
+            lateral_path = LATERAL_CAMERA["prim_path"]
+            ecg_scene.add_camera(
+                stage,
+                lateral_path,
+                position=LATERAL_CAMERA["position"],
+                look_at=LATERAL_CAMERA["look_at"],
+            )
+            for _ in range(3):
+                world.step(render=True)
+        result = verify_placed_electrodes(
+            stage,
+            planned,
+            width=640,
+            height=360,
+            lateral_camera_path=lateral_path,
+        )
 
         result["source_report"] = str(args.report)
         result["provenance"] = (
             "visual re-detection of marker discs placed at the M4 planned "
-            "contacts; detection uses only the rendered overhead RGB-D"
+            "contacts; detection uses only the rendered RGB-D"
+            + (" (overhead + lateral pooled)" if lateral_path else " (overhead)")
         )
         REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
         REPORT_PATH.write_text(json.dumps(result, indent=2) + "\n")
@@ -68,10 +96,11 @@ def main() -> None:
         )
         for row in result["per_target"]:
             error = row["error_mm"]
+            view = (row.get("view") or "").split("/")[-1]
             print(
                 f"  {row['target']}: error = "
                 f"{'n/a' if error is None else f'{error:.2f} mm'} "
-                f"({row['marker_pixels']} px)"
+                f"({row['marker_pixels']} px, {view or 'missed'})"
             )
         print(
             f"visual verify: mean = {result['error_mm']['mean']:.2f} mm, "
