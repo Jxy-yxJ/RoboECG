@@ -265,3 +265,21 @@ def test_spacing_sensitivity_shifts_the_fifth_ics_row(setup):
     base_v1 = {t.name: t for t in base.targets}["V1"].frame_coords[0]
     tight_v1 = {t.name: t for t in tight.targets}["V1"].frame_coords[0]
     assert np.isclose(base_v1, tight_v1)
+
+
+def test_generate_u_5ics_override_replaces_the_regression(setup):
+    """I4-a: a probed ICS5 row replaces the population drop regression."""
+    landmarks, frame, points = setup
+    override = -0.193 - 0.048
+    default = generate_v1_v6(landmarks, frame, points, RULES)
+    corrected = generate_v1_v6(
+        landmarks, frame, points, RULES, u_5ics_override=override
+    )
+    by_default = {t.name: t for t in default.targets}
+    by_corrected = {t.name: t for t in corrected.targets}
+    u_default = frame.to_frame(by_default["V4"].position)[0]
+    u_corrected = frame.to_frame(by_corrected["V4"].position)[0]
+    assert abs(u_corrected - override) < 5e-3
+    assert abs(u_default - u_corrected) > 5e-3
+    provenance = by_corrected["V4"].provenance["vertical"]["intercostal_spacing"]
+    assert "probe_corrected" in provenance

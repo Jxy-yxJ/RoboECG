@@ -6,6 +6,7 @@ chest landmarks are measured at runtime.  No clinical constants live here.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -24,13 +25,31 @@ LOCAL_ASSETS_DIR = PROJECT_ROOT / "assets" / "local"
 ASSETS_ROOT = (
     "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/6.0"
 )
-UR3_USD = f"{ASSETS_ROOT}/Isaac/Robots/UniversalRobots/ur3/ur3.usd"
+# Local asset mirror: the Omniverse S3 assets (UR3, biped_demo) are downloaded
+# on first use through the Omniverse resolver; without its asset cache (or the
+# network path it uses) the scene cannot load them.  A curl-fetched mirror
+# under this directory takes precedence when present (same relative paths,
+# see docs/ECG_V3_SOLUTION_PLAN.md).  Override with ROBOECG_ASSET_DIR.
+ASSET_MIRROR_DIR = Path(
+    os.environ.get(
+        "ROBOECG_ASSET_DIR", str(Path.home() / "isaac_assets" / "mirror")
+    )
+)
+
+
+def _asset(path: str) -> str:
+    local = ASSET_MIRROR_DIR / path
+    if local.is_file():
+        return str(local)
+    return f"https://omniverse-content-production.s3-us-west-2.amazonaws.com/{path}"
+
+
+UR3_USD = _asset("Assets/Isaac/6.0/Isaac/Robots/UniversalRobots/ur3/ur3.usd")
 # Bare-body patient: ECG electrodes require bare skin, and M_Medical_01 has no
 # torso surface under its lab coat / scrub shirt.  biped_demo is the official
 # bare-body mesh (single 16.8k-point mesh, 81-joint skeleton).
-HUMAN_USD = (
-    "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0"
-    "/Isaac/People/Characters/biped_demo/biped_demo_meters.usd"
+HUMAN_USD = _asset(
+    "Assets/Isaac/5.0/Isaac/People/Characters/biped_demo/biped_demo_meters.usd"
 )
 
 LAYOUT = {
@@ -227,11 +246,29 @@ def add_region_box(stage, prefix, center, size, color=(0.95, 0.75, 0.10), width=
 def build_scene(world, layout=None):
     """Assemble the M0 scene; returns (stage, scene_report)."""
     from isaacsim.core.utils.stage import add_reference_to_stage, get_current_stage
-    from pxr import Gf, UsdLux
+    from pxr import Gf, UsdGeom, UsdLux, UsdPhysics
 
     layout = layout or LAYOUT
     stage = get_current_stage()
-    world.scene.add_default_ground_plane()
+    try:
+        world.scene.add_default_ground_plane()
+    except Exception as error:
+        # Offline fallback: the default environment is a remote Omniverse
+        # asset (S3); without the asset cache or network it cannot be
+        # fetched.  The scene supplies its own lights, so a plain local slab
+        # is equivalent for physics and renders (only the grid texture is
+        # lost).  This should not normally trigger.
+        print(
+            f"WARNING: default ground plane unavailable ({error}); "
+            "using a local ground slab",
+            flush=True,
+        )
+        ground = UsdGeom.Cube.Define(stage, "/World/GroundFallback")
+        ground.CreateSizeAttr(1.0)
+        ground.AddTranslateOp().Set(Gf.Vec3d(0.0, 0.0, -0.01))
+        ground.AddScaleOp().Set(Gf.Vec3f(40.0, 40.0, 0.02))
+        ground.CreateDisplayColorAttr().Set([Gf.Vec3f(0.55, 0.57, 0.60)])
+        UsdPhysics.CollisionAPI.Apply(ground.GetPrim())
 
     add_table(stage, layout)
 

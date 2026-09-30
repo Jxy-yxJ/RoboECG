@@ -1,0 +1,65 @@
+{
+  "provenance": "end-to-end probe-correction chain on the rib phantom: construction truth ICS4 at the SNND level, ICS5 exactly 48 mm below; probe = analytic contact model (kappa=3, stroke 2 mm, 5% noise); correction via estimate_ics_rows + generate_v1_v6(u_5ics_override=...)",
+  "phantom": {
+    "u_ics4_m": -0.193,
+    "u_ics5_true_m": -0.241,
+    "v_mcl_m": 0.10867149568182503,
+    "rib_centers_m": [
+      -0.121,
+      -0.169,
+      -0.217,
+      -0.265
+    ]
+  },
+  "probe": {
+    "n_points": 41,
+    "estimate": {
+      "ics4_m": -0.19169754989562962,
+      "ics5_m": -0.24037826827757888,
+      "drop_m": 0.04868071838194926,
+      "band_centers": [
+        -0.12067071765093033,
+        -0.16802723182397478,
+        -0.21536786796728447,
+        -0.2653886685878733
+      ],
+      "ics_midpoints": [
+        -0.14434897473745256,
+        -0.19169754989562962,
+        -0.24037826827757888
+      ]
+    },
+    "drop_error_mm": 0.6807183819492607
+  },
+  "row_errors_mm": {
+    "regression": {
+      "V1": 0.3956172269337088,
+      "V2": 0.3956000430356821,
+      "V4": -42.3613555580824,
+      "V5": -42.26966802543958,
+      "V6": -42.02724140907088,
+      "V3": -21.649377416166487
+    },
+    "probe_corrected": {
+      "V1": 0.3956172269337088,
+      "V2": 0.3956000430356821,
+      "V4": -0.3445933429372383,
+      "V5": 2.0993329403789227,
+      "V6": 1.1179672059947465,
+      "V3": 0.20646589821013417
+    }
+  },
+  "press_plan_corrected": {
+    "order": [
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6"
+    ],
+    "cycle_length_m": 0.5656384361991652,
+    "estimated_cycle_time_s": 10.8,
+    "n_presses": 6
+  }
+}

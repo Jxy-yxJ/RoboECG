@@ -431,12 +431,16 @@ def generate_v1_v6(
     rules: dict,
     spacing_m: float | None = None,
     prior=None,
+    u_5ics_override: float | None = None,
 ) -> V1V6Result:
     """Generate the six precordial targets with full provenance.
 
     `spacing_m` overrides the configured intercostal spacing (used by the
     sensitivity sweep); `prior` (a fitted ChestSurfacePrior) anchors the
-    surface snap when the cloud contains several sheets at the same (u, v).
+    surface snap when the cloud contains several sheets at the same (u, v);
+    `u_5ics_override` replaces the population 5th-ICS regression with a row
+    measured on the patient (contact probing, I4-a: see
+    roboecg/target_localization/rib_probe.py).
     """
     anatomy = rules["anatomy"]
     snnd = float(anatomy["sternal_notch_to_nipple"]["value"])
@@ -465,7 +469,16 @@ def generate_v1_v6(
         else:
             vertical_drop = float(drop_rule["fallback_m"])
             drop_source = "published dataset mean (torso width unavailable)"
-    u_5ics = u_4ics - vertical_drop
+    if u_5ics_override is not None:
+        # I4-a: the 5th-ICS row measured on the patient (contact probing)
+        # replaces the population drop regression.
+        u_5ics = float(u_5ics_override)
+        drop_source = (
+            f"probe_corrected: ICS5 {u_5ics:.4f} m from contact probing "
+            "(roboecg/target_localization/rib_probe.py)"
+        )
+    else:
+        u_5ics = u_4ics - vertical_drop
 
     v_parasternal = abs(float(frame.to_frame(landmarks.clavicle_left)[1]))
     clavicle_mid_left = 0.5 * (landmarks.clavicle_left + landmarks.shoulder_left)
@@ -509,8 +522,12 @@ def generate_v1_v6(
             f"{anatomy['nipple_fourth_ics']['citation']}"
         ),
         "intercostal_spacing": (
-            f"published_regression {vertical_drop:.4f} m ({drop_source}), "
-            f"{drop_rule['citation']}; R2={drop_rule['fit_quality']}"
+            drop_source
+            if u_5ics_override is not None
+            else (
+                f"published_regression {vertical_drop:.4f} m ({drop_source}), "
+                f"{drop_rule['citation']}; R2={drop_rule['fit_quality']}"
+            )
         ),
         "torso_width_m": (None if np.isnan(width_m) else width_m),
         "u_4ics_m": u_4ics,
