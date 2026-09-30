@@ -26,7 +26,7 @@ independently published electrode data instead of against its own assumptions.
 |---|---|
 | Autonomous placement (depth → landmark net → rules → fusion → press), 6 electrodes | **6/6 first-attempt success**, contact error 0.14–0.36 mm, zero safety back-offs, min clearance 33 mm |
 | Target localisation from depth (60 held-out scenes, 360 placements) | **6.08 mm** mean (95% CI 5.53–6.64), no generation failures |
-| Robustness: 11 configurations (body scale 0.90–1.10, arm 60–90°, breathing ±8 mm, camera ±4 cm, patient ±2 cm) | worst 8.5 mm, mean 5.8 mm — the same as the nominal scene |
+| Robustness: 11 configurations (body scale 0.90–1.10, arm 60–90°, breathing ±8 mm, camera ±4 cm, patient ±2 cm) | baseline 3.4 mm, worst 9.0 mm (body scale 1.10), mean 4.3 mm with the anchored multi-view snap — within the ≤10 mm acceptance |
 | Rule check against independent electrode data (25 statistical-shape torsos) | V5 lateral position LOO 2.5 mm; intercostal drop regression R² = 0.81 |
 | Real patient check (PhysioNet/CinC 2007, 120 measured electrodes) | sternal-notch rule −3.9 mm; the drop regression overestimates by 26.5 mm (kept as a documented limitation) |
 | Direct-regression upper bound on the same split | 2.9 mm vs 6.1 mm for the landmark → frame → rule chain |

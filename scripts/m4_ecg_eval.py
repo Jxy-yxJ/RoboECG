@@ -33,6 +33,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORT_PATH = PROJECT_ROOT / "runs" / "m4" / "disturbance_report.json"
 
 WIDTH, HEIGHT, FOV_DEG = 320, 180, 90.0
+MULTIVIEW = "--multiview" in sys.argv
+# Same lateral view as the deployed pipeline (m4_demo.LATERAL_CAMERA): with
+# --multiview both views are captured per config and pooled (anchored snap +
+# per-target view routing), matching the current perception chain.
+LATERAL_CAMERA = {
+    "prim_path": "/World/Cameras/PerceptionLateral",
+    "position": (0.00, 0.75, 0.95),
+    "look_at": (-0.133, 0.14, 0.89),
+}
 
 CONFIGS = [
     ("baseline", {}),
@@ -72,7 +81,10 @@ def main() -> None:
             measure_torso_width,
         )
         from roboecg.target_localization.ecg_rules import load_ecg_rules
-        from roboecg.target_localization.fusion import fuse_target
+        from roboecg.target_localization.fusion import (
+            best_view_index,
+            fuse_target,
+        )
         from roboecg.task_manager import ecg_scene
         from roboecg.task_manager.rendering import capture_depth
         from roboecg.task_manager.supine_pose import (
@@ -92,6 +104,20 @@ def main() -> None:
 
         world = World(stage_units_in_meters=1.0)
         stage, _ = ecg_scene.build_scene(world)
+
+        lateral_path = None
+        if MULTIVIEW:
+            lateral_path = LATERAL_CAMERA["prim_path"]
+            ecg_scene.add_camera(
+                stage,
+                lateral_path,
+                position=LATERAL_CAMERA["position"],
+                look_at=LATERAL_CAMERA["look_at"],
+            )
+            for _ in range(3):
+                world.step(render=True)
+            print("M4 eval: multiview enabled (overhead + lateral pooled)",
+                  flush=True)
 
         rows = []
         for label, config in CONFIGS:
@@ -147,22 +173,78 @@ def main() -> None:
             points = depth_to_world_points(
                 depth, intrinsics, camera_position, cv_rotation, stride=1
             )
+            views = [
+                {
+                    "depth": depth,
+                    "intrinsics": intrinsics,
+                    "camera_position": camera_position,
+                    "cv_rotation": cv_rotation,
+                }
+            ]
+            if lateral_path is not None:
+                lateral_matrix = ecg_scene.world_matrix(stage, lateral_path)
+                lateral_position = lateral_matrix[:3, 3]
+                lateral_rotation = cv_rotation_from_usd(lateral_matrix[:3, :3])
+                lateral_depth = capture_depth(lateral_path, WIDTH, HEIGHT)
+                views.append(
+                    {
+                        "depth": lateral_depth,
+                        "intrinsics": intrinsics,
+                        "camera_position": lateral_position,
+                        "cv_rotation": lateral_rotation,
+                    }
+                )
+                points = np.concatenate(
+                    [
+                        points,
+                        depth_to_world_points(
+                            lateral_depth,
+                            intrinsics,
+                            lateral_position,
+                            lateral_rotation,
+                            stride=1,
+                        ),
+                    ],
+                    axis=0,
+                )
             prior = fit_chest_surface_prior(points, pred_frame)
-            gt_targets = generate_v1_v6(gt_landmarks, gt_frame, points, rules)
-            pred_targets = generate_v1_v6(pred_landmarks, pred_frame, points, rules)
+            prior_gt = fit_chest_surface_prior(points, gt_frame)
+            gt_targets = generate_v1_v6(
+                gt_landmarks, gt_frame, points, rules, prior=prior_gt
+            )
+            pred_targets = generate_v1_v6(
+                pred_landmarks, pred_frame, points, rules, prior=prior
+            )
 
-            # -- M2 fusion on both paths (the deployed chain) ----------------
-            def _fuse(targets):
-                return [
-                    fuse_target(
-                        target, pred_frame, prior, depth, intrinsics,
-                        camera_position, cv_rotation, fusion_settings,
+            # -- M2 fusion on both paths (the deployed chain), per-view ------
+            camera_positions = [view["camera_position"] for view in views]
+
+            def _fuse(targets, frame, path_prior):
+                fused = []
+                for target in targets:
+                    view = views[0]
+                    if len(views) > 1:
+                        view = views[
+                            best_view_index(
+                                target.normal, target.position, camera_positions
+                            )
+                        ]
+                    fused.append(
+                        fuse_target(
+                            target,
+                            frame,
+                            path_prior,
+                            view["depth"],
+                            view["intrinsics"],
+                            view["camera_position"],
+                            view["cv_rotation"],
+                            fusion_settings,
+                        )
                     )
-                    for target in targets
-                ]
+                return fused
 
-            fused_gt = _fuse(gt_targets.targets)
-            fused_pred = _fuse(pred_targets.targets)
+            fused_gt = _fuse(gt_targets.targets, gt_frame, prior_gt)
+            fused_pred = _fuse(pred_targets.targets, pred_frame, prior)
             errors = [
                 float(np.linalg.norm(np.asarray(p.position) - np.asarray(g.position)))
                 for p, g in zip(fused_pred, fused_gt)
@@ -217,6 +299,7 @@ def main() -> None:
 
         baseline = rows[0]["mean_mm"]
         report = {
+            "multiview": bool(MULTIVIEW),
             "configs": rows,
             "baseline_mean_mm": baseline,
             "worst_mean_mm": max(row["mean_mm"] for row in rows),
@@ -228,7 +311,9 @@ def main() -> None:
             },
             "provenance": (
                 "synthetic; detector trained on Isaac renders; disturbances are "
-                "engineering ranges from docs/ECG_PIPELINE.md 5.7"
+                "engineering ranges from docs/ECG_PIPELINE.md 5.7; "
+                "prior-anchored snap; "
+                + ("overhead + lateral views pooled" if MULTIVIEW else "overhead only")
             ),
         }
         REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
