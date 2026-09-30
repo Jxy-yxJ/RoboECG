@@ -267,6 +267,12 @@ def snap_to_surface(points, frame: ChestFrame, u: float, v: float,
     SURFACE_ANCHOR_BAND_M of it whenever that sheet keeps enough points; with
     a multi-view cloud a second sheet at the same (u, v) can otherwise capture
     the nearest-point height guess and displace the contact by ~75 mm.
+    Note (measured, 2026-10-01): making the anchor conditional (only when the
+    free guess disagrees with the prior by more than the band, to avoid
+    injecting the prior's local bias at V6) was implemented and reverted --
+    it left V6 unchanged and worsened the same-cloud term at V4 (+0.9 mm) and
+    V5 (+0.3 mm), because even a correct guess benefits from excluding the
+    far sheet from the surface fit.
     """
     limit = TORSO_HALF_WIDTH_LIMIT_M if v_limit is None else float(v_limit)
     along, lateral, normal = _frame_components(points, frame)
@@ -319,7 +325,9 @@ def snap_to_surface(points, frame: ChestFrame, u: float, v: float,
         if int(rank) < 3:
             return None, None, {"status": "degenerate", "point_count": count}
         coefficients = np.concatenate([coefficients, np.zeros(3)])
-    residual = design @ coefficients - z
+    # design may have been truncated to its linear part above; slice the
+    # (zero-padded) coefficients to match before evaluating the residual.
+    residual = design @ coefficients[: design.shape[1]] - z
     fit_rms = float(np.sqrt(np.mean(residual**2)))
 
     # Nominal point: (u, v) at the height of the patch point nearest to the

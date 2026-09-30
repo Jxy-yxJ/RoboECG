@@ -106,6 +106,30 @@ def test_snap_anchor_selects_the_anchored_sheet():
     assert abs(n - 0.07) < 5e-3, n
 
 
+def test_snap_two_sheet_cloud_rank_deficient_patch():
+    """A two-sheet patch whose quadratic design is rank-deficient must not
+    crash the linear fallback (regression: the truncated design was multiplied
+    by the zero-padded six-vector)."""
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    sheet_a = [
+        frame.from_frame(u, v, 0.0)
+        for u in np.linspace(-0.04, 0.04, 9)
+        for v in np.linspace(-0.04, 0.04, 9)
+    ]
+    sheet_b = [
+        frame.from_frame(u, v, 0.07)
+        for u in np.linspace(-0.01, 0.01, 5)
+        for v in np.linspace(-0.01, 0.01, 5)
+    ]
+    points = np.array(sheet_a + sheet_b)
+    point, normal, info = snap_to_surface(points, frame, 0.0, 0.0)
+    assert info["status"] == "ok"
+    assert point is not None
+    _, _, n = frame.to_frame(point)
+    assert abs(n) < 0.08, n
+
+
 def test_snap_anchor_band_falls_back_when_empty():
     """An anchor far from every sheet must not break the snap."""
     landmarks = make_landmarks()
