@@ -31,7 +31,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from m0_common import boot  # noqa: E402
 
 from roboecg.perception.torso_mesh import (  # noqa: E402
-    anatomical_axes,
     parse_vtk_polydata,
     subdivide_and_smooth,
 )
@@ -43,6 +42,11 @@ NAMES = ("V1", "V2", "V3", "V4", "V5", "V6")
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="T_01", help="model id, e.g. T_01")
+    parser.add_argument(
+        "--models",
+        default=None,
+        help="comma-separated model ids; one Isaac session loops over them",
+    )
     parser.add_argument(
         "--notch-to-4ics-mm",
         type=float,
@@ -132,281 +136,277 @@ def main() -> None:
             [np.asarray(biped_targets[n].position) for n in NAMES], axis=0
         )
 
-        points_mm, faces = parse_vtk_polydata(
-            TORSO_DIR / f"{args.model}_torso_coarse_surface.vtk"
+        models = (
+            [m.strip() for m in args.models.split(",") if m.strip()]
+            if args.models
+            else [args.model]
         )
-        electrodes = np.loadtxt(
-            TORSO_DIR / f"{args.model}_electrodes.csv",
-            delimiter=",",
-            skiprows=1,
-        )
-        points_m = points_mm / 1000.0
-        v_m = electrodes[3:9] / 1000.0
-        if args.subdiv > 0 or args.smooth_iter > 0:
-            points_m, faces = subdivide_and_smooth(
-                points_m,
-                faces,
-                subdivisions=args.subdiv,
-                smooth_iterations=args.smooth_iter,
+        for model_id in models:
+            points_mm, faces = parse_vtk_polydata(
+                TORSO_DIR / f"{model_id}_torso_coarse_surface.vtk"
             )
-            print(
-                f"ssm_torso: mesh subdivided x{args.subdiv} + smoothed "
-                f"x{args.smooth_iter} -> {len(points_m)} verts / "
-                f"{len(faces)} faces",
-                flush=True,
-            )  # V1..V6
-
-        a_m, b_m, c_m = anatomical_axes(points_m, v_m)
-        a_w = np.asarray(landmarks.shoulder_left) - np.asarray(
-            landmarks.shoulder_right
-        )
-        a_w = a_w / (np.linalg.norm(a_w) + 1e-12)  # patient left
-        b_w = np.array([0.0, 0.0, 1.0])  # scene anterior hint (M4)
-        c_w = np.cross(a_w, b_w)  # down the body (towards the feet)
-        down_check = float(
-            np.dot(
-                np.asarray(landmarks.pelvis) - np.asarray(landmarks.neck_base),
-                c_w,
+            electrodes = np.loadtxt(
+                TORSO_DIR / f"{model_id}_electrodes.csv",
+                delimiter=",",
+                skiprows=1,
             )
-        )
-        if down_check <= 0.0:
-            raise RuntimeError(
-                f"scene axes inconsistent: pelvis not below neck along c_w "
-                f"({down_check:.4f})"
-            )
-        rotation = np.column_stack([a_w, b_w, c_w]) @ np.column_stack(
-            [a_m, b_m, c_m]
-        ).T
-        det = float(np.linalg.det(rotation))
-        if not np.isclose(det, 1.0, atol=1e-6):
-            raise RuntimeError(f"placement rotation not proper (det={det:.6f})")
-
-        world_points0 = points_m @ rotation.T
-        electrodes0 = v_m @ rotation.T
-        translation = np.zeros(3)
-        # XY: align the electrode centroid with the biped's nominal centroid
-        # (the cameras and the detector expect the chest there).
-        translation[:2] = biped_center[:2] - electrodes0.mean(axis=0)[:2]
-        # Z: prefer the 3D centroid match (keeps the camera-relative framing of
-        # the training renders), but never sink the back below the table.
-        z_align = float(biped_center[2] - electrodes0.mean(axis=0)[2])
-        z_rest = float(
-            scene_report["table_bounds"]["top_z"] + 0.002
-        ) - float(world_points0[:, 2].min())
-        translation[2] = max(z_align, z_rest)
-        world_points = world_points0 + translation
-        gt_world = electrodes0 + translation
-        print(
-            f"ssm_torso: z placement: align {z_align * 1000:+.0f} mm vs rest "
-            f"{z_rest * 1000:+.0f} mm -> using {translation[2] * 1000:+.0f} mm",
-            flush=True,
-        )
-        print(
-            f"ssm_torso: {args.model} placed "
-            f"(centroid offset xy = "
-            f"{np.linalg.norm(gt_world.mean(axis=0)[:2] - biped_center[:2]) * 1000:.1f} mm, "
-            f"back z = {world_points[:, 2].min() * 1000:.0f} mm)",
-            flush=True,
-        )
-
-        torso = UsdGeom.Mesh.Define(stage, "/World/RealTorso")
-        torso.CreatePointsAttr([Gf.Vec3f(*[float(c) for c in p]) for p in world_points])
-        torso.CreateFaceVertexCountsAttr([3] * len(faces))
-        torso.CreateFaceVertexIndicesAttr(faces.reshape(-1).tolist())
-        torso.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
-        torso.CreateDisplayColorAttr([Gf.Vec3f(0.87, 0.72, 0.63)])
-        if args.arm_proxies:
-            # Arms rest alongside the torso in the training renders; the SSM
-            # torsos are arm-free.  Two cylinders just lateral to the flanks
-            # restore the silhouette context without touching the anatomy.
-            half_width = 0.5 * float(world_points[:, 1].max() - world_points[:, 1].min())
-            center_y = 0.5 * float(world_points[:, 1].max() + world_points[:, 1].min())
-            arm_length = 0.55
-            for side, sign in (("L", +1.0), ("R", -1.0)):
-                cylinder = UsdGeom.Cylinder.Define(stage, f"/World/ArmProxy{side}")
-                cylinder.CreateRadiusAttr(0.05)
-                cylinder.CreateHeightAttr(arm_length)
-                cylinder.CreateAxisAttr(UsdGeom.Tokens.x)
-                cylinder.AddTranslateOp().Set(
-                    Gf.Vec3d(
-                        -0.39 + arm_length / 2.0,
-                        center_y + sign * (half_width + 0.05),
-                        scene_report["table_bounds"]["top_z"] + 0.05,
-                    )
+            points_m = points_mm / 1000.0
+            v_m = electrodes[3:9] / 1000.0
+            if args.subdiv > 0 or args.smooth_iter > 0:
+                points_m, faces = subdivide_and_smooth(
+                    points_m,
+                    faces,
+                    subdivisions=args.subdiv,
+                    smooth_iterations=args.smooth_iter,
                 )
-                cylinder.CreateDisplayColorAttr([Gf.Vec3f(0.78, 0.66, 0.58)])
-            print("ssm_torso: arm proxies added", flush=True)
-        stage.GetPrimAtPath("/World/Human").SetActive(False)
-        world.reset()
+                print(
+                    f"ssm_torso: mesh subdivided x{args.subdiv} + smoothed "
+                    f"x{args.smooth_iter} -> {len(points_m)} verts / "
+                    f"{len(faces)} faces",
+                    flush=True,
+                )  # V1..V6
 
-        detector = (
-            ChestLandmarkDetector(args.detector_checkpoint)
-            if args.detector_checkpoint
-            else ChestLandmarkDetector()
-        )
-        perceived = perceive_targets(
-            stage,
-            detector,
-            rules,
-            world=world,
-            lateral_camera=LATERAL_CAMERA,
-            allow_snap_fallback=True,
-        )
-        fused = {t.name: t for t in perceived["fused"]}
-        generated = {t.name: t for t in perceived["generated"].targets}
-
-        rows = []
-        for index, name in enumerate(NAMES):
-            target = fused[name]
-            position = np.asarray(target.position, dtype=float)
-            gt_position = gt_world[index]
-            gt_normal, _ = estimate_surface_normal(
-                world_points,
-                gt_position,
-                radius=0.03,
-                orient_toward=gt_position + rotation @ b_m,
+            # Canonical model->world mapping, identical to the fine-tune data
+            # generation (scripts/m4_ssm_detector_data.py): +X -> +Y (left),
+            # -Y -> +Z (anterior), +Z -> -X (head).  Electrode-derived axes
+            # deviate up to 36 deg from this canonical frame across the
+            # population while the training used the canonical frame, so the
+            # electrode-derived placement was a train/eval orientation
+            # mismatch that correlated with the per-model raw error.
+            a_m = np.array([1.0, 0.0, 0.0])
+            b_m = np.array([0.0, -1.0, 0.0])
+            c_m = np.cross(a_m, b_m)
+            a_w = np.array([0.0, 1.0, 0.0])
+            b_w = np.array([0.0, 0.0, 1.0])
+            c_w = np.cross(a_w, b_w)
+            rotation = np.column_stack([a_w, b_w, c_w]) @ np.column_stack(
+                [a_m, b_m, c_m]
+            ).T
+            det = float(np.linalg.det(rotation))
+            if not np.isclose(det, 1.0, atol=1e-6):
+                raise RuntimeError(f"placement rotation not proper (det={det:.6f})")
+            # Framing matched to the training generation: the model centroid
+            # sits at the biped chest joint + 8 cm anterior (jitter zero).
+            chest_anchor = np.asarray(landmarks.chest, dtype=float)
+            centroid_m = points_m.mean(axis=0)
+            translation = (
+                chest_anchor
+                + np.array([0.0, 0.0, 0.08])
+                - (centroid_m @ rotation.T)
             )
-            normal_error = None
-            if gt_normal is not None:
-                cosine = float(
-                    np.dot(
-                        np.asarray(target.normal, dtype=float) / np.linalg.norm(target.normal),
-                        np.asarray(gt_normal, dtype=float) / np.linalg.norm(gt_normal),
-                    )
-                )
-                normal_error = float(np.degrees(np.arccos(np.clip(cosine, -1.0, 1.0))))
-            rows.append(
-                {
-                    "target": name,
-                    "source": target.source,
-                    "view": target.info.get("view"),
-                    "incidence_deg": target.info.get("incidence_deg"),
-                    "normal_angle_vs_prior_deg": target.info.get(
-                        "normal_angle_vs_prior_deg"
-                    ),
-                    "snap_status": generated[name].provenance.get("snap", {}).get(
-                        "status"
-                    ),
-                    "position_world": [float(c) for c in position],
-                    "gt_world": [float(c) for c in gt_position],
-                    "error_mm": float(np.linalg.norm(position - gt_position)) * 1000.0,
-                    "normal_error_deg": normal_error,
-                }
-            )
-        errors = [row["error_mm"] for row in rows]
-        print("ssm_torso: perceived vs REAL electrodes (mm):", flush=True)
-        for row in rows:
+            world_points = points_m @ rotation.T + translation
+            gt_world = v_m @ rotation.T + translation
             print(
-                f"  {row['target']}: {row['error_mm']:7.2f} "
-                f"(normal {row['normal_error_deg'] if row['normal_error_deg'] is None else round(row['normal_error_deg'], 1)} deg, "
-                f"{row['source']} / {row['view']})",
+                "ssm_torso: canonical placement (training-matched), "
+                f"centroid -> {np.round(chest_anchor + [0, 0, 0.08], 3)}",
                 flush=True,
             )
-        print(
-            f"ssm_torso: mean {float(np.mean(errors)):.2f} mm, "
-            f"max {float(np.max(errors)):.2f} mm",
-            flush=True,
-        )
+            print(
+                f"ssm_torso: {model_id} placed "
+                f"(centroid offset xy = "
+                f"{np.linalg.norm(gt_world.mean(axis=0)[:2] - biped_center[:2]) * 1000:.1f} mm, "
+                f"back z = {world_points[:, 2].min() * 1000:.0f} mm)",
+                flush=True,
+            )
 
-        report = {
-            "model": args.model,
-            "provenance": (
-                f"I5-b: {args.model} (Bender et al., CC-BY-4.0) placed supine "
-                "where the biped chest was; the biped is hidden; targets from "
-                "the multiview perception chain; ground truth = the dataset's "
-                "real electrode coordinates (non-circular)"
-            ),
-            "rotation": rotation.tolist(),
-            "translation": translation.tolist(),
-            "biped_center_world": biped_center.tolist(),
-            "table_top_z": scene_report["table_bounds"]["top_z"],
-            "arm_proxies": bool(args.arm_proxies),
-            "notch_to_4ics_mm": (
-                None if args.notch_to_4ics_mm is None else float(args.notch_to_4ics_mm)
-            ),
-            "mesh_subdivisions": int(args.subdiv),
-            "mesh_smooth_iterations": int(args.smooth_iter),
-            "perception": {
-                "views": perceived["views"],
-                "prior_fit_rms_m": perceived["prior"].fit_rms_m,
-                "frame": {
-                    "origin": [float(c) for c in perceived["frame"].origin],
-                    "up": [float(c) for c in perceived["frame"].up],
-                    "lateral": [float(c) for c in perceived["frame"].lateral],
-                    "anterior": [float(c) for c in perceived["frame"].anterior],
-                },
-                "frame_angles_deg": {
-                    "up_vs_head": float(
-                        np.degrees(
-                            np.arccos(
-                                np.clip(
-                                    float(
-                                        np.dot(
-                                            perceived["frame"].up,
-                                            np.array([-1.0, 0.0, 0.0]),
-                                        )
-                                    ),
-                                    -1.0,
-                                    1.0,
-                                )
-                            )
+            torso = UsdGeom.Mesh.Define(stage, "/World/RealTorso")
+            torso.CreatePointsAttr([Gf.Vec3f(*[float(c) for c in p]) for p in world_points])
+            torso.CreateFaceVertexCountsAttr([3] * len(faces))
+            torso.CreateFaceVertexIndicesAttr(faces.reshape(-1).tolist())
+            torso.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+            torso.CreateDisplayColorAttr([Gf.Vec3f(0.87, 0.72, 0.63)])
+            if args.arm_proxies:
+                # Arms rest alongside the torso in the training renders; the SSM
+                # torsos are arm-free.  Two cylinders just lateral to the flanks
+                # restore the silhouette context without touching the anatomy.
+                half_width = 0.5 * float(world_points[:, 1].max() - world_points[:, 1].min())
+                center_y = 0.5 * float(world_points[:, 1].max() + world_points[:, 1].min())
+                arm_length = 0.55
+                for side, sign in (("L", +1.0), ("R", -1.0)):
+                    cylinder = UsdGeom.Cylinder.Define(stage, f"/World/ArmProxy{side}")
+                    cylinder.CreateRadiusAttr(0.05)
+                    cylinder.CreateHeightAttr(arm_length)
+                    cylinder.CreateAxisAttr(UsdGeom.Tokens.x)
+                    cylinder.AddTranslateOp().Set(
+                        Gf.Vec3d(
+                            -0.39 + arm_length / 2.0,
+                            center_y + sign * (half_width + 0.05),
+                            scene_report["table_bounds"]["top_z"] + 0.05,
                         )
-                    ),
-                    "lateral_vs_left": float(
-                        np.degrees(
-                            np.arccos(
-                                np.clip(
-                                    float(
-                                        np.dot(
-                                            perceived["frame"].lateral,
-                                            np.array([0.0, 1.0, 0.0]),
-                                        )
-                                    ),
-                                    -1.0,
-                                    1.0,
-                                )
-                            )
-                        )
-                    ),
-                    "anterior_vs_up": float(
-                        np.degrees(
-                            np.arccos(
-                                np.clip(
-                                    float(
-                                        np.dot(
-                                            perceived["frame"].anterior,
-                                            np.array([0.0, 0.0, 1.0]),
-                                        )
-                                    ),
-                                    -1.0,
-                                    1.0,
-                                )
-                            )
-                        )
-                    ),
-                },
-                "detector_landmarks": {
-                    field: [float(c) for c in np.asarray(getattr(perceived["landmarks"], field))]
-                    for field in (
-                        "chest",
-                        "neck_base",
-                        "clavicle_left",
-                        "clavicle_right",
-                        "shoulder_left",
-                        "shoulder_right",
                     )
+                    cylinder.CreateDisplayColorAttr([Gf.Vec3f(0.78, 0.66, 0.58)])
+                print("ssm_torso: arm proxies added", flush=True)
+            stage.GetPrimAtPath("/World/Human").SetActive(False)
+            world.reset()
+
+            detector = (
+                ChestLandmarkDetector(args.detector_checkpoint)
+                if args.detector_checkpoint
+                else ChestLandmarkDetector()
+            )
+            perceived = perceive_targets(
+                stage,
+                detector,
+                rules,
+                world=world,
+                lateral_camera=LATERAL_CAMERA,
+                allow_snap_fallback=True,
+            )
+            fused = {t.name: t for t in perceived["fused"]}
+            generated = {t.name: t for t in perceived["generated"].targets}
+
+            rows = []
+            for index, name in enumerate(NAMES):
+                target = fused[name]
+                position = np.asarray(target.position, dtype=float)
+                gt_position = gt_world[index]
+                gt_normal, _ = estimate_surface_normal(
+                    world_points,
+                    gt_position,
+                    radius=0.03,
+                    orient_toward=gt_position + rotation @ b_m,
+                )
+                normal_error = None
+                if gt_normal is not None:
+                    cosine = float(
+                        np.dot(
+                            np.asarray(target.normal, dtype=float) / np.linalg.norm(target.normal),
+                            np.asarray(gt_normal, dtype=float) / np.linalg.norm(gt_normal),
+                        )
+                    )
+                    normal_error = float(np.degrees(np.arccos(np.clip(cosine, -1.0, 1.0))))
+                rows.append(
+                    {
+                        "target": name,
+                        "source": target.source,
+                        "view": target.info.get("view"),
+                        "incidence_deg": target.info.get("incidence_deg"),
+                        "normal_angle_vs_prior_deg": target.info.get(
+                            "normal_angle_vs_prior_deg"
+                        ),
+                        "snap_status": generated[name].provenance.get("snap", {}).get(
+                            "status"
+                        ),
+                        "position_world": [float(c) for c in position],
+                        "gt_world": [float(c) for c in gt_position],
+                        "error_mm": float(np.linalg.norm(position - gt_position)) * 1000.0,
+                        "normal_error_deg": normal_error,
+                    }
+                )
+            errors = [row["error_mm"] for row in rows]
+            print("ssm_torso: perceived vs REAL electrodes (mm):", flush=True)
+            for row in rows:
+                print(
+                    f"  {row['target']}: {row['error_mm']:7.2f} "
+                    f"(normal {row['normal_error_deg'] if row['normal_error_deg'] is None else round(row['normal_error_deg'], 1)} deg, "
+                    f"{row['source']} / {row['view']})",
+                    flush=True,
+                )
+            print(
+                f"ssm_torso: mean {float(np.mean(errors)):.2f} mm, "
+                f"max {float(np.max(errors)):.2f} mm",
+                flush=True,
+            )
+
+            report = {
+                "model": model_id,
+                "provenance": (
+                    f"I5-b: {model_id} (Bender et al., CC-BY-4.0) placed supine "
+                    "where the biped chest was; the biped is hidden; targets from "
+                    "the multiview perception chain; ground truth = the dataset's "
+                    "real electrode coordinates (non-circular)"
+                ),
+                "rotation": rotation.tolist(),
+                "translation": translation.tolist(),
+                "biped_center_world": biped_center.tolist(),
+                "table_top_z": scene_report["table_bounds"]["top_z"],
+                "arm_proxies": bool(args.arm_proxies),
+                "notch_to_4ics_mm": (
+                    None if args.notch_to_4ics_mm is None else float(args.notch_to_4ics_mm)
+                ),
+                "mesh_subdivisions": int(args.subdiv),
+                "mesh_smooth_iterations": int(args.smooth_iter),
+                "perception": {
+                    "views": perceived["views"],
+                    "prior_fit_rms_m": perceived["prior"].fit_rms_m,
+                    "frame": {
+                        "origin": [float(c) for c in perceived["frame"].origin],
+                        "up": [float(c) for c in perceived["frame"].up],
+                        "lateral": [float(c) for c in perceived["frame"].lateral],
+                        "anterior": [float(c) for c in perceived["frame"].anterior],
+                    },
+                    "frame_angles_deg": {
+                        "up_vs_head": float(
+                            np.degrees(
+                                np.arccos(
+                                    np.clip(
+                                        float(
+                                            np.dot(
+                                                perceived["frame"].up,
+                                                np.array([-1.0, 0.0, 0.0]),
+                                            )
+                                        ),
+                                        -1.0,
+                                        1.0,
+                                    )
+                                )
+                            )
+                        ),
+                        "lateral_vs_left": float(
+                            np.degrees(
+                                np.arccos(
+                                    np.clip(
+                                        float(
+                                            np.dot(
+                                                perceived["frame"].lateral,
+                                                np.array([0.0, 1.0, 0.0]),
+                                            )
+                                        ),
+                                        -1.0,
+                                        1.0,
+                                    )
+                                )
+                            )
+                        ),
+                        "anterior_vs_up": float(
+                            np.degrees(
+                                np.arccos(
+                                    np.clip(
+                                        float(
+                                            np.dot(
+                                                perceived["frame"].anterior,
+                                                np.array([0.0, 0.0, 1.0]),
+                                            )
+                                        ),
+                                        -1.0,
+                                        1.0,
+                                    )
+                                )
+                            )
+                        ),
+                    },
+                    "detector_landmarks": {
+                        field: [float(c) for c in np.asarray(getattr(perceived["landmarks"], field))]
+                        for field in (
+                            "chest",
+                            "neck_base",
+                            "clavicle_left",
+                            "clavicle_right",
+                            "shoulder_left",
+                            "shoulder_right",
+                        )
+                    },
                 },
-            },
-            "electrodes": rows,
-            "error_mean_mm": float(np.mean(errors)),
-            "error_max_mm": float(np.max(errors)),
-        }
-        RUNS_DIR.mkdir(parents=True, exist_ok=True)
-        report_path = RUNS_DIR / f"m4_report_ssm_torso_{args.model}.json"
-        report_path.write_text(
-            json.dumps(report, indent=2, default=str) + "\n", encoding="utf-8"
-        )
-        print(f"ssm_torso: report -> {report_path}", flush=True)
+                "electrodes": rows,
+                "error_mean_mm": float(np.mean(errors)),
+                "error_max_mm": float(np.max(errors)),
+            }
+            RUNS_DIR.mkdir(parents=True, exist_ok=True)
+            report_path = RUNS_DIR / f"m4_report_ssm_torso_{model_id}.json"
+            report_path.write_text(
+                json.dumps(report, indent=2, default=str) + "\n", encoding="utf-8"
+            )
+            print(f"ssm_torso: report -> {report_path}", flush=True)
     except BaseException:
         # SimulationApp.close() terminates the process, so the traceback must
         # be captured before the finally block runs.
