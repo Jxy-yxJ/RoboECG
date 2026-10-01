@@ -44,6 +44,17 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="T_01", help="model id, e.g. T_01")
     parser.add_argument(
+        "--notch-to-4ics-mm",
+        type=float,
+        default=None,
+        help=(
+            "override the notch->4th-ICS distance (I5-c: on the SSM surfaces "
+            "the transferred clavicle proxy sits 84.3 +- 6.1 mm above the "
+            "V1/V2 row, while the published constant is 193 mm; pass the "
+            "leave-one-out population value for an honest transfer test)"
+        ),
+    )
+    parser.add_argument(
         "--detector-checkpoint",
         default=None,
         help="detector checkpoint (default: the deployed model)",
@@ -96,6 +107,19 @@ def main() -> None:
         print("ssm_torso: scene built", flush=True)
 
         rules = load_ecg_rules()
+        if args.notch_to_4ics_mm is not None:
+            rules["anatomy"]["sternal_notch_to_nipple"] = dict(
+                rules["anatomy"]["sternal_notch_to_nipple"]
+            )
+            rules["anatomy"]["sternal_notch_to_nipple"]["value"] = (
+                float(args.notch_to_4ics_mm) / 1000.0
+            )
+            print(
+                "ssm_torso: notch->4ICS override = %.1f mm "
+                "(leave-one-out population value)"
+                % float(args.notch_to_4ics_mm),
+                flush=True,
+            )
         joint_positions = read_joint_world_positions(stage)
         landmarks = read_chest_landmarks(joint_positions)
         frame = build_chest_frame(landmarks, anterior_hint=(0.0, 0.0, 1.0))
@@ -297,6 +321,9 @@ def main() -> None:
             "biped_center_world": biped_center.tolist(),
             "table_top_z": scene_report["table_bounds"]["top_z"],
             "arm_proxies": bool(args.arm_proxies),
+            "notch_to_4ics_mm": (
+                None if args.notch_to_4ics_mm is None else float(args.notch_to_4ics_mm)
+            ),
             "mesh_subdivisions": int(args.subdiv),
             "mesh_smooth_iterations": int(args.smooth_iter),
             "perception": {
