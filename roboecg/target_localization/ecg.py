@@ -140,6 +140,65 @@ def _front_layer_extent(
     return float(np.percentile(np.abs(lateral[keep]), 98.0))
 
 
+def _normal_crossing_extent(
+    points, frame: ChestFrame, u_level: float, band: float,
+    min_v: float = 0.10, cap: float = TORSO_HALF_WIDTH_LIMIT_M,
+    anterior_epsilon: float = 0.0, normal_radius: float = 0.025,
+):
+    """Midaxillary tangent via the anterior-facing normal boundary, or None.
+
+    Walks the wall outward on both sides at ``u_level`` and returns the |v| of
+    the first candidate whose local surface normal stops facing anteriorly
+    (the tangent point of the wrapping chest wall).  Unlike an empty-band or
+    silhouette rule this is geometric: a rest-pose arm beyond the chest edge
+    has front-facing normals of its own, but the walk stops at the chest
+    tangent before reaching it.  Used as the saturation fallback for
+    `measure_lateral_extent` on arm-free (out-of-domain) torsos; measured
+    offline on the 25 SSM models: bias -24 mm, sd 7 mm against the real V6
+    lateral coordinate (a population-absorbable constant).
+    """
+    points = np.asarray(points, dtype=float)
+    along, lateral, normal = _frame_components(points, frame)
+    mask = (
+        (np.abs(along - u_level) <= band)
+        & (np.abs(lateral) <= cap)
+        & (normal > -0.25)
+    )
+    if np.count_nonzero(mask) < 16:
+        return None
+    lat = lateral[mask]
+    along_m = along[mask]
+    pts = points[mask]
+    best = None
+    for sign in (1.0, -1.0):
+        side = sign * lat
+        order = np.argsort(side)
+        for index in order:
+            v = float(side[index])
+            if v < min_v or v > cap:
+                continue
+            position = pts[index]
+            axis_point = frame.origin + float(along_m[index]) * frame.up
+            radial = position - axis_point
+            radial = radial - np.dot(radial, frame.up) * frame.up
+            length = float(np.linalg.norm(radial))
+            if length < 1e-6:
+                continue
+            normal_hat, _ = estimate_surface_normal(
+                points,
+                position,
+                radius=normal_radius,
+                orient_toward=position + radial / length * 0.05,
+            )
+            if normal_hat is None:
+                continue
+            if float(np.dot(normal_hat, frame.anterior)) <= anterior_epsilon:
+                if best is None or v > best:
+                    best = v
+                break
+    return best
+
+
 def measure_lateral_extent(
     points, frame: ChestFrame, u_level: float, band: float = 0.01,
     half_width_limit: float | None = None,
@@ -162,11 +221,29 @@ def measure_lateral_extent(
     if np.count_nonzero(mask) < 8:
         return 0.0
     extent = _front_layer_extent(lateral[mask], normal[mask])
-    if extent is not None:
-        return extent
-    # fallback: 98th percentile (isolated depth pixels must not define the
-    # contour, but the table layer is only handled by the guard above)
-    return float(np.percentile(np.abs(lateral[mask]), 98.0))
+    if extent is None:
+        # fallback: 98th percentile (isolated depth pixels must not define the
+        # contour, but the table layer is only handled by the guard above)
+        extent = float(np.percentile(np.abs(lateral[mask]), 98.0))
+    if limit < TORSO_HALF_WIDTH_LIMIT_M:
+        # The landmark limit may be a transferred one that is narrower than
+        # the chest (out-of-domain torso).  Trigger: near-layer points exist
+        # beyond the limit.  Value: the anterior-facing normal boundary (the
+        # wall tangent), which stops at the chest edge even when a rest-pose
+        # arm continues beyond it, so on the biped this resolves to the same
+        # chest contour.
+        beyond = (
+            (np.abs(along - u_level) <= band)
+            & (np.abs(lateral) > limit)
+            & (np.abs(lateral) <= TORSO_HALF_WIDTH_LIMIT_M)
+        )
+        if np.count_nonzero(beyond) >= 16:
+            near = near_layer_mask(normal[beyond])
+            if int(np.count_nonzero(near)) >= 16:
+                crossing = _normal_crossing_extent(points, frame, u_level, band)
+                if crossing is not None and crossing > extent:
+                    extent = crossing
+    return extent
 
 
 def _silhouette_edge(

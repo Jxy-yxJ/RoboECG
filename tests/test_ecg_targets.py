@@ -412,3 +412,42 @@ def test_cloud_blended_frame_falls_back_when_sparse():
     sparse = np.zeros((10, 3))
     blended = cloud_blended_frame(true_frame, sparse)
     assert blended is true_frame
+
+
+def _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24):
+    """A chest wall wrapping to the midaxillary tangent at |v|=radius."""
+    points = []
+    for u in np.linspace(-0.30, 0.05, 10):
+        theta = np.linspace(0.0, np.pi / 2.0, 40)
+        for t in theta:
+            v = radius * np.sin(t)
+            n = radius * (np.cos(t) - 1.0)
+            points.append(frame.from_frame(u, +v, n))
+            points.append(frame.from_frame(u, -v, n))
+        if arm > radius:
+            for v in np.linspace(gap, arm, 6):
+                points.append(frame.from_frame(u, +v, -0.10))
+                points.append(frame.from_frame(u, -v, -0.10))
+    return np.array(points)
+
+
+def test_normal_crossing_extent_finds_the_midaxillary_tangent():
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24)
+    extent = measure_lateral_extent(
+        points, frame, u_level=-0.30, half_width_limit=0.12
+    )
+    # the fallback must recover the tangent (0.20), not the arm lobe (0.30)
+    assert 0.18 < extent < 0.23
+
+
+def test_normal_crossing_extent_not_triggered_without_saturation():
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24)
+    # with a generous limit the plain (near-layer) measurement is used
+    extent = measure_lateral_extent(
+        points, frame, u_level=-0.30, half_width_limit=0.30
+    )
+    assert extent > 0.28  # picks the outermost populated contour (the arm blob)
