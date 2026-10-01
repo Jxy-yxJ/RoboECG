@@ -25,10 +25,11 @@ independently published electrode data instead of against its own assumptions.
 | | Result |
 |---|---|
 | Autonomous placement (depth → landmark net → rules → fusion → press), 6 electrodes | **6/6 first-attempt success**, contact error 0.14–0.36 mm, zero safety back-offs, min clearance 33 mm |
-| Target localisation from depth (60 held-out scenes, 360 placements) | **6.08 mm** mean (95% CI 5.53–6.64), no generation failures |
+| Target localisation from depth (60 held-out scenes, 360 placements) | **6.08 mm** mean (95% CI 5.53–6.64), no generation failures; cross-seed 5.89 ± 0.22 mm (3 seeds) |
 | Robustness: 11 configurations (body scale 0.90–1.10, arm 60–90°, breathing ±8 mm, camera ±4 cm, patient ±2 cm) | baseline 3.4 mm, worst 9.0 mm (body scale 1.10), mean 4.3 mm with the anchored multi-view snap — within the ≤10 mm acceptance |
 | Rule check against independent electrode data (25 statistical-shape torsos) | V5 lateral position LOO 2.5 mm; intercostal drop regression R² = 0.81 |
 | Real patient check (PhysioNet/CinC 2007, 120 measured electrodes) | sternal-notch rule −3.9 mm; the drop regression overestimates by 26.5 mm (kept as a documented limitation) |
+| In-Isaac transfer to real torso geometry (25 shape models, non-circular electrode GT) | raw **41.7 mm** mean target error; **18.8 / 15.6 mm** with leave-one-out population calibration (similarity / per-electrode; 14/25 and 19/25 models ≤ 20 mm) |
 | Direct-regression upper bound on the same split | 2.9 mm vs 6.1 mm for the landmark → frame → rule chain |
 | Patient-size sweep | clearance ≥ 21 mm for all five body scales |
 
@@ -55,7 +56,7 @@ The full-rate videos are in [`runs/m4/`](runs/m4) and [`runs/m1/`](runs/m1).
 
 ```mermaid
 flowchart LR
-    A[Overhead RGB-D] --> B[7 chest landmarks<br/>heatmap U-Net]
+    A["Overhead + lateral RGB-D<br/>(multi-view routing)"] --> B[7 chest landmarks<br/>heatmap U-Net]
     B --> C[Chest frame<br/>clavicle / spine / lateral]
     C --> D[Clinical rules V1-V6<br/>SNND + drop regression<br/>+ fitted V5 fraction]
     A --> E[Depth cloud]
@@ -75,10 +76,11 @@ that hits 2.9 mm in simulation, but it has no label source outside simulation. K
 chain means the same code can be re-calibrated from measured electrode data, which is exactly what the
 independent validation below did.
 
-**Sharp geometry gets an explicit fallback.** The lateral chest wall (V5, V6) is nearly parallel to the
-overhead camera rays: the depth measurement adds nothing there and the surface coordinate fit becomes
-ill-conditioned. Incidences above 65° therefore keep the model surface instead of the depth measurement,
-and the planner treats the target as a rigid contact rather than a free point.
+**Sharp geometry gets a second view and an explicit fallback.** The lateral chest wall (V5, V6) is
+nearly parallel to the overhead camera rays; the multi-view path routes those targets to a fixed side
+camera that sees the wall frontally (anchored-snap error 77 → 9.7 mm, `--multiview`). For the overhead
+path the grazing fallback remains: incidences above 65° keep the model surface instead of the depth
+measurement, and the planner treats the target as a rigid contact rather than a free point.
 
 ## Repository layout
 
@@ -90,7 +92,7 @@ roboecg/          core package
   task_manager/   scene, supine pose, M0-M4 demos, perception pipeline
 scripts/          entry points (one per milestone / experiment)
 configs/          clinical rule parameters with provenance tags
-tests/            42 logic-only tests (no Isaac Sim needed)
+tests/            70 logic-only tests (no Isaac Sim needed)
 assets/           trained models + the two external validation datasets
 docs/             detailed technical reports (Chinese)
 runs/             reports, figures and videos produced by the scripts
@@ -102,7 +104,7 @@ The logic layer — chest frame, rule generation, fusion gates, press planning �
 
 ```bash
 pip install numpy pyyaml pytest
-python -m pytest tests/            # 42 tests, < 1 s
+python -m pytest tests/            # 70 tests, < 1 s
 ```
 
 The perception and execution demos need Isaac Sim 6.0.1 (Python 3.11+, GPU):
@@ -135,15 +137,21 @@ point: a rule validated against its own output cannot fail.
   positions (Dalhousie, ODC-By 1.0). The standard-lead subset is defined explicitly in the challenge
   readme; the 4th-intercostal rule reproduces the measured V1/V2 level to 3.9 mm, and the drop
   regression is 26.5 mm optimistic on this patient.
+* **In-Isaac transfer to the same 25 shape models** (I5) — the torso surfaces are imported into the
+  Isaac scene (biped hidden) and the full perception chain (fine-tuned detector → frame → rules →
+  fusion) places V1–V6, compared against the models' real electrode coordinates (the only
+  non-circular end-to-end metric here). Raw population mean 41.7 mm; leave-one-out population
+  calibration 18.8 mm (similarity) / 15.6 mm (per-electrode table), 19/25 models ≤ 20 mm.
+  See the [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md) §3.3.
 
 ## Limitations
 
 These are the things I would fix first if this were a hardware project:
 
-* **One overhead view.** V5/V6 sit on a near-vertical wall that the camera cannot see; the depth path
-  is usable (front-of-wall surface + model fallback) but not a measurement. A second camera or a wrist
-  camera would remove the problem — a lateral-view POC already closes the gap to millimetres
-  (V5/V6 nearest-surface error 35–61 mm → 1.6–3.8 mm, [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md) §1.4).
+* **The lateral wall has a second view; a wrist camera is still open.** V5/V6 sit on a near-vertical
+  wall that the overhead camera cannot see, so the multi-view path routes them to a fixed side camera
+  (anchored-snap error 77 → 9.7 mm; `--multiview`). A wrist-camera variant that observes the contact
+  neighbourhood during the press remains future work.
 * **The drop regression is a population prior, not clinical accuracy.** It is fitted on 25 shape
   models, and the one real patient we could check sits ~27 mm below the prediction.
 * **Simulation only.** No real arm, no real skin. The stock press is position-controlled with a linear
@@ -153,18 +161,23 @@ These are the things I would fix first if this were a hardware project:
   (`--force-tracking`: 6/6 electrodes, force 0.64–0.66 N, indentation 4.3–4.5 mm under breathing,
   zero cap violations, settled force RMSE ≤ 0.03 N) — see the [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md);
   real-robot admittance control is still open.
-* **Stylised body.** The patient asset is smooth (no sternum ridge, no ribs, weaker lateral wrap than a
-  real chest), so absolute geometric accuracy should be read as "consistent with the simulation asset".
+* **Stylised body, now quantified.** The patient asset is smooth and out-of-population on the lateral
+  wall (V6 wall steepness −16σ, V4→V6 wrap ratio −3.0σ against the 25 shape models). I5 imports the
+  real torso surfaces into Isaac, fine-tunes the detector on 75 pseudo-labelled renders and calibrates
+  the transfer on the population — raw 41.7 mm, leave-one-out 18.8/15.6 mm
+  ([v3 plan](docs/ECG_V3_SOLUTION_PLAN.md) §3.3).
 
 ## Roadmap
 
 The simulation loop is complete; the parts that a real system needs are still open:
 
-- [ ] Force-controlled press — design + numeric study (`roboecg/robot_controller/compliant_press.py`,
-      21 scenarios) and an in-Isaac validation run (`--force-tracking`, 6/6, zero violations) are done;
-      the real-robot admittance control with a calibrated skin stiffness is open.
-- [ ] A second view or a wrist camera to measure the lateral wall (V5/V6) directly — lateral-view POC
-      done (nearest-surface error 35–61 mm → 1.6–3.8 mm); fusion into the pipeline is open.
+- [x] Force-controlled press — design + numeric study (21 scenarios) and an in-Isaac validation run
+      (`--force-tracking`, 6/6, zero violations) are done; the real-robot admittance control is
+      specified in [docs/ECG_M5_ROBOT_ROADMAP.md](docs/ECG_M5_ROBOT_ROADMAP.md) and still needs hardware.
+- [x] A second view to measure the lateral wall (V5/V6) — integrated into the perception pipeline
+      (`--multiview`); the detector is fine-tuned on real SSM torso renders and the transfer is
+      calibrated leave-one-out (I5, [v3 plan](docs/ECG_V3_SOLUTION_PLAN.md) §3.3). A wrist-camera
+      variant remains open.
 - [ ] A learned approach policy (VLA / RL) on top of the rule-based target generator.
 - [ ] Signal-side verification: acquire a short 12-lead record after placement and check for
       misplacement, closing the loop on the physiological signal rather than on geometry.
@@ -172,7 +185,9 @@ The simulation loop is complete; the parts that a real system needs are still op
 ## Documentation
 
 Detailed milestone reports (Chinese) are in [`docs/`](docs), including the pipeline plan, per-milestone
-findings, the independent ground-truth validation, the real-patient check, and the literature-driven
+findings, the independent ground-truth validation, the real-patient check, the
+[I4 contact-probe protocol](docs/ECG_I4B_PROBE_PROTOCOL.md), the
+[real-robot roadmap](docs/ECG_M5_ROBOT_ROADMAP.md), and the literature-driven
 [v3 plan for the open limitations](docs/ECG_V3_SOLUTION_PLAN.md).
 
 ## Acknowledgements

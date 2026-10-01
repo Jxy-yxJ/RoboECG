@@ -1,0 +1,617 @@
+{
+  "samples": [
+    {
+      "index": 0,
+      "model": "T_01",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 1,
+      "model": "T_01",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 2,
+      "model": "T_01",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 3,
+      "model": "T_02",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 4,
+      "model": "T_02",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 5,
+      "model": "T_02",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 6,
+      "model": "T_03",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 7,
+      "model": "T_03",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 8,
+      "model": "T_03",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 9,
+      "model": "T_04",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 10,
+      "model": "T_04",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 11,
+      "model": "T_04",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 12,
+      "model": "T_05",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 13,
+      "model": "T_05",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 14,
+      "model": "T_05",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 15,
+      "model": "T_06",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 16,
+      "model": "T_06",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 17,
+      "model": "T_06",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 18,
+      "model": "T_07",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 19,
+      "model": "T_07",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 20,
+      "model": "T_07",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 21,
+      "model": "T_08",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 22,
+      "model": "T_08",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 23,
+      "model": "T_08",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 24,
+      "model": "T_09",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 25,
+      "model": "T_09",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 26,
+      "model": "T_09",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 27,
+      "model": "T_10",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 28,
+      "model": "T_10",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 29,
+      "model": "T_10",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 30,
+      "model": "T_11",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 31,
+      "model": "T_11",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 32,
+      "model": "T_11",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 33,
+      "model": "T_12",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 34,
+      "model": "T_12",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 35,
+      "model": "T_12",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 36,
+      "model": "T_13",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 37,
+      "model": "T_13",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 38,
+      "model": "T_13",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 39,
+      "model": "T_14",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 40,
+      "model": "T_14",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 41,
+      "model": "T_14",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 42,
+      "model": "T_15",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 43,
+      "model": "T_15",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 44,
+      "model": "T_15",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 45,
+      "model": "T_16",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 46,
+      "model": "T_16",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 47,
+      "model": "T_16",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 48,
+      "model": "T_17",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 49,
+      "model": "T_17",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 50,
+      "model": "T_17",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 51,
+      "model": "T_18",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 52,
+      "model": "T_18",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 53,
+      "model": "T_18",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 54,
+      "model": "T_19",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 55,
+      "model": "T_19",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 56,
+      "model": "T_19",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 57,
+      "model": "T_20",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 58,
+      "model": "T_20",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 59,
+      "model": "T_20",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 60,
+      "model": "T_21",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 61,
+      "model": "T_21",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 62,
+      "model": "T_21",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 63,
+      "model": "T_22",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 64,
+      "model": "T_22",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 65,
+      "model": "T_22",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 66,
+      "model": "T_23",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 67,
+      "model": "T_23",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 68,
+      "model": "T_23",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 69,
+      "model": "T_24",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 70,
+      "model": "T_24",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 71,
+      "model": "T_24",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 72,
+      "model": "T_25",
+      "scale": 1.0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 73,
+      "model": "T_25",
+      "scale": 0.93,
+      "dx": 0.03,
+      "dy": -0.02,
+      "arm_abduction_deg": 0.0
+    },
+    {
+      "index": 74,
+      "model": "T_25",
+      "scale": 1.07,
+      "dx": -0.02,
+      "dy": 0.03,
+      "arm_abduction_deg": 0.0
+    }
+  ],
+  "landmark_order": [
+    "clavicle_left",
+    "clavicle_right",
+    "shoulder_left",
+    "shoulder_right",
+    "chest",
+    "neck_base",
+    "pelvis"
+  ],
+  "width": 320,
+  "height": 180,
+  "fov_deg": 90.0,
+  "provenance": "I5-c stage 2: SSM torso surfaces (Bender et al., CC-BY-4.0) placed supine under the perception camera; labels are surface fractions transferred from the biped's rig landmarks -- electrode-free, so the real electrode coordinates never enter the training data"
+}
