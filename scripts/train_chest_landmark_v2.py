@@ -39,16 +39,19 @@ from roboecg.perception.chest_detector import (  # noqa: E402
 GAUSSIAN_SIGMA_PX = 2.0
 
 
-def load_dataset():
+def load_dataset(extra_dirs=None):
     manifest = json.loads((DATASET_DIR / "manifest.json").read_text())
+    dirs = [DATASET_DIR] + [Path(d) for d in (extra_dirs or [])]
     depth_list, pixel_list = [], []
-    for sample in manifest["samples"]:
-        data = np.load(DATASET_DIR / f"sample_{sample['index']:04d}.npz")
-        depth = data["depth"].astype(np.float32) / 1000.0
-        depth = np.clip(depth, DEPTH_MIN_M, DEPTH_MAX_M)
-        depth = (depth - DEPTH_MIN_M) / (DEPTH_MAX_M - DEPTH_MIN_M)
-        depth_list.append(depth[None, :, :])
-        pixel_list.append(data["pixels"])
+    for dataset_dir in dirs:
+        dir_manifest = json.loads((dataset_dir / "manifest.json").read_text())
+        for sample in dir_manifest["samples"]:
+            data = np.load(dataset_dir / f"sample_{sample['index']:04d}.npz")
+            depth = data["depth"].astype(np.float32) / 1000.0
+            depth = np.clip(depth, DEPTH_MIN_M, DEPTH_MAX_M)
+            depth = (depth - DEPTH_MIN_M) / (DEPTH_MAX_M - DEPTH_MIN_M)
+            depth_list.append(depth[None, :, :])
+            pixel_list.append(data["pixels"])
     depths = np.stack(depth_list).astype(np.float32)
     pixels = np.stack(pixel_list).astype(np.float32)
     return depths, pixels, manifest
@@ -98,6 +101,16 @@ def main() -> None:
     parser.add_argument("--val-samples", type=int, default=60)
     parser.add_argument("--seed", type=int, default=11)
     parser.add_argument(
+        "--model-out",
+        default=None,
+        help="checkpoint output path (default: the deployed MODEL_PATH)",
+    )
+    parser.add_argument(
+        "--extra-dataset",
+        default=None,
+        help="append samples from another dataset dir (I5-c fine-tune)",
+    )
+    parser.add_argument(
         "--split-seed",
         type=int,
         default=None,
@@ -113,7 +126,9 @@ def main() -> None:
     np.random.seed(args.seed)
     rng = np.random.default_rng(args.seed)
 
-    depths, pixels, manifest = load_dataset()
+    depths, pixels, manifest = load_dataset(
+        [args.extra_dataset] if getattr(args, "extra_dataset", None) else None
+    )
     n = depths.shape[0]
     width, height = manifest["width"], manifest["height"]
     heatmap_h = height // HEATMAP_STRIDE
@@ -183,7 +198,8 @@ def main() -> None:
         scheduler.step()
         if best_val is None or val_loss < best_val:
             best_val = val_loss
-            MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+            out_path = Path(args.model_out) if args.model_out else MODEL_PATH
+            out_path.parent.mkdir(parents=True, exist_ok=True)
             torch.save(
                 {
                     "model_type": "heatmap",
@@ -195,7 +211,7 @@ def main() -> None:
                     "depth_min_m": DEPTH_MIN_M,
                     "depth_max_m": DEPTH_MAX_M,
                 },
-                MODEL_PATH,
+                out_path,
             )
         if epoch % 10 == 0 or epoch == args.epochs - 1:
             print(
@@ -218,7 +234,7 @@ def main() -> None:
                 "best_val_loss": best_val,
                 "final_val_mean_px": history[-1]["val_mean_px"],
                 "final_val_max_px": history[-1]["val_max_px"],
-                "model_path": str(MODEL_PATH),
+                "model_path": str(out_path),
                 "history": history,
                 "provenance": (
                     "synthetic dataset (Isaac overhead depth + rig joint labels); "

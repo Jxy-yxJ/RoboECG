@@ -33,6 +33,7 @@ from m0_common import boot  # noqa: E402
 from roboecg.perception.torso_mesh import (  # noqa: E402
     anatomical_axes,
     parse_vtk_polydata,
+    subdivide_and_smooth,
 )
 
 TORSO_DIR = PROJECT_ROOT / "assets" / "external" / "torso_models"
@@ -42,6 +43,27 @@ NAMES = ("V1", "V2", "V3", "V4", "V5", "V6")
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="T_01", help="model id, e.g. T_01")
+    parser.add_argument(
+        "--detector-checkpoint",
+        default=None,
+        help="detector checkpoint (default: the deployed model)",
+    )
+    parser.add_argument(
+        "--subdiv",
+        type=int,
+        default=0,
+        help=(
+            "midpoint-subdivide the SSM mesh N times (I5-c stage 2: isolates "
+            "the coarse-mesh factor; the models are ~3-4 cm triangles while "
+            "real skin reads smooth in depth)"
+        ),
+    )
+    parser.add_argument(
+        "--smooth-iter",
+        type=int,
+        default=0,
+        help="Laplacian smoothing iterations applied after subdivision",
+    )
     parser.add_argument(
         "--arm-proxies",
         action="store_true",
@@ -95,7 +117,20 @@ def main() -> None:
             skiprows=1,
         )
         points_m = points_mm / 1000.0
-        v_m = electrodes[3:9] / 1000.0  # V1..V6
+        v_m = electrodes[3:9] / 1000.0
+        if args.subdiv > 0 or args.smooth_iter > 0:
+            points_m, faces = subdivide_and_smooth(
+                points_m,
+                faces,
+                subdivisions=args.subdiv,
+                smooth_iterations=args.smooth_iter,
+            )
+            print(
+                f"ssm_torso: mesh subdivided x{args.subdiv} + smoothed "
+                f"x{args.smooth_iter} -> {len(points_m)} verts / "
+                f"{len(faces)} faces",
+                flush=True,
+            )  # V1..V6
 
         a_m, b_m, c_m = anatomical_axes(points_m, v_m)
         a_w = np.asarray(landmarks.shoulder_left) - np.asarray(
@@ -180,7 +215,11 @@ def main() -> None:
         stage.GetPrimAtPath("/World/Human").SetActive(False)
         world.reset()
 
-        detector = ChestLandmarkDetector()
+        detector = (
+            ChestLandmarkDetector(args.detector_checkpoint)
+            if args.detector_checkpoint
+            else ChestLandmarkDetector()
+        )
         perceived = perceive_targets(
             stage,
             detector,
@@ -258,6 +297,8 @@ def main() -> None:
             "biped_center_world": biped_center.tolist(),
             "table_top_z": scene_report["table_bounds"]["top_z"],
             "arm_proxies": bool(args.arm_proxies),
+            "mesh_subdivisions": int(args.subdiv),
+            "mesh_smooth_iterations": int(args.smooth_iter),
             "perception": {
                 "views": perceived["views"],
                 "prior_fit_rms_m": perceived["prior"].fit_rms_m,

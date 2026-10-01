@@ -62,3 +62,36 @@ def test_parse_rejects_missing_blocks(tmp_path):
     path.write_text("DATASET POLYDATA\n", encoding="utf-8")
     with pytest.raises(ValueError):
         parse_vtk_polydata(path)
+
+
+def test_surface_fraction_roundtrip():
+    """Fraction placement must be the inverse of fraction measurement."""
+    from roboecg.perception.torso_mesh import (
+        surface_fraction_landmarks,
+        surface_fraction_of,
+    )
+
+    rng = np.random.default_rng(3)
+    # an ellipsoidal shell: u along +Z (head at high z), v along +Y, n along +X
+    phi = rng.uniform(0.0, 2.0 * np.pi, 6000)
+    z = rng.uniform(-0.35, 0.25, 6000)
+    radius = 0.22 * np.sqrt(np.clip(1.0 - (z / 0.4) ** 2, 0.0, 1.0))
+    points = np.column_stack(
+        [0.05 * np.cos(phi), radius * np.sin(phi), z]
+    ) + np.column_stack([0.06 * np.cos(phi), np.zeros_like(phi), np.zeros_like(phi)])
+    up = np.array([0.0, 0.0, 1.0])
+    lateral = np.array([0.0, 1.0, 0.0])
+    anterior = np.array([1.0, 0.0, 0.0])
+    position = np.array([0.08, 0.10, -0.05])
+    u_frac, v_frac = surface_fraction_of(points, up, lateral, anterior, position)
+    landmarks = surface_fraction_landmarks(
+        points, up, lateral, anterior, {"probe": (u_frac, v_frac)}
+    )
+    placed = landmarks["probe"]
+    # the placement sits on the surface at the same u; v is within the band
+    u_all = points @ up
+    z_expected = float(u_all.max()) - u_frac * (
+        float(u_all.max()) - float(u_all.min())
+    )
+    assert abs(float(placed @ up) - z_expected) < 0.03
+    assert 0.05 < float(placed @ anterior)

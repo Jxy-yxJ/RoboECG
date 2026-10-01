@@ -562,11 +562,12 @@ def generate_v1_v6(
         width_m = float("nan")
     else:
         width_m = measure_torso_width(points, frame, half_width_limit=v_shoulder)
-        if 0.0 < width_m >= 1.98 * v_shoulder:
-            # The measurement sits exactly at the landmark clip: the shoulder
-            # landmark is too close to the midline (out-of-domain torso) and
-            # the width is truncated; re-measure with the silhouette edge.
-            width_m = robust_torso_width(points, frame, landmark_limit=v_shoulder)
+        # NOTE (2026-10-01): a clip-triggered fallback to the silhouette-edge
+        # measurement (robust_torso_width) was tried here; on real depth clouds
+        # the edge rule misfires on internal holes (sternal groove), collapsing
+        # the width.  With accurate landmarks the plain measurement needs no
+        # help; the robust variant stays available (and tested) for the case of
+        # a genuinely clipped limit.
         if width_m > 0.0:
             vertical_drop = (
                 float(coefficients["intercept_mm"])
@@ -593,11 +594,6 @@ def generate_v1_v6(
     v_midax = measure_lateral_extent(
         points, frame, u_5ics, half_width_limit=v_shoulder
     )
-    if 0.0 < v_midax >= 0.98 * v_shoulder:
-        # clipped at the landmark limit: use the silhouette edge instead
-        v_midax = robust_lateral_extent(
-            points, frame, u_5ics, landmark_limit=v_shoulder
-        )
     # V5 (anterior axillary line) sits at a FITTED fraction of the V4->V6
     # lateral span, not at the midpoint: the chest wall wraps towards the
     # axilla, so the clinical V5 projects laterally close to V6.  The 25-model

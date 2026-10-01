@@ -205,7 +205,7 @@ def test_v1_v6_topology_and_provenance(setup):
     # the 4th->5th ICS drop is predicted from the measured torso width
     coefficients = RULES["anatomy"]["fourth_to_fifth_ics"]["coefficients"]
     v_shoulder = abs(float(frame.to_frame(landmarks.shoulder_left)[1]))
-    width_m = robust_torso_width(points, frame, landmark_limit=v_shoulder)
+    width_m = measure_torso_width(points, frame, half_width_limit=v_shoulder)
     expected_drop = (
         coefficients["intercept_mm"]
         + coefficients["slope_mm_per_mm"] * width_m * 1000.0

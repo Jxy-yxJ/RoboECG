@@ -93,3 +93,128 @@ def anatomical_axes(points_m: np.ndarray, electrodes_m: np.ndarray):
             "(expected > 0, pointing towards V4-V6)"
         )
     return a, b, c
+
+
+def subdivide_and_smooth(
+    points_m: np.ndarray, faces: np.ndarray,
+    subdivisions: int = 2, smooth_iterations: int = 3, lam: float = 0.5,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Midpoint-subdivide then Laplacian-smooth a closed triangle mesh.
+
+    The SSM surfaces are deliberately coarse (~3-4 cm triangles), far below a
+    real depth camera's chest sampling; the faceting, not the anatomy,
+    dominates the detector's input statistics (I5-c stage 2 isolates this
+    factor).  Subdividing and smoothing approximates smooth skin while moving
+    the surface only a few millimetres.
+    """
+    points = np.asarray(points_m, dtype=float)
+    faces = np.asarray(faces, dtype=np.int64)
+    for _ in range(int(subdivisions)):
+        edge_midpoint: dict = {}
+        vertices = [row for row in points]
+
+        def midpoint(a: int, b: int) -> int:
+            key = (a, b) if a < b else (b, a)
+            index = edge_midpoint.get(key)
+            if index is None:
+                index = len(vertices)
+                vertices.append(0.5 * (points[a] + points[b]))
+                edge_midpoint[key] = index
+            return index
+
+        new_faces = []
+        for a, b, c in faces:
+            ab = midpoint(int(a), int(b))
+            bc = midpoint(int(b), int(c))
+            ca = midpoint(int(c), int(a))
+            new_faces.append((a, ab, ca))
+            new_faces.append((ab, b, bc))
+            new_faces.append((ca, bc, c))
+            new_faces.append((ab, bc, ca))
+        points = np.asarray(vertices, dtype=float)
+        faces = np.asarray(new_faces, dtype=np.int64)
+
+    for _ in range(int(smooth_iterations)):
+        sums = np.zeros_like(points)
+        counts = np.zeros(len(points))
+        np.add.at(sums, faces[:, 0], points[faces[:, 1]])
+        np.add.at(sums, faces[:, 0], points[faces[:, 2]])
+        np.add.at(sums, faces[:, 1], points[faces[:, 0]])
+        np.add.at(sums, faces[:, 1], points[faces[:, 2]])
+        np.add.at(sums, faces[:, 2], points[faces[:, 0]])
+        np.add.at(sums, faces[:, 2], points[faces[:, 1]])
+        np.add.at(counts, faces[:, 0], 2.0)
+        np.add.at(counts, faces[:, 1], 2.0)
+        np.add.at(counts, faces[:, 2], 2.0)
+        neighbours = sums / np.maximum(counts, 1.0)[:, None]
+        points = points + float(lam) * (neighbours - points)
+    return points, faces
+
+
+def surface_fraction_of(points, up, lateral, anterior, position) -> tuple:
+    """(u_frac, v_frac) of a point on a torso surface.
+
+    u_frac runs 0 at the head end of the surface span to 1 at the hip end
+    (both measured along ``up``); v_frac is the lateral coordinate as a
+    fraction of the local surface half-width (98th percentile), measured from
+    the bilateral midpoint.  Electrode-free by construction: it only uses the
+    surface and a few landmark-independent directions.
+    """
+    points = np.asarray(points, dtype=float)
+    up = np.asarray(up, dtype=float)
+    up = up / (np.linalg.norm(up) + 1e-12)
+    lateral = np.asarray(lateral, dtype=float)
+    lateral = lateral / (np.linalg.norm(lateral) + 1e-12)
+    position = np.asarray(position, dtype=float)
+    u_all = points @ up
+    v_all = points @ lateral
+    u_head, u_hips = float(u_all.max()), float(u_all.min())
+    v_mid = 0.5 * (float(v_all.max()) + float(v_all.min()))
+    u = float(position @ up)
+    v = float(position @ lateral)
+    band = np.abs(u_all - u) <= 0.02
+    if np.count_nonzero(band) < 10:
+        band = np.abs(u_all - u) <= 0.05
+    half_width = float(np.percentile(np.abs(v_all[band] - v_mid), 98.0))
+    u_frac = (u_head - u) / max(u_head - u_hips, 1e-9)
+    v_frac = (v - v_mid) / max(half_width, 1e-9)
+    return float(u_frac), float(v_frac)
+
+
+def surface_fraction_landmarks(points, up, lateral, anterior, fractions) -> dict:
+    """Place landmarks on a torso surface from (u_frac, v_frac) pairs.
+
+    The detector's fine-tune (I5-c stage 2) needs landmark labels on the SSM
+    torsos.  Deriving them from the real electrode coordinates would leak the
+    evaluation target into the training data; instead the biped's rig
+    landmarks are expressed as surface fractions (see `surface_fraction_of`)
+    and applied here to the model surface.  Positions sit on the anterior
+    surface at the requested (u, v).
+    """
+    points = np.asarray(points, dtype=float)
+    up = np.asarray(up, dtype=float)
+    up = up / (np.linalg.norm(up) + 1e-12)
+    lateral = np.asarray(lateral, dtype=float)
+    lateral = lateral / (np.linalg.norm(lateral) + 1e-12)
+    anterior = np.asarray(anterior, dtype=float)
+    anterior = anterior / (np.linalg.norm(anterior) + 1e-12)
+    u_all = points @ up
+    v_all = points @ lateral
+    n_all = points @ anterior
+    u_head, u_hips = float(u_all.max()), float(u_all.min())
+    v_mid = 0.5 * (float(v_all.max()) + float(v_all.min()))
+    landmarks = {}
+    for name, (u_frac, v_frac) in fractions.items():
+        u = u_head - float(u_frac) * (u_head - u_hips)
+        band = np.abs(u_all - u) <= 0.02
+        if np.count_nonzero(band) < 10:
+            band = np.abs(u_all - u) <= 0.05
+        half_width = float(np.percentile(np.abs(v_all[band] - v_mid), 98.0))
+        v = v_mid + float(v_frac) * half_width
+        near = band & (np.abs(v_all - v) <= 0.03)
+        if np.count_nonzero(near) >= 5:
+            n = float(np.percentile(n_all[near], 95.0))
+        else:
+            n = float(np.percentile(n_all[band], 95.0))
+        landmarks[name] = u * up + v * lateral + n * anterior
+    return landmarks
