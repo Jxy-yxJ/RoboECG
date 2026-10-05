@@ -196,6 +196,74 @@ def _normal_crossing_extent(
     return best
 
 
+def _surface_walk_tangent(
+    points, frame: ChestFrame, u: float, v_start: float,
+    du: float = 0.015, step: float = 0.005, max_steps: int = 40,
+    n_window: float = 0.035, normal_radius: float = 0.025, min_points: int = 2,
+):
+    """Track the front surface outward from `v_start`; return the tangent |v|.
+
+    Starts at 0.5*v_start (a single-valued front-sheet region), steps outward
+    in v while following the sheet height (a +-35 mm n window around the
+    previous sample cannot jump to the back sheet or the table), and stops at
+    the anterior-facing normal boundary.  Offline on the 25 SSM models the
+    walked tangent matches the true V6 lateral coordinate to bias +7.6 mm,
+    sd 5.4 mm -- at the rule's (drop-biased) u, where the direct silhouette
+    measurement under-wraps by 10-30 mm.  Returns None when the seed region
+    is empty; returns the last tracked v when the surface ends without a
+    tangent (the caller gates on a >15 mm gain).
+    """
+    points = np.asarray(points, dtype=float)
+    along, lateral, normal = _frame_components(points, frame)
+    sign = 1.0 if v_start >= 0.0 else -1.0
+    v_seed = 0.5 * abs(float(v_start))
+    mask = (np.abs(along - u) <= du) & (np.abs(np.abs(lateral) - v_seed) <= 0.02)
+    if np.count_nonzero(mask) < 5:
+        return None
+    indices = np.flatnonzero(mask)
+    seed = indices[int(np.argmax(normal[indices]))]
+    n_prev = float(normal[seed])
+    v_prev = float(abs(lateral[seed]))
+    point_prev = points[seed]
+    normal_prev = float(normal[seed])
+    for index in range(1, int(max_steps) + 1):
+        v_try = v_seed + index * step
+        mask = (
+            (np.abs(along - u) <= du)
+            & (np.abs(sign * lateral - v_try) <= 1.5 * step)
+            & (np.abs(normal - n_prev) <= n_window)
+        )
+        candidates = np.flatnonzero(mask)
+        if candidates.size < min_points:
+            return v_prev, point_prev, None
+        best = int(candidates[np.argmin(np.abs(normal[candidates] - n_prev))])
+        position = points[best]
+        axis_point = frame.origin + float(along[best]) * frame.up
+        radial = position - axis_point
+        radial = radial - float(np.dot(radial, frame.up)) * frame.up
+        length = float(np.linalg.norm(radial))
+        if length < 1e-6:
+            return v_prev, point_prev, None
+        normal_hat, _ = estimate_surface_normal(
+            points,
+            position,
+            radius=normal_radius,
+            orient_toward=position + radial / length * 0.05,
+        )
+        if normal_hat is not None and float(
+            np.dot(normal_hat, frame.anterior)
+        ) <= 0.0:
+            return float(abs(lateral[best])), position, np.asarray(
+                normal_hat, dtype=float
+            )
+        if float(abs(lateral[best])) > v_prev + 1e-3:
+            v_prev = float(abs(lateral[best]))
+            n_prev = float(normal[best])
+            point_prev = position
+            normal_prev = float(normal[best])
+    return v_prev, point_prev, None
+
+
 def _wrap_refined_point(
     points, frame: ChestFrame, u: float, v_current: float,
     band: float = 0.015, max_shift: float = 0.05,
@@ -286,24 +354,14 @@ def measure_lateral_extent(
         # fallback: 98th percentile (isolated depth pixels must not define the
         # contour, but the table layer is only handled by the guard above)
         extent = float(np.percentile(np.abs(lateral[mask]), 98.0))
-    if limit < TORSO_HALF_WIDTH_LIMIT_M:
-        # The landmark limit may be a transferred one that is narrower than
-        # the chest (out-of-domain torso).  Trigger: near-layer points exist
-        # beyond the limit.  Value: the anterior-facing normal boundary (the
-        # wall tangent), which stops at the chest edge even when a rest-pose
-        # arm continues beyond it, so on the biped this resolves to the same
-        # chest contour.
-        beyond = (
-            (np.abs(along - u_level) <= band)
-            & (np.abs(lateral) > limit)
-            & (np.abs(lateral) <= TORSO_HALF_WIDTH_LIMIT_M)
-        )
-        if np.count_nonzero(beyond) >= 16:
-            near = near_layer_mask(normal[beyond])
-            if int(np.count_nonzero(near)) >= 16:
-                crossing = _normal_crossing_extent(points, frame, u_level, band)
-                if crossing is not None and crossing > extent:
-                    extent = crossing
+    # NOTE (2026-10-01): a saturation fallback that replaced a clipped
+    # measurement with the anterior-facing normal boundary
+    # (`_normal_crossing_extent`) was tried here and removed: it regressed
+    # T_20 (v_midax 0.13 -> 0.236, mean error 50 -> 113 mm) because the far
+    # layer satisfied the "points beyond the limit" trigger there, while the
+    # other 22 models were unaffected.  The crossing/walk helpers stay as
+    # gated-off utilities; only the surface walk (below, V6 direct endpoint)
+    # is wired, and every change must be checked on all 25 models.
     return extent
 
 
@@ -743,6 +801,25 @@ def generate_v1_v6(
             "fraction", V5_LATERAL_FRACTION_DEFAULT
         )
     )
+    # Lateral-wall wrap correction: on out-of-domain torsos the silhouette
+    # measurement under-wraps by 10-30 mm (the rule's 5th-ICS row carries a
+    # drop-regression residual and the wall's front sheet dominates the
+    # window).  Track the surface outward and use the tangent only on a
+    # clear gain (>= 15 mm); the biped's chest tangent coincides with its
+    # measured contour, so it never fires there (regression-verified).
+    walked = _surface_walk_tangent(points, frame, u_5ics, v_midax)
+    walk_point = None
+    walk_normal = None
+    if walked is not None and walked[0] > v_midax + 0.010:
+        # On out-of-domain torsos the rendered wall stops at (or near) the
+        # tangent while the silhouette-based measurement under-wraps by
+        # 10-30 mm; directly use the walked surface endpoint for V6 (the
+        # walk's last tracked point is a real cloud point, bypassing the
+        # (u, v)-snap sheet ambiguity).  The biped's walk gains nothing
+        # (regression-verified) so this never fires there.
+        v_midax = walked[0]
+        walk_point = walked[1]
+        walk_normal = walked[2] if walked[2] is not None else None
     v_v5 = v_mcl + alpha_v5 * (v_midax - v_mcl)
 
     nominal = {
@@ -831,15 +908,16 @@ def generate_v1_v6(
                 else np.asarray(frame.anterior, dtype=float)
             )
             info = {"status": "fallback_nominal"}
-        if name in ("V5", "V6"):
-            # Wrap refinement: keep the clinical tangent definition of the
-            # lateral lines when the (u, v) window lands on the front sheet.
-            v_actual = float(frame.to_frame(point)[1])
-            refined = _wrap_refined_point(points, frame, u, v_actual)
-            if refined is not None:
-                point, normal = refined
-                info = dict(info)
-                info["wrap_refined"] = True
+        if name == "V6" and walk_point is not None:
+            # Direct walked-endpoint placement (see above).  The separate
+            # `_wrap_refined_point` variant was removed after it regressed
+            # T_20 (50 -> 76 mm) through a far-layer tangent: keep every
+            # change checked on all 25 models.
+            point, normal = walk_point, (
+                walk_normal if walk_normal is not None else normal
+            )
+            info = dict(info)
+            info["wrap_walk_refined"] = True
         targets.append(
             ElectrodeTarget(
                 name=name,

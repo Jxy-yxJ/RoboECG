@@ -29,209 +29,209 @@
   "provenance": "I5-c: SSM fine-tuned detector + LOO notch anchor; calibration constants fitted on the other 24 models and applied to the held-out one (honest LOO); canonical training-matched placement",
   "summary": {
     "raw_mm": {
-      "mean": 41.72459270378121,
+      "mean": 41.13757567845449,
       "min": 26.134563381931002,
-      "max": 67.63607355795851,
+      "max": 61.45011328103315,
       "under_20mm": 0,
       "under_25mm": 0
     },
     "translation_mm": {
-      "mean": 29.247686716680224,
-      "min": 18.334216089647757,
-      "max": 53.35671380161825,
-      "under_20mm": 4,
+      "mean": 28.577250226945836,
+      "min": 18.114967583336743,
+      "max": 47.15521177518562,
+      "under_20mm": 5,
       "under_25mm": 12
     },
     "similarity_mm": {
-      "mean": 18.819145457604513,
-      "min": 10.505970263237723,
-      "max": 34.96935069383314,
-      "under_20mm": 14,
+      "mean": 18.027259701732714,
+      "min": 10.319235596518448,
+      "max": 28.306835585005974,
+      "under_20mm": 15,
       "under_25mm": 22
     },
     "per_electrode_mm": {
-      "mean": 15.61760698025554,
-      "min": 7.079024075628877,
-      "max": 32.204008207492016,
-      "under_20mm": 19,
-      "under_25mm": 22
+      "mean": 14.919854932123176,
+      "min": 6.981027230139325,
+      "max": 25.962109688331097,
+      "under_20mm": 20,
+      "under_25mm": 24
     }
   },
   "per_model": [
     {
       "model": "T_01",
       "raw_mm": 39.458543093760085,
-      "translation_mm": 25.347128516025453,
-      "similarity_mm": 17.094842278400368,
-      "per_electrode_mm": 8.892189356846503
+      "translation_mm": 25.3125008861611,
+      "similarity_mm": 16.29845937724215,
+      "per_electrode_mm": 9.082198256834614
     },
     {
       "model": "T_02",
       "raw_mm": 47.18796602901195,
-      "translation_mm": 32.41445156236452,
-      "similarity_mm": 16.345883131929458,
-      "per_electrode_mm": 11.171214508766186
+      "translation_mm": 32.3893102907248,
+      "similarity_mm": 16.13749972203399,
+      "per_electrode_mm": 11.791854483845695
     },
     {
       "model": "T_03",
       "raw_mm": 48.68392020065729,
-      "translation_mm": 35.68586076978667,
-      "similarity_mm": 20.330881157045496,
-      "per_electrode_mm": 14.87199347788153
+      "translation_mm": 35.75952251268637,
+      "similarity_mm": 20.337035204929023,
+      "per_electrode_mm": 15.511307818869911
     },
     {
       "model": "T_04",
       "raw_mm": 56.86412049575562,
-      "translation_mm": 44.93951165975465,
-      "similarity_mm": 24.338846377242945,
-      "per_electrode_mm": 22.77052861943203
+      "translation_mm": 45.052943305627046,
+      "similarity_mm": 25.025468327653716,
+      "per_electrode_mm": 23.4494437720314
     },
     {
       "model": "T_05",
-      "raw_mm": 67.63607355795851,
-      "translation_mm": 53.35671380161825,
-      "similarity_mm": 34.96935069383314,
-      "per_electrode_mm": 32.204008207492016
+      "raw_mm": 61.45011328103315,
+      "translation_mm": 47.15521177518562,
+      "similarity_mm": 28.306835585005974,
+      "per_electrode_mm": 25.962109688331097
     },
     {
       "model": "T_06",
       "raw_mm": 36.20534054642304,
-      "translation_mm": 22.99548677942846,
-      "similarity_mm": 21.252017471711092,
-      "per_electrode_mm": 13.921975146665678
+      "translation_mm": 22.759269267354387,
+      "similarity_mm": 20.426474417599326,
+      "per_electrode_mm": 13.288298759468724
     },
     {
       "model": "T_07",
       "raw_mm": 40.38113093668111,
-      "translation_mm": 25.527611101571566,
-      "similarity_mm": 12.684940812602756,
-      "per_electrode_mm": 9.468703001117339
+      "translation_mm": 25.516148268737226,
+      "similarity_mm": 12.17585451382189,
+      "per_electrode_mm": 9.146054830423855
     },
     {
       "model": "T_08",
       "raw_mm": 40.07291808234394,
-      "translation_mm": 23.755833073698085,
-      "similarity_mm": 11.104756303210364,
-      "per_electrode_mm": 7.079024075628877
+      "translation_mm": 23.752360040389902,
+      "similarity_mm": 10.783800008826065,
+      "per_electrode_mm": 6.981027230139325
     },
     {
       "model": "T_09",
       "raw_mm": 53.444785852178235,
-      "translation_mm": 40.95045295405691,
-      "similarity_mm": 24.071525548301192,
-      "per_electrode_mm": 17.718147366986837
+      "translation_mm": 41.034678315605085,
+      "similarity_mm": 24.55639607869696,
+      "per_electrode_mm": 18.37419428431836
     },
     {
       "model": "T_10",
-      "raw_mm": 59.787694575656815,
-      "translation_mm": 47.533608929199,
-      "similarity_mm": 30.82378533165213,
-      "per_electrode_mm": 25.87775109106722
+      "raw_mm": 51.29822921941409,
+      "translation_mm": 39.46322977684864,
+      "similarity_mm": 22.039377628208644,
+      "per_electrode_mm": 17.420973317843792
     },
     {
       "model": "T_11",
       "raw_mm": 31.597050197621797,
-      "translation_mm": 18.334216089647757,
-      "similarity_mm": 17.056840473494827,
-      "per_electrode_mm": 12.678944958082665
+      "translation_mm": 18.114967583336743,
+      "similarity_mm": 16.340311017654205,
+      "per_electrode_mm": 12.031606123610581
     },
     {
       "model": "T_12",
       "raw_mm": 33.88868571652773,
-      "translation_mm": 22.870438263049152,
-      "similarity_mm": 17.52175763180311,
-      "per_electrode_mm": 12.420792603839283
+      "translation_mm": 22.73333650761008,
+      "similarity_mm": 16.952488670672807,
+      "per_electrode_mm": 11.77151275269385
     },
     {
       "model": "T_13",
       "raw_mm": 43.75140258668045,
-      "translation_mm": 28.41904608210993,
-      "similarity_mm": 12.834803982027347,
-      "per_electrode_mm": 9.596894079317838
+      "translation_mm": 28.423269407892835,
+      "similarity_mm": 13.013936190990977,
+      "per_electrode_mm": 9.635802335630308
     },
     {
       "model": "T_14",
       "raw_mm": 48.55996298023078,
-      "translation_mm": 37.04341775086369,
-      "similarity_mm": 21.40870310196746,
-      "per_electrode_mm": 15.89489692242445
+      "translation_mm": 37.11876793000981,
+      "similarity_mm": 21.949669245075324,
+      "per_electrode_mm": 16.51579952712539
     },
     {
       "model": "T_15",
       "raw_mm": 53.30136754861589,
-      "translation_mm": 40.30862360622016,
-      "similarity_mm": 25.751573702017605,
-      "per_electrode_mm": 16.98939301305963
+      "translation_mm": 40.38419475918421,
+      "similarity_mm": 26.237293215626085,
+      "per_electrode_mm": 17.651737525540582
     },
     {
       "model": "T_16",
       "raw_mm": 28.775857903176526,
-      "translation_mm": 19.919239912336554,
-      "similarity_mm": 20.796581200159725,
-      "per_electrode_mm": 21.6656322803078
+      "translation_mm": 19.396928077075614,
+      "similarity_mm": 20.094619417160718,
+      "per_electrode_mm": 20.99652565159216
     },
     {
       "model": "T_17",
       "raw_mm": 31.906202531874115,
-      "translation_mm": 19.557142338460675,
-      "similarity_mm": 15.554555026845662,
-      "per_electrode_mm": 13.922485419462651
+      "translation_mm": 19.28674618119289,
+      "similarity_mm": 14.975420336144486,
+      "per_electrode_mm": 13.280189241533648
     },
     {
       "model": "T_18",
       "raw_mm": 33.34014490804515,
-      "translation_mm": 22.075021983499898,
-      "similarity_mm": 14.127963754205334,
-      "per_electrode_mm": 11.121817470106672
+      "translation_mm": 22.000300203622558,
+      "similarity_mm": 13.684237932810541,
+      "per_electrode_mm": 10.436928072614508
     },
     {
       "model": "T_19",
       "raw_mm": 43.97384521453649,
-      "translation_mm": 29.996365664794865,
-      "similarity_mm": 16.636827855145757,
-      "per_electrode_mm": 9.211166575299378
+      "translation_mm": 29.98671831736307,
+      "similarity_mm": 16.847979887498088,
+      "per_electrode_mm": 9.183480598645708
     },
     {
       "model": "T_20",
       "raw_mm": 50.131945622356824,
-      "translation_mm": 33.75042919869747,
-      "similarity_mm": 20.436150443593764,
-      "per_electrode_mm": 12.80080057129342
+      "translation_mm": 33.84415627081946,
+      "similarity_mm": 20.993311583278743,
+      "per_electrode_mm": 13.333351913875484
     },
     {
       "model": "T_21",
       "raw_mm": 26.134563381931002,
-      "translation_mm": 21.970438937388867,
-      "similarity_mm": 20.63419062681587,
-      "per_electrode_mm": 25.46473091045566
+      "translation_mm": 21.43388835265196,
+      "similarity_mm": 19.962243844376363,
+      "per_electrode_mm": 24.81318574870809
     },
     {
       "model": "T_22",
       "raw_mm": 28.979035626123288,
-      "translation_mm": 20.294231873566275,
-      "similarity_mm": 18.720692888848742,
-      "per_electrode_mm": 24.217251125311282
+      "translation_mm": 19.794280611204332,
+      "similarity_mm": 18.166772411211088,
+      "per_electrode_mm": 23.55317694434724
     },
     {
       "model": "T_23",
       "raw_mm": 30.43366798829562,
-      "translation_mm": 19.453162639507855,
-      "similarity_mm": 11.329180329105448,
-      "per_electrode_mm": 15.198153987142916
+      "translation_mm": 19.155561534210815,
+      "similarity_mm": 10.769072426732002,
+      "per_electrode_mm": 14.524162147465093
     },
     {
       "model": "T_24",
       "raw_mm": 33.51720339996813,
-      "translation_mm": 21.399197195908105,
-      "similarity_mm": 10.505970263237723,
-      "per_electrode_mm": 12.952376811489877
+      "translation_mm": 21.281730171762092,
+      "similarity_mm": 10.319235596518448,
+      "per_electrode_mm": 12.32333213278901
     },
     {
       "model": "T_25",
       "raw_mm": 35.101388618119884,
-      "translation_mm": 23.29453723345081,
-      "similarity_mm": 14.146016054915572,
-      "per_electrode_mm": 12.329302926910772
+      "translation_mm": 23.281235326389222,
+      "similarity_mm": 14.287699903550186,
+      "per_electrode_mm": 11.938120144801042
     }
   ]
 }

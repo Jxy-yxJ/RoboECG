@@ -432,25 +432,14 @@ def _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24):
 
 
 def test_normal_crossing_extent_finds_the_midaxillary_tangent():
+    from roboecg.target_localization.ecg import _normal_crossing_extent
+
     landmarks = make_landmarks()
     frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
     points = _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24)
-    extent = measure_lateral_extent(
-        points, frame, u_level=-0.30, half_width_limit=0.12
-    )
-    # the fallback must recover the tangent (0.20), not the arm lobe (0.30)
-    assert 0.18 < extent < 0.23
-
-
-def test_normal_crossing_extent_not_triggered_without_saturation():
-    landmarks = make_landmarks()
-    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
-    points = _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24)
-    # with a generous limit the plain (near-layer) measurement is used
-    extent = measure_lateral_extent(
-        points, frame, u_level=-0.30, half_width_limit=0.30
-    )
-    assert extent > 0.28  # picks the outermost populated contour (the arm blob)
+    crossing = _normal_crossing_extent(points, frame, -0.30, 0.015)
+    assert crossing is not None
+    assert 0.18 < crossing < 0.23
 
 
 def test_wrap_refinement_moves_front_sheet_contact_to_tangent():
@@ -477,3 +466,32 @@ def test_wrap_refinement_skips_when_already_at_tangent():
     assert _wrap_refined_point(points, frame, -0.30, 0.20) is None
 
 
+
+
+def test_surface_walk_finds_the_wrapping_tangent():
+    from roboecg.target_localization.ecg import _surface_walk_tangent
+
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _wrapping_wall_cloud(frame, radius=0.20, arm=0.0)
+    walked = _surface_walk_tangent(points, frame, -0.30, 0.17)
+    assert walked is not None
+    assert 0.18 < walked[0] < 0.23
+    assert walked[1] is not None
+
+
+def test_surface_walk_returns_last_v_when_no_tangent():
+    from roboecg.target_localization.ecg import _surface_walk_tangent
+
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    # a shallow slab that never wraps and ends at |v| = 0.15
+    points = []
+    for u in np.linspace(-0.30, 0.05, 10):
+        for v in np.linspace(-0.15, 0.15, 31):
+            points.append(frame.from_frame(u, v, -0.02 * abs(v)))
+    walked = _surface_walk_tangent(
+        np.array(points), frame, -0.30, 0.12
+    )
+    assert walked is not None
+    assert walked[0] < 0.160  # no tangent: stays at the measured contour
