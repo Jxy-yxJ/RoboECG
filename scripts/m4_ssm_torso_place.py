@@ -287,6 +287,17 @@ def main() -> None:
                         "snap_status": generated[name].provenance.get("snap", {}).get(
                             "status"
                         ),
+                        "generated_world": [
+                            float(c) for c in np.asarray(generated[name].position)
+                        ],
+                        "generated_frame_coords": [
+                            float(c) for c in np.asarray(generated[name].frame_coords)
+                        ],
+                        "wrap_refined": bool(
+                            generated[name]
+                            .provenance.get("snap", {})
+                            .get("wrap_refined", False)
+                        ),
                         "position_world": [float(c) for c in position],
                         "gt_world": [float(c) for c in gt_position],
                         "error_mm": float(np.linalg.norm(position - gt_position)) * 1000.0,

@@ -149,13 +149,10 @@ def _normal_crossing_extent(
 
     Walks the wall outward on both sides at ``u_level`` and returns the |v| of
     the first candidate whose local surface normal stops facing anteriorly
-    (the tangent point of the wrapping chest wall).  Unlike an empty-band or
-    silhouette rule this is geometric: a rest-pose arm beyond the chest edge
-    has front-facing normals of its own, but the walk stops at the chest
-    tangent before reaching it.  Used as the saturation fallback for
-    `measure_lateral_extent` on arm-free (out-of-domain) torsos; measured
-    offline on the 25 SSM models: bias -24 mm, sd 7 mm against the real V6
-    lateral coordinate (a population-absorbable constant).
+    (the tangent point of the wrapping chest wall).  Kept gated off in the
+    live pipeline (see `measure_lateral_extent.scan_down` and the v3 plan
+    section 3.3): on the biped it misfires through arm/tangent ambiguities,
+    and at the rule's (drop-biased) u the runtime cloud has no tangent.
     """
     points = np.asarray(points, dtype=float)
     along, lateral, normal = _frame_components(points, frame)
@@ -199,9 +196,53 @@ def _normal_crossing_extent(
     return best
 
 
+def _wrap_refined_point(
+    points, frame: ChestFrame, u: float, v_current: float,
+    band: float = 0.015, max_shift: float = 0.05,
+):
+    """Move a lateral-wall contact onto the wrapping tangent at the same u.
+
+    The anterior-axillary / midaxillary lines are defined by the wall tangent
+    (where the surface normal stops facing anteriorly), not by a fixed (u, v).
+    A drop-regression residual of 20-35 mm along u shifts the snap window near
+    the silhouette and can select the front sheet instead of the wrap
+    (measured: up to 131 mm depth error on T_05's V6).  Returns the refined
+    (point, normal) when a tangent exists within ``max_shift`` beyond the
+    current |v|, else None (never pulls a target inward).
+    """
+    crossing = _normal_crossing_extent(points, frame, u, band)
+    if crossing is None or crossing <= abs(v_current) + 0.005:
+        return None
+    if crossing - abs(v_current) > max_shift:
+        return None
+    along, lateral, _ = _frame_components(points, frame)
+    sign = 1.0 if v_current >= 0.0 else -1.0
+    distance_sq = (along - u) ** 2 + (lateral - sign * crossing) ** 2
+    index = int(np.argmin(distance_sq))
+    if float(np.sqrt(distance_sq[index])) > 0.03:
+        return None
+    point = np.asarray(points, dtype=float)[index]
+    axis_point = frame.origin + u * frame.up
+    radial = point - axis_point
+    radial = radial - float(np.dot(radial, frame.up)) * frame.up
+    length = float(np.linalg.norm(radial))
+    if length < 1e-6:
+        return None
+    normal, _ = estimate_surface_normal(
+        points,
+        point,
+        radius=NORMAL_FIT_RADIUS_M,
+        orient_toward=point + radial / length * 0.05,
+    )
+    if normal is None:
+        return None
+    return point, np.asarray(normal, dtype=float)
+
+
 def measure_lateral_extent(
     points, frame: ChestFrame, u_level: float, band: float = 0.01,
     half_width_limit: float | None = None,
+    scan_down: tuple = (0.0,),
 ) -> float:
     """Largest |v| of the chest contour at `u_level` (midaxillary line).
 
@@ -210,7 +251,27 @@ def measure_lateral_extent(
     report the arm's outer edge as the torso contour.  The near-layer guard
     additionally rejects the table/back layers of a depth cloud (see
     `_front_layer_extent`).
+
+    `scan_down` (default off) takes the maximum over the listed u offsets.
+    Rationale and negative result (2026-10-01): the midaxillary line is the
+    torso's widest lower-chest contour while the rule's 5th-ICS row carries a
+    20-35 mm regression residual, and offline an 80 mm scan fixes the wall
+    wrap (T_05 V6 131 -> 40 mm).  In the full pipeline it re-captures the
+    front sheet through the prior anchor band (and regresses the biped
+    5.84 -> 28.96 mm), so it stays gated off until a sheet-aware anchor gate
+    exists.
     """
+    if len(tuple(scan_down)) > 1:
+        return max(
+            measure_lateral_extent(
+                points,
+                frame,
+                u_level + float(offset),
+                band=band,
+                half_width_limit=half_width_limit,
+            )
+            for offset in scan_down
+        )
     limit = (
         TORSO_HALF_WIDTH_LIMIT_M
         if half_width_limit is None
@@ -770,6 +831,15 @@ def generate_v1_v6(
                 else np.asarray(frame.anterior, dtype=float)
             )
             info = {"status": "fallback_nominal"}
+        if name in ("V5", "V6"):
+            # Wrap refinement: keep the clinical tangent definition of the
+            # lateral lines when the (u, v) window lands on the front sheet.
+            v_actual = float(frame.to_frame(point)[1])
+            refined = _wrap_refined_point(points, frame, u, v_actual)
+            if refined is not None:
+                point, normal = refined
+                info = dict(info)
+                info["wrap_refined"] = True
         targets.append(
             ElectrodeTarget(
                 name=name,

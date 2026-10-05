@@ -451,3 +451,29 @@ def test_normal_crossing_extent_not_triggered_without_saturation():
         points, frame, u_level=-0.30, half_width_limit=0.30
     )
     assert extent > 0.28  # picks the outermost populated contour (the arm blob)
+
+
+def test_wrap_refinement_moves_front_sheet_contact_to_tangent():
+    from roboecg.target_localization.ecg import _wrap_refined_point
+
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24)
+    # a front-sheet contact at v=0.16 on a wall that wraps to 0.20
+    refined = _wrap_refined_point(points, frame, -0.30, 0.16)
+    assert refined is not None
+    point, normal = refined
+    v_refined = abs(float(frame.to_frame(point)[1]))
+    assert 0.17 < v_refined < 0.23
+
+
+def test_wrap_refinement_skips_when_already_at_tangent():
+    from roboecg.target_localization.ecg import _wrap_refined_point
+
+    landmarks = make_landmarks()
+    frame = build_chest_frame(landmarks, anterior_hint=(1.0, 0.0, 0.0))
+    points = _wrapping_wall_cloud(frame, radius=0.20, arm=0.30, gap=0.24)
+    # already at the tangent (within 5 mm) -> no refinement
+    assert _wrap_refined_point(points, frame, -0.30, 0.20) is None
+
+
