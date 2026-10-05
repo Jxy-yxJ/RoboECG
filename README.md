@@ -29,7 +29,7 @@ independently published electrode data instead of against its own assumptions.
 | Robustness: 11 configurations (body scale 0.90–1.10, arm 60–90°, breathing ±8 mm, camera ±4 cm, patient ±2 cm) | baseline 3.4 mm, worst 9.0 mm (body scale 1.10), mean 4.3 mm with the anchored multi-view snap — within the ≤10 mm acceptance |
 | Rule check against independent electrode data (25 statistical-shape torsos) | V5 lateral position LOO 2.5 mm; intercostal drop regression R² = 0.81 |
 | Real patient check (PhysioNet/CinC 2007, 120 measured electrodes) | sternal-notch rule −3.9 mm; the drop regression overestimates by 26.5 mm (kept as a documented limitation) |
-| In-Isaac transfer to real torso geometry (25 shape models, non-circular electrode GT) | raw **41.7 mm** mean target error; **18.8 / 15.6 mm** with leave-one-out population calibration (similarity / per-electrode; 14/25 and 19/25 models ≤ 20 mm) |
+| In-Isaac transfer to real torso geometry (25 shape models, non-circular electrode GT) | raw **41.1 mm** mean target error (max 61.5); **18.0 / 14.9 mm** with leave-one-out population calibration (similarity / per-electrode; 15/25 and **20/25** models ≤ 20 mm, 24/25 ≤ 25 mm) |
 | Direct-regression upper bound on the same split | 2.9 mm vs 6.1 mm for the landmark → frame → rule chain |
 | Patient-size sweep | clearance ≥ 21 mm for all five body scales |
 
