@@ -9,11 +9,11 @@
       "wrap_sd": 0.17918366715977602
     },
     "hcm_17_low": {
-      "n": 0,
-      "steepness_mean": null,
-      "steepness_sd": null,
-      "wrap_mean": null,
-      "wrap_sd": null
+      "n": 5,
+      "steepness_mean": 54.68701106769659,
+      "steepness_sd": 25.835544429529705,
+      "wrap_mean": 0.29006580413383454,
+      "wrap_sd": 0.1750153187538897
     },
     "ssm_25_chest": {
       "n": 25,
@@ -23,11 +23,11 @@
       "wrap_sd": 0.1987835564809233
     },
     "hcm_17_chest": {
-      "n": 0,
-      "steepness_mean": null,
-      "steepness_sd": null,
-      "wrap_mean": null,
-      "wrap_sd": null
+      "n": 5,
+      "steepness_mean": 64.22997604209718,
+      "steepness_sd": 16.316330023754972,
+      "wrap_mean": 0.40819994615983707,
+      "wrap_sd": 0.11913270637165879
     }
   },
   "cohorts": {
@@ -508,6 +508,107 @@
         }
       }
     },
-    "hcm_17": {}
+    "hcm_17": {
+      "01": {
+        "nodes": 1958569,
+        "extent_m": [
+          0.502078,
+          0.226962400391,
+          0.45068270019499995
+        ],
+        "low": {
+          "y_span_mm": 210.64690039099997,
+          "x_extreme_mm": 244.17590000000004,
+          "wrap_fraction": 0.6092892715096587,
+          "wall_steepness_deg": 62.00658905525365
+        },
+        "chest": {
+          "y_span_mm": 226.55840039099996,
+          "x_extreme_mm": 248.62270499999994,
+          "wrap_fraction": 0.4055731577395536,
+          "wall_steepness_deg": 42.585468766314804
+        }
+      },
+      "02": {
+        "nodes": 1927608,
+        "extent_m": [
+          0.5009969999999999,
+          0.245341699219,
+          0.46128795996099997
+        ],
+        "low": {
+          "y_span_mm": 228.50869921899996,
+          "x_extreme_mm": 176.9701,
+          "wrap_fraction": 0.13765471900417073,
+          "wall_steepness_deg": 77.02945539888056
+        },
+        "chest": {
+          "y_span_mm": 232.87219921899998,
+          "x_extreme_mm": 249.92899999999997,
+          "wrap_fraction": 0.6216611435049667,
+          "wall_steepness_deg": 50.3147879818549
+        }
+      },
+      "03": {
+        "nodes": 1988028,
+        "extent_m": [
+          0.501036,
+          0.25485869921899995,
+          0.413056898438
+        ],
+        "low": {
+          "y_span_mm": 251.543001953,
+          "x_extreme_mm": 249.152,
+          "wrap_fraction": 0.22890319985033197,
+          "wall_steepness_deg": 16.7872557983833
+        },
+        "chest": {
+          "y_span_mm": 246.880699219,
+          "x_extreme_mm": 249.137,
+          "wrap_fraction": 0.2603415373673468,
+          "wall_steepness_deg": 68.51494857194336
+        }
+      },
+      "12": {
+        "nodes": 2184854,
+        "extent_m": [
+          0.500995,
+          0.2583285,
+          0.409450097656
+        ],
+        "low": {
+          "y_span_mm": 255.43230078099998,
+          "x_extreme_mm": 160.42395999999994,
+          "wrap_fraction": 0.14055263756865677,
+          "wall_steepness_deg": 84.44075776199993
+        },
+        "chest": {
+          "y_span_mm": 244.766001953,
+          "x_extreme_mm": 249.35299999999998,
+          "wrap_fraction": 0.40450878494968406,
+          "wall_steepness_deg": 70.87898830938988
+        }
+      },
+      "16": {
+        "nodes": 1712283,
+        "extent_m": [
+          0.500439,
+          0.291195800781,
+          0.43264400000000003
+        ],
+        "low": {
+          "y_span_mm": 290.669101562,
+          "x_extreme_mm": 249.773685,
+          "wrap_fraction": 0.3339291927363543,
+          "wall_steepness_deg": 33.17099732396551
+        },
+        "chest": {
+          "y_span_mm": 274.525800781,
+          "x_extreme_mm": 248.57859000000002,
+          "wrap_fraction": 0.3489151072376342,
+          "wall_steepness_deg": 88.85568658098293
+        }
+      }
+    }
   }
 }
