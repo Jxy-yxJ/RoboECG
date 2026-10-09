@@ -1,0 +1,513 @@
+{
+  "provenance": "HCM 17 patient torso meshes (Malik et al., Zenodo 10.5281/zenodo.18890229, CC-BY-4.0; CARP .pts, um, volume mesh so the node cloud is filled) vs the 25 SSM models (Bender et al.); arm stumps in the HCM chest band are flagged; sim asset V6 wall steepness 53.8 deg quoted from the v3 plan section 3.3",
+  "summary": {
+    "ssm_25_low": {
+      "n": 25,
+      "steepness_mean": 87.96691114630696,
+      "steepness_sd": 6.213614588644192,
+      "wrap_mean": 0.3118104610478835,
+      "wrap_sd": 0.17918366715977602
+    },
+    "hcm_17_low": {
+      "n": 0,
+      "steepness_mean": null,
+      "steepness_sd": null,
+      "wrap_mean": null,
+      "wrap_sd": null
+    },
+    "ssm_25_chest": {
+      "n": 25,
+      "steepness_mean": 87.30798164768366,
+      "steepness_sd": 1.951271171260943,
+      "wrap_mean": 0.453198920036722,
+      "wrap_sd": 0.1987835564809233
+    },
+    "hcm_17_chest": {
+      "n": 0,
+      "steepness_mean": null,
+      "steepness_sd": null,
+      "wrap_mean": null,
+      "wrap_sd": null
+    }
+  },
+  "cohorts": {
+    "ssm_25": {
+      "T_01": {
+        "extent_m": [
+          0.43960899999999997,
+          0.368122,
+          0.671087
+        ],
+        "low": {
+          "y_span_mm": 323.6501,
+          "x_extreme_mm": 203.47267499999998,
+          "wrap_fraction": 0.5115144410584147,
+          "wall_steepness_deg": 89.38469629962285
+        },
+        "chest": {
+          "y_span_mm": 321.29200000000003,
+          "x_extreme_mm": 224.32075,
+          "wrap_fraction": 0.5886240553764176,
+          "wall_steepness_deg": 89.61904005493707
+        }
+      },
+      "T_02": {
+        "extent_m": [
+          0.427473,
+          0.371298,
+          0.633784
+        ],
+        "low": {
+          "y_span_mm": 333.045,
+          "x_extreme_mm": 204.9114,
+          "wrap_fraction": 0.568946538756024,
+          "wall_steepness_deg": 88.81464772552181
+        },
+        "chest": {
+          "y_span_mm": 326.149,
+          "x_extreme_mm": 220.4248,
+          "wrap_fraction": 0.34486814308797514,
+          "wall_steepness_deg": 89.5719842021873
+        }
+      },
+      "T_03": {
+        "extent_m": [
+          0.418149,
+          0.374625,
+          0.608552
+        ],
+        "low": {
+          "y_span_mm": 336.91700000000003,
+          "x_extreme_mm": 208.10257,
+          "wrap_fraction": 0.4951189758902044,
+          "wall_steepness_deg": 89.72510219378216
+        },
+        "chest": {
+          "y_span_mm": 332.135,
+          "x_extreme_mm": 217.468765,
+          "wrap_fraction": 0.6438014662712451,
+          "wall_steepness_deg": 88.82441904087733
+        }
+      },
+      "T_04": {
+        "extent_m": [
+          0.424152,
+          0.38139,
+          0.593422
+        ],
+        "low": {
+          "y_span_mm": 345.69300000000004,
+          "x_extreme_mm": 212.722925,
+          "wrap_fraction": 0.15097789078749074,
+          "wall_steepness_deg": 89.61813879410255
+        },
+        "chest": {
+          "y_span_mm": 342.71,
+          "x_extreme_mm": 214.72385500000001,
+          "wrap_fraction": 0.7439817921858133,
+          "wall_steepness_deg": 87.62776298761409
+        }
+      },
+      "T_05": {
+        "extent_m": [
+          0.43632800000000005,
+          0.397138,
+          0.580289
+        ],
+        "low": {
+          "y_span_mm": 372.134,
+          "x_extreme_mm": 217.60825000000006,
+          "wrap_fraction": 0.15105472759812325,
+          "wall_steepness_deg": 89.5227806755465
+        },
+        "chest": {
+          "y_span_mm": 351.687,
+          "x_extreme_mm": 211.76517,
+          "wrap_fraction": 0.6818796259173641,
+          "wall_steepness_deg": 87.5057549120341
+        }
+      },
+      "T_06": {
+        "extent_m": [
+          0.40862200000000004,
+          0.323788,
+          0.652655
+        ],
+        "low": {
+          "y_span_mm": 278.8417,
+          "x_extreme_mm": 182.17204,
+          "wrap_fraction": 0.28410492404830406,
+          "wall_steepness_deg": 89.6343443195852
+        },
+        "chest": {
+          "y_span_mm": 285.381,
+          "x_extreme_mm": 210.3376,
+          "wrap_fraction": 0.07775380981915402,
+          "wall_steepness_deg": 87.91764547624764
+        }
+      },
+      "T_07": {
+        "extent_m": [
+          0.397959,
+          0.326738,
+          0.615789
+        ],
+        "low": {
+          "y_span_mm": 285.03279999999995,
+          "x_extreme_mm": 184.2935,
+          "wrap_fraction": 0.24307588459994786,
+          "wall_steepness_deg": 89.75580701060447
+        },
+        "chest": {
+          "y_span_mm": 290.09400000000005,
+          "x_extreme_mm": 205.53995,
+          "wrap_fraction": 0.3159899894516949,
+          "wall_steepness_deg": 88.75152688513745
+        }
+      },
+      "T_08": {
+        "extent_m": [
+          0.389073,
+          0.330324,
+          0.582065
+        ],
+        "low": {
+          "y_span_mm": 291.5861,
+          "x_extreme_mm": 187.23429,
+          "wrap_fraction": 0.48545352470505276,
+          "wall_steepness_deg": 88.8200298397562
+        },
+        "chest": {
+          "y_span_mm": 297.35599999999994,
+          "x_extreme_mm": 201.5415,
+          "wrap_fraction": 0.6265809332920809,
+          "wall_steepness_deg": 88.82810831617944
+        }
+      },
+      "T_09": {
+        "extent_m": [
+          0.397084,
+          0.33704,
+          0.563527
+        ],
+        "low": {
+          "y_span_mm": 299.37390000000005,
+          "x_extreme_mm": 191.01016,
+          "wrap_fraction": 0.49439814225622203,
+          "wall_steepness_deg": 89.59509235026371
+        },
+        "chest": {
+          "y_span_mm": 307.119,
+          "x_extreme_mm": 198.1958,
+          "wrap_fraction": 0.41456634073437326,
+          "wall_steepness_deg": 89.03741931418702
+        }
+      },
+      "T_10": {
+        "extent_m": [
+          0.40936799999999995,
+          0.35246900000000003,
+          0.548168
+        ],
+        "low": {
+          "y_span_mm": 322.359,
+          "x_extreme_mm": 196.399705,
+          "wrap_fraction": 0.07500953905428426,
+          "wall_steepness_deg": 89.96073275623635
+        },
+        "chest": {
+          "y_span_mm": 315.932,
+          "x_extreme_mm": 194.82745,
+          "wrap_fraction": 0.6726662699568262,
+          "wall_steepness_deg": 89.11018445575495
+        }
+      },
+      "T_11": {
+        "extent_m": [
+          0.384559,
+          0.283429,
+          0.637314
+        ],
+        "low": {
+          "y_span_mm": 233.22650000000002,
+          "x_extreme_mm": 162.14788000000001,
+          "wrap_fraction": 0.2778727974737005,
+          "wall_steepness_deg": 89.59943941151374
+        },
+        "chest": {
+          "y_span_mm": 250.489,
+          "x_extreme_mm": 197.34336,
+          "wrap_fraction": 0.2312804155072678,
+          "wall_steepness_deg": 85.63504549290407
+        }
+      },
+      "T_12": {
+        "extent_m": [
+          0.37070400000000003,
+          0.28670500000000004,
+          0.6005539999999999
+        ],
+        "low": {
+          "y_span_mm": 239.8343,
+          "x_extreme_mm": 164.8558,
+          "wrap_fraction": 0.31307490213034583,
+          "wall_steepness_deg": 88.5710595072062
+        },
+        "chest": {
+          "y_span_mm": 255.529,
+          "x_extreme_mm": 192.159735,
+          "wrap_fraction": 0.4238548266537262,
+          "wall_steepness_deg": 89.00494010689546
+        }
+      },
+      "T_13": {
+        "extent_m": [
+          0.362055,
+          0.289321,
+          0.561434
+        ],
+        "low": {
+          "y_span_mm": 245.67600000000002,
+          "x_extreme_mm": 166.66327,
+          "wrap_fraction": 0.46835970953613704,
+          "wall_steepness_deg": 89.84149785514657
+        },
+        "chest": {
+          "y_span_mm": 264.33,
+          "x_extreme_mm": 187.1856,
+          "wrap_fraction": 0.37655582037604507,
+          "wall_steepness_deg": 86.45062679214374
+        }
+      },
+      "T_14": {
+        "extent_m": [
+          0.37094800000000006,
+          0.295624,
+          0.5332939999999999
+        ],
+        "low": {
+          "y_span_mm": 251.6621,
+          "x_extreme_mm": 169.47455,
+          "wrap_fraction": 0.6340354785245772,
+          "wall_steepness_deg": 89.4890094827995
+        },
+        "chest": {
+          "y_span_mm": 273.552,
+          "x_extreme_mm": 182.57825,
+          "wrap_fraction": 0.45867622974790895,
+          "wall_steepness_deg": 87.0710134793385
+        }
+      },
+      "T_15": {
+        "extent_m": [
+          0.382413,
+          0.310754,
+          0.5188349999999999
+        ],
+        "low": {
+          "y_span_mm": 271.7257,
+          "x_extreme_mm": 176.50859,
+          "wrap_fraction": 0.35628908123155073,
+          "wall_steepness_deg": 89.48715282691526
+        },
+        "chest": {
+          "y_span_mm": 283.717,
+          "x_extreme_mm": 178.25325999999998,
+          "wrap_fraction": 0.5789607249477472,
+          "wall_steepness_deg": 89.84280284223853
+        }
+      },
+      "T_16": {
+        "extent_m": [
+          0.36044200000000004,
+          0.246029,
+          0.6198030000000001
+        ],
+        "low": {
+          "y_span_mm": 191.303,
+          "x_extreme_mm": 142.44326500000003,
+          "wrap_fraction": 0.2806009315065629,
+          "wall_steepness_deg": 89.94939340223078
+        },
+        "chest": {
+          "y_span_mm": 218.473,
+          "x_extreme_mm": 183.83503499999998,
+          "wrap_fraction": 0.3171751200377164,
+          "wall_steepness_deg": 86.2252835390665
+        }
+      },
+      "T_17": {
+        "extent_m": [
+          0.346905,
+          0.24793300000000001,
+          0.584187
+        ],
+        "low": {
+          "y_span_mm": 196.89780000000002,
+          "x_extreme_mm": 144.25114000000002,
+          "wrap_fraction": 0.36237987422916873,
+          "wall_steepness_deg": 89.58006704352543
+        },
+        "chest": {
+          "y_span_mm": 225.729,
+          "x_extreme_mm": 178.78112499999997,
+          "wrap_fraction": 0.07484284252355702,
+          "wall_steepness_deg": 83.74530569360287
+        }
+      },
+      "T_18": {
+        "extent_m": [
+          0.336774,
+          0.250733,
+          0.546454
+        ],
+        "low": {
+          "y_span_mm": 201.0325,
+          "x_extreme_mm": 146.95069999999998,
+          "wrap_fraction": 0.4805520500416599,
+          "wall_steepness_deg": 89.34189337160372
+        },
+        "chest": {
+          "y_span_mm": 233.89300000000003,
+          "x_extreme_mm": 174.39270000000002,
+          "wrap_fraction": 0.5192280230703783,
+          "wall_steepness_deg": 86.42399909758005
+        }
+      },
+      "T_19": {
+        "extent_m": [
+          0.34427399999999997,
+          0.256331,
+          0.5113110000000001
+        ],
+        "low": {
+          "y_span_mm": 206.91869999999997,
+          "x_extreme_mm": 149.13002500000002,
+          "wrap_fraction": 0.5083334662357728,
+          "wall_steepness_deg": 89.18668711973942
+        },
+        "chest": {
+          "y_span_mm": 242.81400000000002,
+          "x_extreme_mm": 168.96704000000003,
+          "wrap_fraction": 0.5178325796700356,
+          "wall_steepness_deg": 87.50952863649748
+        }
+      },
+      "T_20": {
+        "extent_m": [
+          0.355848,
+          0.271067,
+          0.489311
+        ],
+        "low": {
+          "y_span_mm": 223.10040000000004,
+          "x_extreme_mm": 155.59409000000002,
+          "wrap_fraction": 0.11695093330177801,
+          "wall_steepness_deg": 89.81233664808572
+        },
+        "chest": {
+          "y_span_mm": 251.54499999999996,
+          "x_extreme_mm": 164.041615,
+          "wrap_fraction": 0.501865670158421,
+          "wall_steepness_deg": 89.82446168611476
+        }
+      },
+      "T_21": {
+        "extent_m": [
+          0.33340800000000004,
+          0.2126566,
+          0.60238
+        ],
+        "low": {
+          "y_span_mm": 152.178,
+          "x_extreme_mm": 123.74545499999998,
+          "wrap_fraction": 0.2726451918148485,
+          "wall_steepness_deg": 87.83877238507219
+        },
+        "chest": {
+          "y_span_mm": 191.3656,
+          "x_extreme_mm": 168.05435000000006,
+          "wrap_fraction": 0.38544754125088315,
+          "wall_steepness_deg": 85.76879070506506
+        }
+      },
+      "T_22": {
+        "extent_m": [
+          0.322652,
+          0.21399230000000002,
+          0.566227
+        ],
+        "low": {
+          "y_span_mm": 155.13670000000002,
+          "x_extreme_mm": 125.45836000000001,
+          "wrap_fraction": 0.05521904230269169,
+          "wall_steepness_deg": 88.37303088724862
+        },
+        "chest": {
+          "y_span_mm": 198.91330000000002,
+          "x_extreme_mm": 164.76298999999997,
+          "wrap_fraction": 0.1027075615356037,
+          "wall_steepness_deg": 85.78474256116176
+        }
+      },
+      "T_23": {
+        "extent_m": [
+          0.311782,
+          0.2161761,
+          0.528025
+        ],
+        "low": {
+          "y_span_mm": 159.7273,
+          "x_extreme_mm": 126.6864,
+          "wrap_fraction": 0.06367915816519785,
+          "wall_steepness_deg": 88.60047434958992
+        },
+        "chest": {
+          "y_span_mm": 206.47010000000003,
+          "x_extreme_mm": 160.63322499999992,
+          "wrap_fraction": 0.2994191410766014,
+          "wall_steepness_deg": 83.3335035055312
+        }
+      },
+      "T_24": {
+        "extent_m": [
+          0.316757,
+          0.2205405,
+          0.491877
+        ],
+        "low": {
+          "y_span_mm": 161.7398,
+          "x_extreme_mm": 127.96363999999998,
+          "wrap_fraction": 0.03376658064372533,
+          "wall_steepness_deg": 86.94962268736013
+        },
+        "chest": {
+          "y_span_mm": 214.26139999999998,
+          "x_extreme_mm": 156.55183,
+          "wrap_fraction": 0.6388346197681897,
+          "wall_steepness_deg": 83.48801935428438
+        }
+      },
+      "T_25": {
+        "extent_m": [
+          0.328616,
+          0.23725600000000002,
+          0.46328
+        ],
+        "low": {
+          "y_span_mm": 175.2427,
+          "x_extreme_mm": 132.8341,
+          "wrap_fraction": 0.11184774030530226,
+          "wall_steepness_deg": 57.720969714614874
+        },
+        "chest": {
+          "y_span_mm": 221.9838,
+          "x_extreme_mm": 150.83550000000002,
+          "wrap_fraction": 0.7925794585010256,
+          "wall_steepness_deg": 85.79763205451113
+        }
+      }
+    },
+    "hcm_17": {}
+  }
+}
